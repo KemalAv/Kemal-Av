@@ -38,6 +38,9 @@ import {
   Dna
 } from 'lucide-react';
 
+import profileImg from '../assets/profile.jpg';
+import multiverseImg from '../assets/MULTIVERSE.jpg';
+
 export default function DreamPlan() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -173,7 +176,7 @@ export default function DreamPlan() {
                       viewport={{ once: true }}
                       className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl mb-6"
                     >
-                      <img src="/src/assets/profile.jpg" alt="Profile" className="w-full h-full object-cover" />
+                      <img src={profileImg} alt="Profile" className="w-full h-full object-cover" />
                     </motion.div>
                     <motion.p 
                       initial={{ opacity: 0, y: 20 }}
@@ -531,7 +534,7 @@ export default function DreamPlan() {
                    <div className="p-12 bg-slate-900 rounded-[3rem] text-white relative overflow-hidden border border-slate-800 shadow-2xl">
                     <div className="relative z-10 flex flex-col md:flex-row gap-12 items-center">
                       <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-indigo-500 shadow-glow-blue shrink-0">
-                        <img src="/src/assets/MULTIVERSE.jpg" alt="Multiverse Profile" className="w-full h-full object-cover" />
+                        <img src={multiverseImg} alt="Multiverse Profile" className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 space-y-4 text-center md:text-left">
                         <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
