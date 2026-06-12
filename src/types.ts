@@ -109,12 +109,14 @@ export interface BlogPost {
   title: string;
   summary: string;
   date: string;
+  image?: string;
+  content?: string;
 }
 
 // Mini App: Practice Questions Types
 export type Language = 'id' | 'en';
 
-export type AppView = 'MAIN_SITE' | 'PRACTICE_APP' | 'QURAN_APP' | 'EXAM_COMPARISON_APP';
+export type AppView = 'MAIN_SITE' | 'PRACTICE_APP' | 'QURAN_APP' | 'EXAM_COMPARISON_APP' | 'DREAM_PLAN_APP' | 'ARTICLE_VIEW';
 
 export type PracticeMode = 'FLASHCARD' | 'MCQ';
 

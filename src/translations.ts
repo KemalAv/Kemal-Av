@@ -51,7 +51,7 @@ export const translations = {
       }
     },
     exam: {
-      title: "BANDINGKAN SKOR UJIAN",
+      title: "Perbandingan pencapaian",
       subtitle: "Visualisasi perbandingan akademik dan benchmark gaming dunia.",
       searchPlaceholder: "Cari level, status, atau rank...",
       table: "Tabel",
@@ -69,8 +69,9 @@ export const translations = {
       scorePlaceholder: "Contoh: 550, 1450, 130...",
       standing: "Estimasi Posisi",
       insight: "Wawasan Statistik",
+      interpolationMetrics: "Metrik Interpolasi & Output JSON",
       insightDesc: "Berdasarkan {subject}, kamu berada di persentil ke-{percentile} dari peserta global. Ini setara dengan {hours} waktu latihan di bidang kompetitif.",
-      calcDesc: "Perhitungan kalkulator bekerja dengan mencari tingkat terdekat di basis data kami berdasarkan input statistikmu.",
+      calcDesc: "Kalkulator menggunakan interpolasi linear persis antar tingkat di basis data untuk menghitung estimasi posisi kamu.",
       noMatches: "Tidak ada hasil ditemukan.",
       enterStats: "Masukkan statistikmu untuk\nmelihat posisi kamu",
       cols: {
@@ -90,6 +91,38 @@ export const translations = {
         percentile: "Persentil",
         compoundDifficulty: "Kompleksitas",
         iq: "Level IQ"
+      },
+      zones: {
+        humanZone: "Zona Manusia",
+        mythic: "Mythic",
+        legend: "Legend",
+        epic: "Epic",
+        grandmaster: "Grandmaster",
+        master: "Master",
+        elite: "Elite",
+        warrior: "Warrior"
+      },
+      tierNames: {
+        "150-160": "Luar Angkasa Jauh",
+        "140–149": "Sabuk Satelit",
+        "130–139": "Batas Awal Angkasa",
+        "120–129": "Orbit Stasiun Luar Angkasa",
+        "110–119": "Tempat Meteor Terbakar",
+        "100–109": "Jalur Pesawat Jet",
+        "90–99": "Zona Awan Tinggi",
+        "80–89": "Zona Nyaman Manusia",
+        "70–79": "Tanah Humus & Pipa Air",
+        "60–69": "Zona Tambang Dalam & Batu Induk",
+        "50–59": "Patahan Lempeng & Lubang Bor",
+        "40–49": "Zona Litosfer Bertekanan Tinggi",
+        "2–39": "Zona Aliran Magma Cair",
+        "<2": "Pusat Lava Panas Ekstrem"
+      },
+      tierCategories: {
+        subterranean: "Zona Bawah Tanah",
+        humanActivity: "Zona Manusia",
+        atmosphere: "Zona Atmosfer",
+        space: "Zona Luar Angkasa"
       }
     }
   },
@@ -146,7 +179,7 @@ export const translations = {
       }
     },
     exam: {
-      title: "WORLDWIDE EXAM COMPARISON",
+      title: "ACHIEVEMENT COMPARISON",
       subtitle: "Visualizing the intersection of competitive academics and global gaming benchmarks.",
       searchPlaceholder: "Search level, status, or rank...",
       table: "Table",
@@ -164,8 +197,9 @@ export const translations = {
       scorePlaceholder: "Example: 550, 1450, 130...",
       standing: "Estimated Standing",
       insight: "Statistical Insight",
+      interpolationMetrics: "Interpolation Metrics & JSON Output",
       insightDesc: "Based on your {subject}, you are performing at the {percentile} percentile of global participants. This is equivalent to {hours} of dedicated practice in competitive domains.",
-      calcDesc: "Calculator matching works by finding the closest tier in our database based on your input statistically.",
+      calcDesc: "The calculator uses exact linear interpolation between database tiers to compute your estimated standing.",
       noMatches: "No matches found.",
       enterStats: "Enter your stats to\nreveal your global standing",
       cols: {
@@ -185,6 +219,38 @@ export const translations = {
         percentile: "Percentile",
         compoundDifficulty: "Complexity",
         iq: "IQ Level"
+      },
+      zones: {
+        humanZone: "Human Zone",
+        mythic: "Mythic",
+        legend: "Legend",
+        epic: "Epic",
+        grandmaster: "Grandmaster",
+        master: "Master",
+        elite: "Elite",
+        warrior: "Warrior"
+      },
+      tierNames: {
+        "150-160": "Deep Space",
+        "140–149": "Satellite Belt",
+        "130–139": "Edge of Space",
+        "120–129": "Space Station Orbit",
+        "110–119": "Meteor Burning Zone",
+        "100–109": "Jet Stream Zone",
+        "90–99": "High Cloud Zone",
+        "80–89": "Human Comfort Zone",
+        "70–79": "Humus Soil & Water Pipes",
+        "60–69": "Deep Mine & Bedrock Zone",
+        "50–59": "Plate Fault & Borehole Zone",
+        "40–49": "High Pressure Lithosphere",
+        "2–39": "Liquid Magma Flow Zone",
+        "<2": "Extreme Hot Lava Core"
+      },
+      tierCategories: {
+        subterranean: "Subterranean Descent",
+        humanActivity: "Human Activity Zone",
+        atmosphere: "Atmospheric Altitude",
+        space: "Outer Space Orbit"
       }
     }
   }

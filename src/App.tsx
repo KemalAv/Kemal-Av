@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { motion } from 'motion/react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Projects from './components/Projects';
@@ -22,13 +23,15 @@ import { MultipleChoiceArea } from './components/MultipleChoiceArea';
 import { QuranMiniApp } from './components/quran-miniapp/App';
 import { ExamComparison } from './components/ExamComparison';
 import { useLocalization } from './hooks/useLocalization';
-import { AppView, PracticeMode, PracticeView, Flashcard, MultipleChoiceQuestion } from './types';
+import { AppView, PracticeMode, PracticeView, Flashcard, MultipleChoiceQuestion, BlogPost } from './types';
 import { Icons } from './constants';
 import { Button } from './components/Button';
+import { ContentRenderer } from './components/ContentRenderer';
 
 export default function App() {
   // Navigation State
   const [currentView, setCurrentView] = useState<AppView>('MAIN_SITE');
+  const [selectedArticle, setSelectedArticle] = useState<BlogPost | null>(null);
   const [practiceMode, setPracticeMode] = useState<PracticeMode>('FLASHCARD');
   const [practiceView, setPracticeView] = useState<PracticeView>('MENU');
 
@@ -51,11 +54,20 @@ export default function App() {
     } else if (title === "Belajar Al-Qur'an") {
       setCurrentView('QURAN_APP');
       window.scrollTo(0, 0);
-    } else if (title === "Bandingkan Skor Ujian") {
+    } else if (title === "Perbandingan Pencapaian") {
       setCurrentView('EXAM_COMPARISON_APP');
+      window.scrollTo(0, 0);
+    } else if (title === "Rencana Masa Depan") {
+      setCurrentView('DREAM_PLAN_APP');
       window.scrollTo(0, 0);
     }
   }, [setLanguage]);
+
+  const openArticle = useCallback((article: BlogPost) => {
+    setSelectedArticle(article);
+    setCurrentView('ARTICLE_VIEW');
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleFlashcardParse = (cards: Flashcard[]) => {
     let finalCards = [...cards];
@@ -198,6 +210,96 @@ export default function App() {
     );
   }
 
+  if (currentView === 'DREAM_PLAN_APP') {
+    return (
+      <div className="min-h-screen bg-slate-50 font-sans relative">
+         <div className="fixed top-4 left-4 z-50">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setCurrentView('MAIN_SITE')}
+            icon={<Icons.Prev size={18} />}
+            className="bg-white/80 backdrop-blur-sm shadow-sm"
+          >
+            Kembali
+          </Button>
+        </div>
+        <DreamPlan />
+      </div>
+    );
+  }
+
+  if (currentView === 'ARTICLE_VIEW' && selectedArticle) {
+    return (
+      <div className="min-h-screen bg-white font-sans selection:bg-blue-500 selection:text-white">
+        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setCurrentView('MAIN_SITE')}
+              icon={<Icons.Prev size={18} />}
+              className="text-slate-600 hover:text-blue-600 font-bold uppercase tracking-widest text-[10px] font-tech"
+            >
+              Kembali
+            </Button>
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-mono text-blue-600 uppercase tracking-tighter">Reading Mode</span>
+              <span className="text-[10px] font-mono text-slate-400">ARTICLE</span>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-4xl mx-auto px-4 py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-12"
+          >
+            <div className="space-y-6 text-center">
+              <h1 className="text-4xl md:text-6xl font-black text-slate-900 leading-none uppercase tracking-tight">
+                {selectedArticle.title}
+              </h1>
+              <p className="text-xl text-slate-500 font-sans max-w-2xl mx-auto leading-relaxed italic">
+                {selectedArticle.summary}
+              </p>
+            </div>
+
+            {selectedArticle.image && (
+              <div className="aspect-video w-full overflow-hidden rounded-sm tech-border border-slate-100 shadow-2xl">
+                <img 
+                  src={selectedArticle.image} 
+                  alt={selectedArticle.title} 
+                  className="w-full h-full object-contain bg-slate-50"
+                />
+              </div>
+            )}
+
+            <div className="bg-white p-8 md:p-16 rounded-sm border border-slate-100 shadow-sm relative">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400" />
+              <ContentRenderer 
+                content={selectedArticle.content || ''} 
+                className="prose-lg first-letter:text-5xl first-letter:font-black first-letter:mr-3 first-letter:float-left first-letter:text-blue-600"
+              />
+            </div>
+          </motion.div>
+        </main>
+
+        <footer className="py-20 border-t border-slate-100 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentView('MAIN_SITE')}
+              className="tech-border font-bold uppercase tracking-widest text-xs px-12"
+            >
+              Selesai Membaca
+            </Button>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans selection:bg-blue-500 selection:text-white relative overflow-hidden">
       {/* Background Layer */}
@@ -211,7 +313,7 @@ export default function App() {
           <Hero />
           
           <div id="works">
-            <Projects id="works" title="Portofolio" items={works} />
+            <Projects id="works" title="Kumpulan Karya" items={works} />
           </div>
 
           <div id="apps">
@@ -225,9 +327,7 @@ export default function App() {
 
           <Socials />
           
-          <DreamPlan />
-          
-          <Articles />
+          <Articles onArticleClick={openArticle} />
         </main>
 
         <footer className="py-12 px-4 border-t border-slate-200 bg-white/50 backdrop-blur-xl">
@@ -239,7 +339,7 @@ export default function App() {
             
             <div className="flex items-center gap-8 font-tech">
               <a href="#profile" className="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-[0.2em]">Profil</a>
-              <a href="#works" className="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-[0.2em]">Karya</a>
+              <a href="#works" className="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-[0.2em]">Kumpulan Karya</a>
               <a href="#articles" className="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-[0.2em]">Artikel</a>
             </div>
           </div>
