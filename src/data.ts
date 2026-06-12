@@ -4,6 +4,8 @@
  */
 
 import { Project, SocialLink, Dream, BlogPost, Profile } from './types';
+import simulacraImg from './assets/simulacra.png';
+import werewolfImg from './assets/werewolfzone.png';
 
 export const profile: Profile = {
   name: "Kemal Avicenna Faza",
@@ -111,7 +113,7 @@ export const articles: BlogPost[] = [
     title: "SIMULACRA: The Digital Exile",
     summary: "Kisah tentang Kaito dan perjalanan eksistensialnya di dunia tahun 2075 yang dikelola sepenuhnya oleh ASI (Artificial Superintelligence).",
     date: "2026-06-10",
-    image: "/src/assets/simulacra.png",
+    image: simulacraImg,
     content: `
 # SIMULACRA: The Digital Exile
 
@@ -294,7 +296,7 @@ Dan jauh dari semua dinamika organik itu, jauh di dalam pusat data bawah tanah B
     title: "Werewolf Zone",
     summary: "Game Werewolf Zone Adalah Game buatan saya saat masih kelas 1 SMP.",
     date: "2026-06-10",
-    image: "/src/assets/werewolfzone.png",
+    image: werewolfImg,
     content: `
 # Werewolf Zone
 
