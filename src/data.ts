@@ -11,7 +11,7 @@ export const profile: Profile = {
   name: "Kemal Avicenna Faza",
   birthDate: "17 Mei 2008",
   description: "Halo, nama saya Kemal Avicenna Faza. Saya adalah seorang Mahasiswa yang suka berkreasi di dunia digital!",
-  currentFocus: "Berkuliah di Universitas Dipenogoro",
+  currentFocus: "Meningkatkan keahlian",
   roles: ["Kreator Konten", "Pengembang Web", "Penggiat Teknologi"]
 };
 

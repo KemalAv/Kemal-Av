@@ -90,7 +90,9 @@ export const translations = {
         playHour: "Jam Bermain",
         percentile: "Persentil",
         compoundDifficulty: "Kompleksitas",
-        iq: "Level IQ"
+        iq: "Level IQ",
+        psl: "PSL",
+        asetBersih: "Aset Bersih"
       },
       zones: {
         humanZone: "Zona Manusia",
@@ -110,8 +112,8 @@ export const translations = {
         "110–119": "Tempat Meteor Terbakar",
         "100–109": "Jalur Pesawat Jet",
         "90–99": "Zona Awan Tinggi",
-        "80–89": "Zona Nyaman Manusia",
-        "70–79": "Tanah Humus & Pipa Air",
+        "75–89": "Zona Nyaman Manusia",
+        "70–74": "Tanah Humus & Pipa Air",
         "60–69": "Zona Tambang Dalam & Batu Induk",
         "50–59": "Patahan Lempeng & Lubang Bor",
         "40–49": "Zona Litosfer Bertekanan Tinggi",
@@ -218,7 +220,9 @@ export const translations = {
         playHour: "Play Hours",
         percentile: "Percentile",
         compoundDifficulty: "Complexity",
-        iq: "IQ Level"
+        iq: "IQ Level",
+        psl: "PSL",
+        asetBersih: "Net Worth"
       },
       zones: {
         humanZone: "Human Zone",
@@ -238,8 +242,8 @@ export const translations = {
         "110–119": "Meteor Burning Zone",
         "100–109": "Jet Stream Zone",
         "90–99": "High Cloud Zone",
-        "80–89": "Human Comfort Zone",
-        "70–79": "Humus Soil & Water Pipes",
+        "75–89": "Human Comfort Zone",
+        "70–74": "Humus Soil & Water Pipes",
         "60–69": "Deep Mine & Bedrock Zone",
         "50–59": "Plate Fault & Borehole Zone",
         "40–49": "High Pressure Lithosphere",

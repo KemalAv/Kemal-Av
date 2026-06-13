@@ -79,6 +79,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     { key: 'percentile', label: t.cols.percentile, icon: <Percent className="w-4 h-4" />, isChartable: true },
     { key: 'compoundDifficulty', label: t.cols.compoundDifficulty, icon: <Brain className="w-4 h-4" />, isChartable: true },
     { key: 'iq', label: t.cols.iq, icon: <Brain className="w-4 h-4" />, isChartable: true },
+    { key: 'psl', label: t.cols.psl, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true },
+    { key: 'asetBersih', label: t.cols.asetBersih, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true },
   ];
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -92,6 +94,21 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   // View Your Position State
   const [calcInput, setCalcInput] = useState<string>('');
   const [calcSubject, setCalcSubject] = useState<string>('IRT SNBT');
+  
+  // Alternative value tracking for multi-value results (calculator and table)
+  const [altIndices, setAltIndices] = useState<Record<string, number>>({});
+  const [currencyMode, setCurrencyMode] = useState<'USD' | 'IDR'>(language === 'id' ? 'IDR' : 'USD');
+
+  const toggleCurrency = () => {
+    setCurrencyMode(prev => prev === 'USD' ? 'IDR' : 'USD');
+  };
+
+  const toggleAlt = (key: string, total: number) => {
+    setAltIndices(prev => ({
+      ...prev,
+      [key]: ((prev[key] || 0) + 1) % total
+    }));
+  };
   
   // Axis selection for All Charts
   const chartableMetrics = useMemo(() => columns.filter(c => c.isChartable), []);
@@ -124,23 +141,26 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       }
       if (s.toLowerCase().includes('accepted')) return 1;
 
-      // Remove internal dots/commas as thousand separators
-      // Heuristic: if a dot/comma is followed by 3 digits, it's a separator
-      let res = s.replace(/[\.,](\d{3})(?![0-9])/g, '$1');
-      // Replace remaining comma with dot for Indonesian decimal format support if needed
-      // but in this specific dataset, we mainly use dot for decimal in some and comma in others.
-      // Normalize to dot.
+      // Remove thousand separators (dots or commas followed by 3 digits)
+      // Repeat to handle multiple separators like 10.000.000.000
+      let res = s;
+      let prev;
+      do {
+        prev = res;
+        res = res.replace(/([\.,])(\d{3})(?![0-9])/g, '$2');
+      } while (res !== prev);
+
+      // Normalize decimal separator
       res = res.replace(',', '.');
-      // If there's still more than one dot, it might be multiple thousand separators.
-      // But process above should have handled it.
-      return parseFloat(res.replace(/[^\d\.]/g, ''));
+      const val = parseFloat(res);
+      return isNaN(val) ? 0 : val;
     };
 
     // Handle ranges like "140–149" or "3.000–4.000"
     if (cleaned.includes('-') || cleaned.includes('–')) {
       const parts = cleaned.split(/[–-]/).map(p => processNumber(p));
       if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-        return (parts[0] + parts[1]) / 2;
+        return Math.min(parts[0], parts[1]);
       }
     }
     
@@ -164,6 +184,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       columns.forEach(col => {
         if (col.isChartable) {
           entry[col.label] = parseValue(row[col.key]);
+          entry[col.label + 'Label'] = row[col.key];
         }
       });
       return entry;
@@ -227,6 +248,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     [t.cols.percentile]: 'pct',
     [t.cols.compoundDifficulty]: 'comp',
     [t.cols.iq]: 'iq',
+    [t.cols.psl]: 'psl',
+    [t.cols.asetBersih]: 'asetBersih',
     [t.cols.chessElo]: 'elo',
     [t.cols.statusPenerimaan]: 'univ',
     [t.cols.gdMap]: 'map'
@@ -293,7 +316,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       if (typeof l === 'number' && typeof u === 'number') {
         const interpolated = l + t_factor * (u - l);
         // Round to nearest integer for these specific keys
-        if (['rank', 'comp', 'jam', 'benar', 'iq', 'pp', 'elo', 'sat', 'irt', 'sel'].includes(key)) {
+        if (['rank', 'comp', 'jam', 'benar', 'iq', 'pp', 'elo', 'sat', 'irt', 'sel', 'asetBersih'].includes(key)) {
           result[key] = Math.round(interpolated);
         } else {
           result[key] = Number(interpolated.toFixed(2));
@@ -383,8 +406,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     else if (benar >= 110) tierId = "110–119";
     else if (benar >= 100) tierId = "100–109";
     else if (benar >= 90) tierId = "90–99";
-    else if (benar >= 80) tierId = "80–89";
-    else if (benar >= 70) tierId = "70–79";
+    else if (benar >= 75) tierId = "75–89";
+    else if (benar >= 70) tierId = "70–74";
     else if (benar >= 60) tierId = "60–69";
     else if (benar >= 50) tierId = "50–59";
     else if (benar >= 40) tierId = "40–49";
@@ -396,6 +419,43 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   const activeColumns = columns.filter(col => visibleColumns.has(col.key));
 
   const formatValue = (val: any, colKey: string) => {
+    if (colKey === 'percentile' || colKey === 'pct') {
+      if (typeof val === 'string' && (val.includes('–') || val.includes('-'))) return val;
+      const numVal = typeof val === 'number' ? val : parseFloat(String(val).replace(/[%]/g, ''));
+      if (isNaN(numVal)) return val;
+      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+    }
+
+    if (colKey === 'psl') {
+      const numVal = typeof val === 'number' ? val : parseFloat(String(val));
+      if (isNaN(numVal)) return val;
+      
+      const pslTiers: Record<number, string> = {
+        8.0: 'Gigachad / Elite Chad',
+        7.5: 'High-Tier Chad',
+        7.0: 'Chad',
+        6.5: 'Chadlite',
+        6.0: 'High-Tier Normie / HTN',
+        5.5: 'Above Average Normie',
+        5.0: 'True Normie / MTN',
+        4.5: 'Low-Mid Tier Normie',
+        4.0: 'Low-Tier Normie / LTN',
+        3.5: 'High-Tier Sub5',
+        3.0: 'Sub5 / Trucel Tier',
+        2.5: 'Low-Tier Sub5',
+        2.0: 'Saint Tier / Very Low',
+        1.5: 'Near Subhuman',
+        1.0: 'Subhuman'
+      };
+
+      // Find the closest tier match
+      const tiers = Object.keys(pslTiers).map(Number).sort((a, b) => b - a);
+      const matchedTier = tiers.find(t => numVal >= t) || tiers[tiers.length - 1];
+      const tierLabel = pslTiers[matchedTier] || '';
+      
+      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} (${tierLabel})`;
+    }
+
     if (colKey === 'mlbb' || colKey === 'rankSNBT') {
       if (typeof val === 'string') {
         if (language === 'en') {
@@ -408,14 +468,37 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       }
     }
 
+    if (colKey === 'asetBersih' || colKey === 'aset') {
+      if (typeof val === 'number') {
+        if (currencyMode === 'IDR') {
+          const rupiah = val * 18000;
+          return `Rp ${Math.round(rupiah).toLocaleString('id-ID')}`;
+        }
+        return `$${Math.round(val).toLocaleString('en-US')}`;
+      }
+      if (typeof val === 'string' && currencyMode === 'IDR' && val.includes('$')) {
+        // Handle range strings like "$50.000.000 - $100.000.000"
+        return val.replace(/\$([\d\.]+)/g, (match, p1) => {
+          const usd = parseFloat(p1.replace(/\./g, ''));
+          const idr = usd * 18000;
+          return `Rp ${Math.round(idr).toLocaleString('id-ID')}`;
+        });
+      }
+      // If string contains $ and we are in USD mode, just return or ensure it follows $format
+      return val;
+    }
+
     if (typeof val === 'number') {
-      const formatted = val.toLocaleString('en-US');
+      const formatted = val.toLocaleString('en-US', { 
+        maximumFractionDigits: (colKey === 'percentile' || colKey === 'pct') ? 2 : 1 
+      });
       if (colKey === 'percentile' || colKey === 'pct') return `${formatted}%`;
       if (colKey === 'posisiNasional' || colKey === 'rank') return `#${formatted}`;
       if (colKey === 'osuStar' || colKey === 'star') return `${formatted}★`;
       if (colKey === 'playHour' || colKey === 'jam') return `${formatted}h`;
       if (colKey === 'keketatan' || colKey === 'sel') {
-        return `1:${formatted}`;
+        const selVal = val < 2 ? val.toFixed(1) : Math.round(val).toLocaleString('en-US');
+        return `1:${selVal}`;
       }
       return formatted;
     }
@@ -436,8 +519,11 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
 
     const getOriginalValue = (item: any, label: string) => {
       const col = columns.find(c => c.label === label);
-      if (col && item._row) return item._row[col.key];
-      return item[label];
+      let val;
+      if (col && item._row) val = item._row[col.key];
+      else val = item[label];
+      
+      return formatValue(val, col?.key || label);
     };
 
     const isRankSNBT = activeYLabels.length === 1 && activeYLabels[0] === t.cols.posisiNasional;
@@ -477,7 +563,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
           <XAxis 
             type={"category"} 
-            dataKey={xAxisMetric as any} 
+            dataKey={xAxisMetric === 'Rank MLBB' ? 'Rank MLBB' : (xAxisMetric + 'Label')} 
             name={xAxisMetric} 
             unit={isNormalized ? '%' : ''} 
             label={{ value: xAxisMetric, position: 'insideBottom', offset: -80, fontSize: 12, fill: '#64748b', fontWeight: 800 }} 
@@ -489,6 +575,19 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             dataKey={scatterY as any} 
             name={scatterY} 
             label={{ value: scatterY, angle: -90, position: 'insideLeft', offset: -70, fontSize: 12, fill: '#64748b', fontWeight: 800 }} 
+            tickFormatter={(val) => {
+              const col = columns.find(c => c.label === scatterY);
+              if (col?.key === 'asetBersih') {
+                if (currencyMode === 'IDR') {
+                  if (val >= 1000000) return `Rp ${(val / 1000000).toFixed(0)} jt`;
+                  return `Rp ${val.toLocaleString('id-ID')}`;
+                }
+                if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
+                if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`;
+                return `$${val}`;
+              }
+              return val.toLocaleString('en-US');
+            }}
           />
           <Tooltip 
             cursor={{ strokeDasharray: '3 3' }} 
@@ -516,7 +615,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     }
 
     const XComponent = <XAxis 
-      dataKey={xAxisMetric as any} 
+      dataKey={xAxisMetric === 'Rank MLBB' ? 'Rank MLBB' : (xAxisMetric + 'Label')} 
       type={"category"}
       angle={-45} 
       textAnchor="end" 
@@ -588,8 +687,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
 
   // Decorative SVG Patterns for Backgrounds
   const DecorativeSVGBackground = ({ b, hex }: { b: number; hex: string }) => {
-    const isUnderground = b < 80;
-    const isGround = b >= 80 && b < 90;
+    const isUnderground = b < 75;
+    const isGround = b >= 75 && b < 90;
     const isSkies = b >= 90 && b < 130;
     const isSpace = b >= 130;
 
@@ -608,8 +707,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                 </linearGradient>
               </defs>
               
-              {/* TOP SOIL Layer (70-79): Roots, Humus, Fossils */}
-              {b >= 70 && (
+              {/* TOP SOIL Layer (70-74): Roots, Humus, Fossils */}
+              {b >= 70 && b < 75 && (
                 <g>
                   {/* Tree Roots */}
                   <path d="M500,0 C520,300 480,600 500,1000" stroke="#4a3525" strokeWidth="2" fill="none" opacity="0.4" />
@@ -735,7 +834,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             </svg>
           )}
 
-          {/* GROUND LEVEL (80-82): Grass, Power Poles, Azure Sky, Campus Silhouette */}
+          {/* GROUND LEVEL (75-89): Grass, Power Poles, Azure Sky, Campus Silhouette */}
           {isGround && (
             <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMax slice">
               <defs>
@@ -1284,13 +1383,45 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                 <tbody className={`divide-y transition-colors duration-500 ${activeTierVisual ? 'divide-white/5' : 'divide-slate-50'}`}>
                   {filteredData.map((row, idx) => (
                     <motion.tr key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.01 }} className={`transition-all group ${activeTierVisual ? 'hover:bg-white/5' : 'hover:bg-slate-50/80'}`}>
-                      {activeColumns.map((col) => (
-                        <td key={`${idx}-${col.key}`} className={`px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors duration-500 ${activeTierVisual ? 'text-white/70' : 'text-slate-600'}`}>
-                          <span className={`px-2.5 py-1 rounded-lg ${col.key === 'statusPenerimaan' && row[col.key].includes('ACCEPTED') ? (activeTierVisual ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-emerald-50 text-emerald-700 font-bold') : ''} ${col.key === 'iq' && row[col.key].includes('145') ? (activeTierVisual ? 'bg-indigo-500/20 text-indigo-300 font-black' : 'bg-indigo-50 text-indigo-700 font-black') : ''}`}>
-                            {row[col.key]}
-                          </span>
-                        </td>
-                      ))}
+                        {activeColumns.map((col) => {
+                          const val = row[col.key];
+                          const isCurrency = col.key === 'asetBersih';
+                          const isAltSupported = (typeof val === 'string' && val.includes('/') && !val.includes('(')) || isCurrency;
+                          const options = isAltSupported ? (isCurrency ? [val] : (val as string).split('/').map(s => s.trim())) : [val];
+                          // Use a more stable key for table cell alternatives
+                          const rowId = row.jumlahBenar; // jumlahBenar is unique per row
+                          const cellKey = `table-${rowId}-${col.key}`;
+                          const currentVal = isCurrency ? val : options[(altIndices[cellKey] || 0) % options.length];
+
+                          return (
+                            <td 
+                              key={`${idx}-${col.key}`} 
+                              className={`px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors duration-500 ${activeTierVisual ? 'text-white/70' : 'text-slate-600'} ${isAltSupported ? 'cursor-pointer active:scale-95 transition-transform group/cell' : ''}`}
+                              onClick={() => {
+                                if (isCurrency) {
+                                  toggleCurrency();
+                                } else if (isAltSupported) {
+                                  toggleAlt(cellKey, options.length);
+                                }
+                              }}
+                            >
+                              <div className="relative inline-flex items-center">
+                                <AnimatePresence mode="wait">
+                                  <motion.span 
+                                    key={isCurrency ? currencyMode + currentVal : currentVal}
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -5 }}
+                                    className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg ${col.key === 'statusPenerimaan' && String(val).includes('ACCEPTED') ? (activeTierVisual ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-emerald-50 text-emerald-700 font-bold') : ''} ${col.key === 'iq' && String(val).includes('145') ? (activeTierVisual ? 'bg-indigo-500/20 text-indigo-300 font-black' : 'bg-indigo-50 text-indigo-700 font-black') : ''} ${isAltSupported ? (activeTierVisual ? 'hover:bg-white/10' : 'hover:bg-slate-100') : ''}`}
+                                  >
+                                    {formatValue(currentVal, col.key)}
+                                    {isAltSupported && <Zap className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400 animate-pulse" />}
+                                  </motion.span>
+                                </AnimatePresence>
+                              </div>
+                            </td>
+                          );
+                        })}
                     </motion.tr>
                   ))}
                 </tbody>
@@ -1444,7 +1575,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                         <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">
                           {(() => {
                             const b = interpolationResult.benar;
-                            if (b < 80) return t.tierCategories.subterranean;
+                            if (b < 75) return t.tierCategories.subterranean;
                             if (b < 90) return t.tierCategories.humanActivity;
                             if (b < 130) return t.tierCategories.atmosphere;
                             return t.tierCategories.space;
@@ -1469,10 +1600,10 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                               altitude = 12 + (b - 100) * 3.8;
                             } else if (b >= 90) {
                               altitude = 2 + (b - 90) * 1;
-                            } else if (b >= 80) {
-                              altitude = (b - 80) * 0.2;
+                            } else if (b >= 75) {
+                              altitude = (b - 75) * 0.2;
                             } else if (b >= 70) {
-                              altitude = -0.1 - (80 - b) * 0.19;
+                              altitude = -0.1 - (75 - b) * 0.19;
                             } else if (b >= 60) {
                               altitude = -2 - (70 - b) * 0.8;
                             } else if (b >= 50) {
@@ -1504,40 +1635,77 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-6">
                         {/* Always include key metrics requested */}
                         {[
-                          { key: 'benar', label: 'SNBT Correct Count' },
-                          { key: 'mlbb', label: 'MLBB Rank' },
-                          { key: 'irt', label: 'IRT SNBT' },
-                          { key: 'rank', label: 'SNBT National Rank' },
-                          { key: 'gd', label: 'GD Difficulty' },
-                          { key: 'pp', label: 'osu! PP' },
-                          { key: 'sel', label: 'Selectivity' },
-                          { key: 'star', label: 'osu! Star' },
-                          { key: 'univ', label: 'Univ/Status' },
-                          { key: 'map', label: 'GD Map' },
-                          { key: 'elo', label: 'Chess ELO' },
-                          { key: 'sat', label: 'SAT Score' },
-                          { key: 'iq', label: 'Estimated IQ' },
-                          { key: 'jam', label: 'Gaming Hours' },
-                          { key: 'pct', label: 'Percentile' },
-                          { key: 'comp', label: 'Compound Diff' }
+                          { key: 'benar', labelKey: 'jumlahBenar' },
+                          { key: 'mlbb', labelKey: 'rankSNBT' },
+                          { key: 'irt', labelKey: 'skorIRT' },
+                          { key: 'rank', labelKey: 'posisiNasional' },
+                          { key: 'gd', labelKey: 'gdDifficulty' },
+                          { key: 'pp', labelKey: 'osuPP' },
+                          { key: 'sel', labelKey: 'keketatan' },
+                          { key: 'star', labelKey: 'osuStar' },
+                          { key: 'univ', labelKey: 'statusPenerimaan' },
+                          { key: 'map', labelKey: 'gdMap' },
+                          { key: 'elo', labelKey: 'chessElo' },
+                          { key: 'sat', labelKey: 'sat' },
+                          { key: 'iq', labelKey: 'iq' },
+                          { key: 'jam', labelKey: 'playHour' },
+                          { key: 'pct', labelKey: 'percentile' },
+                          { key: 'comp', labelKey: 'compoundDifficulty' },
+                          { key: 'psl', labelKey: 'psl' },
+                          { key: 'asetBersih', labelKey: 'asetBersih' }
                         ].map((metric, idx) => {
                           const val = interpolationResult[metric.key];
                           if (val === undefined) return null;
+
+                          const label = t.cols[metric.labelKey] || metric.labelKey;
+                          const isCurrency = metric.key === 'asetBersih';
+                          const isAltSupported = (typeof val === 'string' && val.includes('/') && !val.includes('(')) || isCurrency;
+                          const options = isAltSupported ? (isCurrency ? [val] : (val as string).split('/').map(s => s.trim())) : [val];
+                          const currentVal = isCurrency ? val : options[(altIndices[metric.key] || 0) % options.length];
+
                           return (
                             <motion.div 
                               key={metric.key}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: idx * 0.03 }}
-                              className="group"
+                              whileHover={isAltSupported ? { y: -3, scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' } : {}}
+                              whileTap={isAltSupported ? { scale: 0.96 } : {}}
+                              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                              className={`group p-4 rounded-2xl transition-all duration-300 ${isAltSupported ? 'cursor-pointer hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 bg-white/5 border border-white/10 ring-1 ring-white/5' : 'bg-white/5 border border-white/5'}`}
+                              onClick={(e) => {
+                                if (isCurrency) {
+                                  e.stopPropagation();
+                                  toggleCurrency();
+                                } else if (isAltSupported) {
+                                  e.stopPropagation();
+                                  toggleAlt(metric.key, options.length);
+                                }
+                              }}
                             >
                               <div className="flex items-center gap-2 mb-1">
-                                <div className="w-1 h-3 rounded-full opacity-40" style={{ backgroundColor: activeTierVisual.ui.hexCode }} />
-                                <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-white/60 transition-colors">{metric.label}</p>
+                                <div className="w-1 h-3 rounded-full opacity-40 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: activeTierVisual.ui.hexCode }} />
+                                <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-white/60 transition-colors flex items-center gap-1">
+                                  {label}
+                                  {isAltSupported && <Zap className="w-2 h-2 animate-pulse text-yellow-400 fill-yellow-400" />}
+                                </p>
                               </div>
-                              <p className="text-lg sm:text-xl font-black text-white italic leading-tight break-words" style={{ textShadow: `0 0 10px ${activeTierVisual.ui.hexCode}33` }}>
-                                {formatValue(val, metric.key === 'sel' ? 'sel' : metric.key)}
-                              </p>
+                              <AnimatePresence mode="wait">
+                                <motion.p 
+                                  key={isCurrency ? currencyMode + currentVal : currentVal}
+                                  initial={{ opacity: 0, x: -5 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  exit={{ opacity: 0, x: 5 }}
+                                  className="text-lg sm:text-xl font-black text-white italic leading-tight break-words group-hover:scale-[1.02] origin-left transition-transform" 
+                                  style={{ textShadow: `0 0 10px ${activeTierVisual.ui.hexCode}33` }}
+                                >
+                                  {formatValue(currentVal, metric.key === 'sel' ? 'sel' : metric.key)}
+                                </motion.p>
+                              </AnimatePresence>
+                              {isAltSupported && (
+                                <p className="text-[8px] font-bold text-white/40 uppercase mt-2 group-hover:text-white/80 transition-colors">
+                                  {isCurrency ? `TAP TO SWITCH TO ${currencyMode === 'USD' ? 'IDR' : 'USD'}` : `TAP FOR ALT (${((altIndices[metric.key] || 0) % options.length) + 1}/${options.length})`}
+                                </p>
+                              )}
                             </motion.div>
                           );
                         })}

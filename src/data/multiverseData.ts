@@ -47,7 +47,7 @@ export const altUniverseData = {
     },
     {
       title: "Bisnis Keluarga",
-      desc: "Waralaba ritel aset > Rp4 Miliar. Integrasi pada usia 24-28 tahun."
+      desc: "Waralaba ritel aset > Rp4 Miliar. Integrasi penuh pada usia 24-28 tahun."
     }
   ],
   cognitive: [

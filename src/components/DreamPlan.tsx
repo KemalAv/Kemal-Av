@@ -42,19 +42,18 @@ import profileImg from '../assets/profile.jpg';
 import multiverseImg from '../assets/MULTIVERSE.jpg';
 
 export default function DreamPlan() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
   const [universe, setUniverse] = useState<'MAIN' | 'ALT'>('MAIN');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'KemalAv 5125') {
+    if (passwordInput === 'KemalAv 5125') {
       setIsAuthenticated(true);
-      setError(false);
+      setIsError(false);
     } else {
-      setError(true);
-      setTimeout(() => setError(false), 2000);
+      setIsError(true);
     }
   };
 
@@ -76,99 +75,103 @@ export default function DreamPlan() {
   return (
     <section id="dreams" className="py-24 px-4 bg-slate-50/50">
       <div className="max-w-7xl mx-auto">
-        <AnimatePresence mode="wait">
-          {!isAuthenticated ? (
-            <motion.div
-              key="auth-gate"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
-              className="max-w-md mx-auto pt-24"
+        <motion.div
+          key="content"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="space-y-12"
+        >
+          <div className="flex flex-col items-center text-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-3 bg-indigo-600 text-white rounded-2xl mb-6 shadow-lg shadow-indigo-200"
             >
-              <div className="glass-white p-12 rounded-sm tech-border shadow-2xl text-center relative overflow-hidden border-blue-100">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-pulse" />
-                <div className="w-24 h-24 bg-blue-500/10 text-blue-600 rounded-sm tech-border flex items-center justify-center mx-auto mb-10 shadow-glow-blue border-blue-100">
-                  <Lock size={48} strokeWidth={1} />
-                </div>
-                <h2 className="text-3xl font-display font-black text-slate-900 mb-4 uppercase tracking-[0.2em]">Halaman Terkunci</h2>
-                <p className="text-slate-500 mb-12 leading-relaxed font-tech font-bold uppercase text-xs tracking-widest">Silakan masukkan kode akses untuk melihat isi rencana masa depan.</p>
-                
-                <form onSubmit={handleLogin} className="space-y-8">
-                   <div className="relative group">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
-                      <Key size={20} />
-                    </div>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="KODE AKSES..."
-                      className={`w-full h-16 pl-14 pr-4 glass-white tech-border ${error ? 'border-red-500' : 'focus:border-blue-500 shadow-glow-blue'} outline-none transition-all font-tech font-black tracking-[0.5em] text-slate-900 text-center uppercase placeholder:text-slate-300 placeholder:tracking-normal placeholder:font-bold placeholder:text-[10px]`}
-                    />
+              <Globe size={32} />
+            </motion.div>
+            <div className="space-y-2">
+              <h2 className="font-display text-5xl font-bold text-slate-900">MULTIVERSE INTERFACE</h2>
+              <p className="text-slate-400 font-tech font-bold text-xs tracking-[0.3em] uppercase">Temporal Access Granted</p>
+            </div>
+            
+            {/* Universe Switcher */}
+            <div className="flex p-1 bg-slate-200/50 rounded-2xl backdrop-blur-sm border border-slate-200 mt-10 overflow-hidden">
+              <button
+                onClick={() => setUniverse('MAIN')}
+                className={`px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${universe === 'MAIN' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Main Universe
+              </button>
+              <button
+                onClick={() => setUniverse('ALT')}
+                className={`px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${universe === 'ALT' ? 'bg-indigo-600 text-white shadow-indigo-200 shadow-lg' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Alternative Universe
+              </button>
+            </div>
+          </div>
+
+          {universe === 'MAIN' ? (
+            !isAuthenticated ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="max-w-md mx-auto mt-20 p-8 bg-white rounded-[2rem] border border-slate-200 shadow-2xl shadow-indigo-100/50"
+              >
+                <div className="flex flex-col items-center text-center space-y-6">
+                  <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl">
+                    <Lock size={40} className={isError ? 'animate-shake' : ''} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-slate-900">Protected Universe</h3>
+                    <p className="text-slate-500 text-sm mt-1">Identity validation required for Main Universe access.</p>
                   </div>
                   
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="submit"
-                    className="w-full h-16 bg-blue-600 text-white font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all font-tech rounded-sm"
-                  >
-                    <Unlock size={20} /> Buka Halaman
-                  </motion.button>
-                  
-                  {error && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-red-500 text-[10px] font-black font-tech tracking-widest uppercase mt-4"
+                  <form onSubmit={handlePasswordSubmit} className="w-full space-y-4">
+                    <div className="space-y-1">
+                      <div className={`relative transition-all duration-300 ${isError ? 'scale-[1.02]' : ''}`}>
+                        <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input
+                          type="password"
+                          value={passwordInput}
+                          onChange={(e) => {
+                            setPasswordInput(e.target.value);
+                            if (isError) setIsError(false);
+                          }}
+                          placeholder="Enter access code..."
+                          className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl outline-none transition-all font-mono text-center tracking-widest ${
+                            isError 
+                              ? 'border-red-200 bg-red-50 text-red-600 placeholder:text-red-300 focus:border-red-300' 
+                              : 'border-slate-100 focus:border-indigo-500 focus:bg-white text-slate-900'
+                          }`}
+                        />
+                      </div>
+                      {isError && (
+                        <motion.p 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-red-500 text-xs font-bold"
+                        >
+                          Access Denied: Invalid Security Key
+                        </motion.p>
+                      )}
+                    </div>
+                    
+                    <button
+                      type="submit"
+                      className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
                     >
-                      Kode Akses Salah
-                    </motion.p>
-                  )}
-                </form>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="content"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="space-y-12"
-            >
-              <div className="flex flex-col items-center text-center">
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="p-3 bg-indigo-600 text-white rounded-2xl mb-6 shadow-lg shadow-indigo-200"
-                >
-                  <Globe size={32} />
-                </motion.div>
-                <div className="space-y-2">
-                  <h2 className="font-display text-5xl font-bold text-slate-900">MULTIVERSE INTERFACE</h2>
-                  <p className="text-slate-400 font-tech font-bold text-xs tracking-[0.3em] uppercase">Temporal Access Granted</p>
+                      Verify Identity
+                      <Unlock size={18} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </form>
                 </div>
-                
-                {/* Universe Switcher */}
-                <div className="flex p-1 bg-slate-200/50 rounded-2xl backdrop-blur-sm border border-slate-200 mt-10 overflow-hidden">
-                  <button
-                    onClick={() => setUniverse('MAIN')}
-                    className={`px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${universe === 'MAIN' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                  >
-                    Main Universe
-                  </button>
-                  <button
-                    onClick={() => setUniverse('ALT')}
-                    className={`px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${universe === 'ALT' ? 'bg-indigo-600 text-white shadow-indigo-200 shadow-lg' : 'text-slate-500 hover:text-slate-700'}`}
-                  >
-                    Alternative Universe
-                  </button>
-                </div>
-              </div>
-
-              {universe === 'MAIN' ? (
-                <div className="space-y-24 py-12">
+              </motion.div>
+            ) : (
+              <div className="space-y-24 py-12">
+               {/* Content ... */}
                    <div className="flex flex-col items-center text-center">
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -527,8 +530,9 @@ export default function DreamPlan() {
                     </div>
                   </div>
                 </div>
-              ) : (
-                /* Alternative Universe Content */
+              )
+            ) : (
+              /* Alternative Universe Content */
                 <div className="space-y-16 py-12">
                    {/* Alt Header */}
                    <div className="p-12 bg-slate-900 rounded-[3rem] text-white relative overflow-hidden border border-slate-800 shadow-2xl">
@@ -662,8 +666,6 @@ export default function DreamPlan() {
                 </div>
               )}
             </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </section>
   );

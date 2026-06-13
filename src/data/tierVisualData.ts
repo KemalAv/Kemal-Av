@@ -208,8 +208,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Burung elang terbang melintas secara acak"
     }
   },
-  "80–89": {
-    tierId: "80–89",
+  "75–89": {
+    tierId: "75–89",
     name: "Zona Nyaman Manusia",
     background: {
       description: "Latar belakang lapangan rumput hijau, tiang listrik, sunset sore yang hangat, dan siluet kampus Unnes.",
@@ -234,8 +234,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Efek lens flare sunset yang lembut"
     }
   },
-  "70–79": {
-    tierId: "70–79",
+  "70–74": {
+    tierId: "70–74",
     name: "Tanah Humus & Pipa Air",
     background: {
       description: "Lapisan tanah atas dengan latar belakang tanah humus cokelat dan akar-akar pohon besar.",
