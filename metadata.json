@@ -1,6 +1,6 @@
 {
-  "name": "Kumpulan Karya Kemal Avicenna",
-  "description": "Kumpulan Karya Kemal Avicenna Faza yang berisi berbagai proyek, aplikasi, dan tulisan menarik.",
+  "name": "Personal Roadmap Kemal Avicenna Faza",
+  "description": "Dashboard interaktif Rencana Induk (Master Plan) Kemal Avicenna Faza mencakup pendidikan, karir hibrida tekno-finansial, dan proyek kemandirian energi off-grid.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
