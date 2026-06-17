@@ -6,26 +6,27 @@
 import { Project, SocialLink, Dream, BlogPost, Profile } from './types';
 import simulacraImg from './assets/simulacra.png';
 import werewolfImg from './assets/werewolfzone.png';
+import multiverseImg from './assets/MULTIVERSE.jpg';
 
 export const profile: Profile = {
   name: "Kemal Avicenna Faza",
-  birthDate: "17 Mei 2008",
+  birthDate: "17 Mei 2006",
   description: "Halo, nama saya Kemal Avicenna Faza. Saya adalah seorang Mahasiswa yang suka berkreasi di dunia digital!",
   currentFocus: "Meningkatkan keahlian",
-  roles: ["Kreator Konten", "Pengembang Web", "Penggiat Teknologi"]
+  roles: ["Automation Enthusiast", "Web Developer", "Future Tech CEO"]
 };
 
 export const works: Project[] = [
   {
     title: "Octavia Piano 🎹",
-    description: "Platform web interaktif seputar piano.",
+    description: "Platform web interaktif seputar piano untuk membantu pemain belajar lagu tingkat tinggi.",
     link: "https://octaviapiano.com",
     type: "work"
   },
   {
     title: "Custom Web Background 🌐",
     description: "Ekstensi Google Chrome untuk mengubah latar belakang web sesuai keinginan.",
-    link: "https://chromewebstore.google.com/detail/khcclkconpfiinfefklbgiadmboljdga?utm_source=item-share-cb",
+    link: "https://chromewebstore.google.com/detail/khcclkconpfiinfefklbgiadmboljdga",
     type: "work"
   },
   {
@@ -38,26 +39,26 @@ export const works: Project[] = [
 
 export const apps: Project[] = [
   {
-    title: "Bikin Kuis Materi",
-    description: "Ubah materi belajar jadi kartu hafalan atau kuis pilihan ganda dengan cepat.",
+    title: "Rencana Masa Depan",
+    description: "Dashboard interaktif strategi hibrida tekno-finansial dan target masa depan Kemal.",
     link: "#",
     type: "app"
   },
   {
     title: "Belajar Al-Qur'an",
-    description: "Aplikasi untuk bantu hafalan dan baca Al-Qur'an secara mandiri.",
+    description: "Mini app pendukung hafalan Al-Qur'an dengan fitur per surat dan ayat.",
+    link: "#",
+    type: "app"
+  },
+  {
+    title: "Bikin Kuis Materi",
+    description: "Tool untuk mengubah materi PDF/teks menjadi quic kuis Flashcard atau MCQ.",
     link: "#",
     type: "app"
   },
   {
     title: "Perbandingan Pencapaian",
-    description: "Cek perbandingan skor akademikmu dengan benchmark seru lainnya.",
-    link: "#",
-    type: "app"
-  },
-  {
-    title: "Rencana Masa Depan",
-    description: "Lihat strategi hibrida tekno-finansial dan target masa depan.",
+    description: "Visualisasi benchmark akademik SNBT/SAT dengan rank gaming global (osu!, GD, ML).",
     link: "#",
     type: "app"
   }
@@ -83,29 +84,17 @@ export const socials: SocialLink[] = [
     icon: "Instagram"
   },
   {
-    platform: "Instagram - Piano",
-    handle: "@kemal_av_piano",
-    link: "https://www.instagram.com/kemal_av_piano/",
-    icon: "Instagram"
-  },
-  {
     platform: "GitHub",
     handle: "@KemalAv",
     link: "https://github.com/KemalAv",
     icon: "Github"
-  },
-  {
-    platform: "TikTok",
-    handle: "@kemalav_",
-    link: "https://tiktok.com/@kemalav_",
-    icon: "Music2"
   }
 ];
 
 export const dreams: Dream[] = [
-  { title: "Membangun komunitas teknologi global", status: "planned" },
-  { title: "Menguasai Full-stack Development", status: "in-progress" },
-  { title: "Membuat alat pendidikan berbasis AI", status: "planned" }
+  { title: "Lulus S1 Teknik Elektro 3.5 Tahun", status: "in-progress" },
+  { title: "Membangun Rumah Off-Grid Gunungpati", status: "planned" },
+  { title: "CEO Ekosistem Bisnis Keluarga", status: "planned" }
 ];
 
 export const articles: BlogPost[] = [
@@ -152,7 +141,7 @@ Hari-harinya berjalan terlalu lempeng. Dunia luar stabil, semua urusan logistik 
 Karena bingung mau melakukan apa lagi, Kaito mulai mengutak-atik daftar menu di chip BCI miliknya secara acak. Ia membuka-buka folder lama sampai menemukan daftar gim yang pernah tersimpan. Hampir semuanya sudah mati karena tidak ada pembaruan. Namun, ada satu gim MMORPG buatan manusia dari era sebelum AI memegang kendali yang statusnya ternyata masih aktif.
 
 Keterangannya sangat singkat:
-Server Aktif – 0 Pemain Terhubung.
+Server Aktif - 0 Pemain Terhubung.
 “Masih hidup rupanya,” gumam Kaito.
 
 Tanpa pikir panjang, ia langsung memilih opsi masuk. Tidak ada sensasi mendebarkan atau hitungan mundur yang dramatis. Baginya, berpindah ke ruang virtual seperti ini sudah jadi rutis biasa, seperti menekan sakelar lampu untuk pindah ke ruangan sebelah yang suasananya sedikit berbeda. Kaito sudah terlalu sering melakukannya sampai tidak merasa ada yang spesial lagi.
@@ -349,6 +338,32 @@ Namun, pada sore hari ketiga, sebuah keajaiban muncul di batas cakrawala. Sebuah
 Petugas segera membungkus tubuh Zoe dengan selimut hangat dan memberinya minum sebelum membawanya naik ke atas kapal patroli utama. Ketika kapal penyelamat itu mulai melaju menuju pelabuhan kota pelabuhan terdekat, Zoe menyandarkan kepalanya di dinding dek kapal. Ia melihat ke arah laut lepas, bernapas lega karena tahu bahwa ia berhasil selamat dari neraka pulau itu sendirian, hanya berbekal sebuah kapak penambang dan tekad kuat untuk hidup.
 
 **Funfact:** Game Werewolf Zone Adalah Game buatan saya saat masih kelas 1 SMP.
+`
+  },
+  {
+    title: "Kemal Avicenna Faza Alternative Universe",
+    summary: "Eksplorasi perjalanan hidup Kemal Avicenna Faza dalam lini masa alternatif: dari 'Prime Era' hingga pencapaian 'MAXXED VERSION'.",
+    date: "2025-05-17",
+    image: multiverseImg,
+    content: `
+# Kemal Avicenna Faza Alternative Universe
+
+## Fase 1: Benih yang Tumbuh di Luar Arus (2006-2017)
+Kemal Avicenna Faza terlahir sebagai anak biasa di Semarang pada tanggal 17 Mei 2006 dengan kecenderungan karakter yang sangat introver. Titik balik transformasinya baru dimulai pada 12 Februari 2017, saat ia pertama kali mengunduh game osu! dan mulai menenggelamkan diri ke dalam ekosistem internet global melalui story games seperti Animal Crossing dan Zelda, sembari aktif mengonsumsi konten-konten kreator asal Amerika Serikat. Ketika memasuki SMP Al-Azhar di akhir tahun 2017, Kemal sempat mencoba mengikuti les piano formal. Namun, karena merasa bosan dengan kurikulum yang kaku, ia memilih keluar setelah satu tahun dan memutuskan untuk mendalami instrumen tersebut secara otodidak lewat panduan YouTube.
+
+## Fase 2: Anomali Sains dan Cetak Biru Fisik (2018-2019)
+Memasuki tahun 2018, ketertarikannya beralih ke dunia sains dan kosmologi yang dipicu oleh kanal edukasi visual seperti Kurzgesagt dan Kok Bisa?. Kecerdasan akademisnya terbukti nyata saat ia duduk di kelas 2 SMP, di mana ia berhasil mewakili sekolahnya dan menyabet Medali Perak dalam ajang Olimpiade Sains Al-Azhar (OSA) 2019. Pada tahun yang sama, penjelajahannya di sisi internet lainnya seperti reddit dan 4chan mempertemukannya dengan subkultur looksmaxxing di forum Reddit. Kemal kemudian mulai merekayasa cetak biru fisiknya sendiri melalui latihan kekuatan yang ekstrem, pembentukan struktur rahang, serta pengaturan nutrisi yang sangat ketat. Hasilnya, ia berhasil mendobrak batas genetik dan melampaui prediksi pertumbuhan tinggi badan dari dokternya, yang semula hanya berkisar di angka 155 cm. Untuk mengimbangi pertumbuhan fisik tersebut, ia juga membeli software Synthesia guna mempertajam insting bermusiknya secara mandiri di kamar.
+
+## Fase 3: Karantina Agung dan Kebangkitan Siber (2020-2021)
+Ketika pandemi COVID-19 melanda pada tahun 2020, momen karantina agung ini dimanfaatkannya sebagai ruang isolasi untuk melakukan grinding tanpa batas. Kemal mengunci diri di dalam kamarnya dengan jadwal harian yang sangat disiplin, yang membagi waktu secara presisi antara olahraga fisik, mengaji, dan bermain osu!. Dari kamar kecil inilah muncul ide visioner untuk menciptakan aplikasi musik kompetitif berbasis online yang kelak menjadi fondasi utama dari proyek besarnya, Octavia. Tahun 2021 sempat memberikan hantaman pahit ketika Kemal ditolak dari SMA Negeri favorit akibat kendala sistem zonasi serta keengganannya untuk mempelajari mata pelajaran formal yang dinilainya tidak berguna untuk masa depannya, seperti Bahasa Jawa dan PJOK. Namun, Kemal menolak tunduk pada sistem; ia mengalihkan seluruh energinya untuk mempelajari bahasa Arab secara mendalam dan melahap soal-soal SBMPTN Saintek. Ledakan siber pertamanya pun tercipta pada Desember 2021, saat ia berhasil menembus jajaran Top 3 Digit Global di osu!, menaklukkan map Cataclysm (Extreme Demon) di Geometry Dash, dan mulai membangun basis massa lewat live streaming di Twitch, TikTok, serta YouTube.
+
+## Fase 4: Kelahiran Octavia dan Era Ultra-Kompeten (2022-2024)
+Pada Maret 2022, proyek idealis Octavia resmi dirilis di platform Steam dan di luar dugaan sukses mengumpulkan hingga 5.000 unduhan pada tahun pertama, meskipun sempat memicu kontroversi hangat di forum Reddit. Selama masa SMA ini, Kemal memiliki kebiasaan unik di mana ia sering kali sengaja membolos sekolah untuk tetap diam di rumah. Keputusan ini sepenuhnya didukung dan diizinkan oleh orang tuanya. Dalam satu semester saja, akumulasi hari bolosnya bisa menembus hingga 15 hari. Mayoritas dari absen tersebut diakali dengan surat izin pergi atau keterangan sakit, walaupun terkadang alasan sebenarnya hanyalah karena ia merasa kelelahan akibat kehabisan energi setelah grinding, walau tetap tidur cukup. Kemal sengaja melakukan taktik ini demi mendapatkan ruang dan waktu agar bisa fokus melakukan grinding harian serta mendevelop proyek game Octavia dengan jauh lebih tenang dan nyaman tanpa gangguan formalitas sekolah. Meski begitu, di awal kelas 2 SMA ia tetap menjalani kehidupan ganda yang kontras; ia sempat bermobilitas menggunakan sepeda fixie sebelum akhirnya beralih ke Vespa Matik (Vesmet) yang dimodifikasi total dengan konsep estetika Hatsune Miku serta dapur pacu yang di-bore-up habis-habisan.
+
+Tahun 2023 kemudian hadir sebagai panggung transendensi dan pembuktian mutlak statusnya sebagai manusia ultra-kompeten. Di tengah semua kesuksesan duniawi yang mulai menghampiri, Kemal berhasil menembus performa atletis tingkat elite di dunia nyata dengan mencatatkan rekor waktu lari 5K dalam 18:30 serta Sprint 100m hanya dalam waktu 11.27 detik. Dominasi virtualnya pun ikut menggila secara simultan di berbagai lini kompetitif yang berbeda jauh, mulai dari merajai Mobile Legends dengan capaian Mythic Immortal 134 Bintang, menduduki Elo Rapid 2174 pada permainan Catur, hingga puncaknya berhasil menamatkan map legendaris berkategori ekstrem Sonic Wave di Geometry Dash pada akhir tahun 2023. Konsistensi tingkat tinggi ini juga membawanya menembus peringkat Top 2 Digit Global di osu! pada Oktober 2023. Namun, di balik semua kegilaan kompetisi siber dan fisik tersebut, Kemal tetap menjaga pilar spiritualnya tetap seimbang dan kokoh sebagai seorang penghafal Al-Quran yang memegang status 8 Juz Mutqin. Pada akhir fase ini, wawasannya mulai terbuka oleh teori Post-Economy dan perkembangan AGI dari David Shapiro, yang membuatnya mantap membidik jurusan Teknik Elektro demi masa depan industri otomotif. Meskipun sempat mengalami kegagalan di jalur undangan (SNBP) di UGM dan UNDIP pada awal 2024, Kemal membalasnya dengan telak lewat jalur tulis (SNBT) 2024 dengan raihan skor fantastis 734, yang meloloskannya secara murni ke STEI-R Institut Teknologi Bandung (ITB).
+
+## Fase 5: Prime Era: "Obama V2" (2025-Sekarang)
+Kini, Kemal telah sepenuhnya memasuki Prime Era dalam hidupnya. Fisiknya telah bertransformasi menjadi Maxxed Version dengan tinggi 185 cm, berat 82 kg, kadar lemak tubuh 11%, serta skor ketampanan PSL murni di angka 6.5-7.0, yang membuatnya mendapatkan julukan ikonik "Young Obama V2" dari mahasiswa di lingkungan kampus ITB. Tepat pada hari ulang tahunnya yang ke-19 di tanggal 17 Mei 2025, karier siber di osu! mencapai titik kulminasi tertinggi setelah berhasil mengunci posisi Peringkat Global #53 Dunia (Top 0.01%) dengan total akumulasi 2.573 jam bermain. Dari sektor bisnis dan finansial, game Octavia meledak hebat di pasar internasional dengan torehan 3,5 Juta unduhan dan menghasilkan pendapatan kotor sebesar <span>$</span>14 Juta USD. Keputusan strategisnya menjual sebagian hak kepemilikan game kepada investor senilai <span>$</span>7 Juta USD (Rp107 Miliar) langsung mendongkrak kekayaan pribadinya hingga menembus angka Rp20 Miliar. Uang tersebut langsung ia putar untuk membangun infrastruktur masa depannya, mulai dari membeli rumah futuristik di Bandung sebagai markas kuliah, hingga mendirikan hunian mandiri berbasis off-grid yang disokong penuh oleh panel surya di kawasan Gunungpati, Semarang. Garasi rumahnya kini tengah bersiap menyambut kedatangan supercar Mercedes-AMG GT 3 dengan modifikasi visual bertema Miku Racing, selagi ia fokus mematangkan proyek akademis utamanya di ITB: sebuah Aplikasi Mengaji berbasis kecerdasan buatan (AI) yang mampu mengoreksi makhraj serta pelafalan ayat suci secara real-time.
 `
   }
 ];

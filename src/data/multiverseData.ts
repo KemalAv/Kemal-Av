@@ -22,7 +22,7 @@ export const altUniverseData = {
         "Rahang tajam, kulit bersih",
         "Gaya rambut Afro modis (Young Obama Style)",
         "Penglihatan: 20/25",
-        "Skor PSL: 6.5–7.0 murni"
+        "Skor PSL: 6.5/8"
       ]
     }
   ],

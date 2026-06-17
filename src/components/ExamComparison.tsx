@@ -133,17 +133,18 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     if (!val) return 0;
     
     // Clean string but keep meaningful characters for ranges and numbers
-    let cleaned = val.replace(/[^0-9\-– \.,>★]/g, '').trim();
+    let cleaned = val.replace(/[^0-9\- \.,>★:%]/g, '').trim();
     
     const processNumber = (s: string) => {
+      if (!s || s.trim() === '') return NaN;
       if (s.includes(':')) {
-        return parseFloat(s.split(':')[1]) || 1;
+        const parts = s.split(':');
+        return parseFloat(parts[parts.length - 1]) || 0;
       }
       if (s.toLowerCase().includes('accepted')) return 1;
 
       // Remove thousand separators (dots or commas followed by 3 digits)
-      // Repeat to handle multiple separators like 10.000.000.000
-      let res = s;
+      let res = s.trim();
       let prev;
       do {
         prev = res;
@@ -152,13 +153,12 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
 
       // Normalize decimal separator
       res = res.replace(',', '.');
-      const val = parseFloat(res);
-      return isNaN(val) ? 0 : val;
+      return parseFloat(res);
     };
 
-    // Handle ranges like "140–149" or "3.000–4.000"
-    if (cleaned.includes('-') || cleaned.includes('–')) {
-      const parts = cleaned.split(/[–-]/).map(p => processNumber(p));
+    // Handle ranges like "140-149" or "3.000-4.000"
+    if (cleaned.includes('-')) {
+      const parts = cleaned.split('-').map(p => processNumber(p));
       if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
         return Math.min(parts[0], parts[1]);
       }
@@ -398,20 +398,21 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     if (!interpolationResult) return null;
     const benar = interpolationResult.benar;
     
-    let tierId = "<2";
+    let tierId = "1-4";
     if (benar >= 150) tierId = "150-160";
-    else if (benar >= 140) tierId = "140–149";
-    else if (benar >= 130) tierId = "130–139";
-    else if (benar >= 120) tierId = "120–129";
-    else if (benar >= 110) tierId = "110–119";
-    else if (benar >= 100) tierId = "100–109";
-    else if (benar >= 90) tierId = "90–99";
-    else if (benar >= 75) tierId = "75–89";
-    else if (benar >= 70) tierId = "70–74";
-    else if (benar >= 60) tierId = "60–69";
-    else if (benar >= 50) tierId = "50–59";
-    else if (benar >= 40) tierId = "40–49";
-    else if (benar >= 2) tierId = "2–39";
+    else if (benar >= 140) tierId = "140-149";
+    else if (benar >= 130) tierId = "130-139";
+    else if (benar >= 120) tierId = "120-129";
+    else if (benar >= 110) tierId = "110-119";
+    else if (benar >= 100) tierId = "100-109";
+    else if (benar >= 90) tierId = "90-99";
+    else if (benar >= 80) tierId = "80-89";
+    else if (benar >= 75) tierId = "75-79";
+    else if (benar >= 70) tierId = "70-74";
+    else if (benar >= 60) tierId = "60-69";
+    else if (benar >= 50) tierId = "50-59";
+    else if (benar >= 40) tierId = "40-49";
+    else if (benar >= 5) tierId = "5-39";
     
     return TIER_VISUAL_DATA[tierId] || null;
   }, [interpolationResult]);
@@ -420,7 +421,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
 
   const formatValue = (val: any, colKey: string) => {
     if (colKey === 'percentile' || colKey === 'pct') {
-      if (typeof val === 'string' && (val.includes('–') || val.includes('-'))) return val;
+      if (typeof val === 'string' && val.includes('-')) return val;
       const numVal = typeof val === 'number' ? val : parseFloat(String(val).replace(/[%]/g, ''));
       if (isNaN(numVal)) return val;
       return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
@@ -547,9 +548,11 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         else if (label === t.cols.playHour) props.domain = [0, 'auto'];
         else if (label === t.cols.posisiNasional) {
           props.domain = [0, 'auto'];
-          props.reversed = false;
+          props.reversed = true; // Lower rank is at the top
         }
         else if (label === t.cols.keketatan) props.domain = [0, 150];
+        else if (label === t.cols.psl) props.domain = [1, 10];
+        else if (label === t.cols.asetBersih) props.domain = [0, 'auto'];
       }
       return props;
     };

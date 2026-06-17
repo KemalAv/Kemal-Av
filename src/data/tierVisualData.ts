@@ -52,8 +52,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Pulsa cahaya kosmis yang menyebar perlahan"
     }
   },
-  "140–149": {
-    tierId: "140–149",
+  "140-149": {
+    tierId: "140-149",
     name: "Sabuk Satelit",
     background: {
       description: "Sabuk tata surya dengan latar belakang planet Saturnus yang megah dan komet yang melintas.",
@@ -78,8 +78,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Komet melesat cepat di latar belakang"
     }
   },
-  "130–139": {
-    tierId: "130–139",
+  "130-139": {
+    tierId: "130-139",
     name: "Batas Awal Angkasa",
     background: {
       description: "Batas eksosfer dengan latar belakang lengkungan bumi yang biru dan hujan mikrometeoroid.",
@@ -104,8 +104,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Hujan meteoroid jatuh secara miring"
     }
   },
-  "120–129": {
-    tierId: "120–129",
+  "120-129": {
+    tierId: "120-129",
     name: "Orbit Stasiun Luar Angkasa",
     background: {
       description: "Lapisan termosfer dengan latar belakang stasiun luar angkasa (ISS) dan aurora hijau yang menari.",
@@ -130,8 +130,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Efek shimmer aurora di seluruh layar"
     }
   },
-  "110–119": {
-    tierId: "110–119",
+  "110-119": {
+    tierId: "110-119",
     name: "Tempat Meteor Terbakar",
     background: {
       description: "Lapisan mesosfer dengan latar belakang meteor terbakar dan awan es tipis noctilucent.",
@@ -156,8 +156,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Garis-garis angin melintas sangat cepat"
     }
   },
-  "100–109": {
-    tierId: "100–109",
+  "100-109": {
+    tierId: "100-109",
     name: "Jalur Pesawat Jet",
     background: {
       description: "Lapisan stratosfer dengan latar belakang hamparan awan putih tebal yang luas dan jet tempur.",
@@ -168,7 +168,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       pose: "Pose terjun bebas (skydiving) yang ekstrem",
       suitCondition: "Bergetar hebat karena tekanan udara",
       helmetStatus: "Wajah terekspos angin kencang",
-      expression: "Muka nyengir ambis dan antusias",
+      expression: "Muka nyengir ambis and antusias",
       props: ["Tas punggung isi tumpukan buku tebal dengan kabel baja"]
     },
     ui: {
@@ -182,8 +182,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Efek motion blur pada elemen jet tempur"
     }
   },
-  "90–99": {
-    tierId: "90–99",
+  "90-99": {
+    tierId: "90-99",
     name: "Zona Awan Tinggi",
     background: {
       description: "Lapisan troposfer bawah dengan latar belakang langit biru cerah dan kawanan burung elang.",
@@ -208,8 +208,34 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Burung elang terbang melintas secara acak"
     }
   },
-  "75–89": {
-    tierId: "75–89",
+  "80-89": {
+    tierId: "80-89",
+    name: "Zone Nyaman (High)",
+    background: {
+      description: "Latar belakang lapangan rumput hijau, tiang listrik, sunset sore yang hangat, dan siluet kampus Unnes.",
+      elements: ["Green Field", "Power Poles", "Warm Sunset", "Unnes Silhouette", "Fence"]
+    },
+    astronaut: {
+      physicalState: "Casual Hybrid",
+      pose: "Berdiri tegak di atas tanah, membumi",
+      suitCondition: "Baju astronot bawah, bagian atas memakai hoodie santai",
+      helmetStatus: "Helm dilepas (ditenteng di tangan)",
+      expression: "Muka datar, lempeng, unbothered",
+      props: ["Smartphone (Social Media)", "Es Kopi (Iced Coffee) dengan sedotan"]
+    },
+    ui: {
+      themeColor: "Putih Bersih",
+      hexCode: "#FFFFFF",
+      dominantColor: "#2E5A44",
+      neonGlow: "0 0 12px #FFFFFF, 0 0 20px #A6A6A6",
+    },
+    motion: {
+      cameraBehavior: "Statis, tenang, tanpa guncangan",
+      animationReaction: "Efek lens flare sunset yang lembut"
+    }
+  },
+  "75-79": {
+    tierId: "75-79",
     name: "Zona Nyaman Manusia",
     background: {
       description: "Latar belakang lapangan rumput hijau, tiang listrik, sunset sore yang hangat, dan siluet kampus Unnes.",
@@ -234,8 +260,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Efek lens flare sunset yang lembut"
     }
   },
-  "70–74": {
-    tierId: "70–74",
+  "70-74": {
+    tierId: "70-74",
     name: "Tanah Humus & Pipa Air",
     background: {
       description: "Lapisan tanah atas dengan latar belakang tanah humus cokelat dan akar-akar pohon besar.",
@@ -260,12 +286,12 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Efek debu tanah yang berjatuhan"
     }
   },
-  "60–69": {
-    tierId: "60–69",
+  "60-69": {
+    tierId: "60-69",
     name: "Zona Tambang Dalam & Batu Induk",
     background: {
       description: "Lapisan batu induk (bedrock) dengan latar belakang dinding gua batu sedimen yang padat dan stalaktit kecil.",
-      elements: ["Sediment Wall", "Bedrock", "Stalactites", "Stone Layers"]
+      elements: ["Sediment Wall", "Bedrock", "Stalactites", " Stone Layers"]
     },
     astronaut: {
       physicalState: "Narrow Crawl",
@@ -286,8 +312,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Kilatan cahaya senter yang bergoyang"
     }
   },
-  "50–59": {
-    tierId: "50–59",
+  "50-59": {
+    tierId: "50-59",
     name: "Patahan Lempeng & Lubang Bor",
     background: {
       description: "Lapisan litosfer atas dengan latar belakang retakan lempeng tektonik dan asap belerang.",
@@ -312,8 +338,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Efek distorsi panas yang mulai muncul"
     }
   },
-  "40–49": {
-    tierId: "40–49",
+  "40-49": {
+    tierId: "40-49",
     name: "Zona Litosfer Bertekanan Tinggi",
     background: {
       description: "Kerak bumi tengah dengan latar belakang batuan kristal berkilau bawah tekanan tinggi dan nuansa merah tua.",
@@ -338,8 +364,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Cahaya kristal berdenyut dalam warna merah"
     }
   },
-  "2–39": {
-    tierId: "2–39",
+  "5-39": {
+    tierId: "5-39",
     name: "Zona Aliran Magma Cair",
     background: {
       description: "Mantel atas dekat magma dengan latar belakang batuan pecah dialiri urat lava merah menyala dan abu vulkanik.",
@@ -364,8 +390,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Partikel abu naik memenuhi layar"
     }
   },
-  "<2": {
-    tierId: "<2",
+  "1-4": {
+    tierId: "1-4",
     name: "Pusat Lava Panas Ekstrem",
     background: {
       description: "Inti bumi / magma cair dengan latar belakang kolam lava mendidih total penuh asap hitam tanpa pijakan.",
