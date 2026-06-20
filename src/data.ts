@@ -10,7 +10,7 @@ import multiverseImg from './assets/MULTIVERSE.jpg';
 
 export const profile: Profile = {
   name: "Kemal Avicenna Faza",
-  birthDate: "17 Mei 2006",
+  birthDate: "17 Mei 2008",
   description: "Halo, nama saya Kemal Avicenna Faza. Saya adalah seorang Mahasiswa yang suka berkreasi di dunia digital!",
   currentFocus: "Meningkatkan keahlian",
   roles: ["Automation Enthusiast", "Web Developer", "Future Tech CEO"]
