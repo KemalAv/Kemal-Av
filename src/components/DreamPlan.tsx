@@ -49,7 +49,7 @@ export default function DreamPlan() {
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === 'KemalAv 5125') {
+    if (passwordInput === '696969') {
       setIsAuthenticated(true);
       setIsError(false);
     } else {

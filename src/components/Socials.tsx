@@ -5,14 +5,15 @@
 
 import { motion } from 'motion/react';
 import { socials } from '../data';
-import { Youtube, Music, Music2, Instagram, Github } from 'lucide-react';
+import { Youtube, Music, Music2, Instagram, Github, Heart } from 'lucide-react';
 
 const IconMap: Record<string, any> = {
   Youtube,
   Music,
   Music2,
   Instagram,
-  Github
+  Github,
+  Heart
 };
 
 export default function Socials() {

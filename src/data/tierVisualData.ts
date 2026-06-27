@@ -74,7 +74,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       neonGlow: "0 0 20px #BF00FF, 0 0 40px #FF00AA",
     },
     motion: {
-      cameraBehavior: "Kamera mengikuti meteor dengan getaran halus",
+      cameraBehavior: "Kamera mengikuti meteor with getaran halus",
       animationReaction: "Komet melesat cepat di latar belakang"
     }
   },
@@ -82,7 +82,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "130-139",
     name: "Batas Awal Angkasa",
     background: {
-      description: "Batas eksosfer dengan latar belakang lengkungan bumi yang biru dan hujan mikrometeoroid.",
+      description: "Batas eksosfer dengan latar belakang lengkungan bumi yang biru and hujan mikrometeoroid.",
       elements: ["Earth Curve", "Micrometeoroid Rain", "Ionization Tails", "Satellites"]
     },
     astronaut: {
@@ -108,7 +108,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "120-129",
     name: "Orbit Stasiun Luar Angkasa",
     background: {
-      description: "Lapisan termosfer dengan latar belakang stasiun luar angkasa (ISS) dan aurora hijau yang menari.",
+      description: "Lapisan termosfer dengan latar belakang stasiun luar angkasa (ISS) and aurora hijau yang menari.",
       elements: ["ISS Modules", "Green Aurora", "Solar Panels", "Orbital Junks"]
     },
     astronaut: {
@@ -134,7 +134,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "110-119",
     name: "Tempat Meteor Terbakar",
     background: {
-      description: "Lapisan mesosfer dengan latar belakang meteor terbakar dan awan es tipis noctilucent.",
+      description: "Lapisan mesosfer dengan latar belakang meteor terbakar and awan es tipis noctilucent.",
       elements: ["Burning Meteors", "Noctilucent Clouds", "Transition Sky"]
     },
     astronaut: {
@@ -160,7 +160,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "100-109",
     name: "Jalur Pesawat Jet",
     background: {
-      description: "Lapisan stratosfer dengan latar belakang hamparan awan putih tebal yang luas dan jet tempur.",
+      description: "Lapisan stratosfer dengan latar belakang hamparan awan putih tebal yang luas and jet tempur.",
       elements: ["Thick Cloud Sea", "Fighter Jets", "Condensation Trails", "Ultra Blue Sky"]
     },
     astronaut: {
@@ -186,7 +186,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "90-99",
     name: "Zona Awan Tinggi",
     background: {
-      description: "Lapisan troposfer bawah dengan latar belakang langit biru cerah dan kawanan burung elang.",
+      description: "Lapisan troposfer bawah dengan latar belakang langit biru cerah and kawanan burung elang.",
       elements: ["Azure Sky", "Soaring Eagles", "Cumulus Clouds", "Sunbeams"]
     },
     astronaut: {
@@ -212,7 +212,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "80-89",
     name: "Zone Nyaman (High)",
     background: {
-      description: "Latar belakang lapangan rumput hijau, tiang listrik, sunset sore yang hangat, dan siluet kampus Unnes.",
+      description: "Latar belakang lapangan rumput hijau, tiang listrik, sunset sore yang hangat, and siluet kampus Unnes.",
       elements: ["Green Field", "Power Poles", "Warm Sunset", "Unnes Silhouette", "Fence"]
     },
     astronaut: {
@@ -238,7 +238,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "75-79",
     name: "Zona Nyaman Manusia",
     background: {
-      description: "Latar belakang lapangan rumput hijau, tiang listrik, sunset sore yang hangat, dan siluet kampus Unnes.",
+      description: "Latar belakang lapangan rumput hijau, tiang listrik, sunset sore yang hangat, and siluet kampus Unnes.",
       elements: ["Green Field", "Power Poles", "Warm Sunset", "Unnes Silhouette", "Fence"]
     },
     astronaut: {
@@ -264,15 +264,15 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "70-74",
     name: "Tanah Humus & Pipa Air",
     background: {
-      description: "Lapisan tanah atas dengan latar belakang tanah humus cokelat dan akar-akar pohon besar.",
+      description: "Lapisan tanah atas dengan latar belakang tanah humus cokelat and akar-akar pohon besar.",
       elements: ["Tree Roots", "Humus Soil", "Worms", "Ancient Fossils"]
     },
     astronaut: {
       physicalState: "Cramped / Sweaty",
-      pose: "Jongkok karena atap tanah yang sempit dan rendah",
+      pose: "Jongkok karena atap tanah yang sempit and rendah",
       suitCondition: "Baju putih penuh bercak tanah cokelat",
       helmetStatus: "Helm dipasang, visor baret kena batu",
-      expression: "Muka keringatan dan kelelahan fisik",
+      expression: "Muka keringatan and kelelahan fisik",
       props: ["Sekop (Shovel) di samping badan"]
     },
     ui: {
@@ -290,15 +290,15 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "60-69",
     name: "Zona Tambang Dalam & Batu Induk",
     background: {
-      description: "Lapisan batu induk (bedrock) dengan latar belakang dinding gua batu sedimen yang padat dan stalaktit kecil.",
+      description: "Lapisan batu induk (bedrock) dengan latar belakang dinding gua batu sedimen yang padat and stalaktit kecil.",
       elements: ["Sediment Wall", "Bedrock", "Stalactites", " Stone Layers"]
     },
     astronaut: {
       physicalState: "Narrow Crawl",
       pose: "Merangkak di celah sempit di antara himpitan batu",
-      suitCondition: "Baju kotor penuh lumpur dan debu batu abu-abu",
+      suitCondition: "Baju kotor penuh lumpur and debu batu abu-abu",
       helmetStatus: "Visor penuh goresan dalam",
-      expression: "Muka panik dan nafas tersenggal",
+      expression: "Muka panik and nafas tersenggal",
       props: ["Lampu Senter Proyek di pundak (beam tajam)"]
     },
     ui: {
@@ -308,7 +308,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       neonGlow: "0 0 10px #808080, 0 0 25px #FF5500",
     },
     motion: {
-      cameraBehavior: "Gerak perlahan dan sesak di antara celah",
+      cameraBehavior: "Gerak perlahan and sesak di antara celah",
       animationReaction: "Kilatan cahaya senter yang bergoyang"
     }
   },
@@ -316,13 +316,13 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "50-59",
     name: "Patahan Lempeng & Lubang Bor",
     background: {
-      description: "Lapisan litosfer atas dengan latar belakang retakan lempeng tektonik dan asap belerang.",
+      description: "Lapisan litosfer atas dengan latar belakang retakan lempeng tektonik and asap belerang.",
       elements: ["Tectonic Cracks", "Sulfur Clouds", "Magma Glow", "Rock Sparks"]
     },
     astronaut: {
       physicalState: "Trapped / Squeezed",
       pose: "Terjepit di celah batu yang sempit",
-      suitCondition: "Kain baju tertarik dan tegang, penuh debu vulkanik",
+      suitCondition: "Kain baju tertarik and tegang, penuh debu vulkanik",
       helmetStatus: "Visor memantulkan strobe darurat",
       expression: "Muka kelelahan luar biasa",
       props: ["Lampu Sirine Merah (kedip)", "Layar Dada Eror"]
@@ -342,7 +342,7 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     tierId: "40-49",
     name: "Zona Litosfer Bertekanan Tinggi",
     background: {
-      description: "Kerak bumi tengah dengan latar belakang batuan kristal berkilau bawah tekanan tinggi dan nuansa merah tua.",
+      description: "Kerak bumi tengah dengan latar belakang batuan kristal berkilau bawah tekanan tinggi and nuansa merah tua.",
       elements: ["Glowing Crystals", "Quartz Veins", "Dark Red Rock", "Heat Shimmer"]
     },
     astronaut: {
@@ -364,17 +364,17 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Cahaya kristal berdenyut dalam warna merah"
     }
   },
-  "5-39": {
-    tierId: "5-39",
+  "10-39": {
+    tierId: "10-39",
     name: "Zona Aliran Magma Cair",
     background: {
-      description: "Mantel atas dekat magma dengan latar belakang batuan pecah dialiri urat lava merah menyala dan abu vulkanik.",
+      description: "Mantel atas dekat magma dengan latar belakang batuan pecah dialiri urat lava merah menyala and abu vulkanik.",
       elements: ["Lava Veins", "Volcanic Ash", "Shattered Rock", "Intense Ember"]
     },
     astronaut: {
       physicalState: "Defeated / Despair",
       pose: "Berlutut pasrah meratapi nasib",
-      suitCondition: "Baju gosong kehitaman, robek, dan mengeluarkan asap",
+      suitCondition: "Baju gosong kehitaman, robek, and mengeluarkan asap",
       helmetStatus: "Helm pecah parah, wajah terekspos panas",
       expression: "Muka nangis meratapi buku-buku yang terbakar",
       props: ["Buku-buku UTBK yang terbakar abu"]
@@ -390,8 +390,8 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
       animationReaction: "Partikel abu naik memenuhi layar"
     }
   },
-  "1-4": {
-    tierId: "1-4",
+  "1-9": {
+    tierId: "1-9",
     name: "Pusat Lava Panas Ekstrem",
     background: {
       description: "Inti bumi / magma cair dengan latar belakang kolam lava mendidih total penuh asap hitam tanpa pijakan.",

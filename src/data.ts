@@ -7,6 +7,7 @@ import { Project, SocialLink, Dream, BlogPost, Profile } from './types';
 import simulacraImg from './assets/simulacra.png';
 import werewolfImg from './assets/werewolfzone.png';
 import multiverseImg from './assets/MULTIVERSE.jpg';
+import achmadImg from './assets/achmad.png';
 
 export const profile: Profile = {
   name: "Kemal Avicenna Faza",
@@ -88,6 +89,12 @@ export const socials: SocialLink[] = [
     handle: "@KemalAv",
     link: "https://github.com/KemalAv",
     icon: "Github"
+  },
+  {
+    platform: "SociaBuzz",
+    handle: "@kemalavicennafaza",
+    link: "https://sociabuzz.com/kemalavicennafaza",
+    icon: "Heart"
   }
 ];
 
@@ -341,12 +348,12 @@ Petugas segera membungkus tubuh Zoe dengan selimut hangat dan memberinya minum s
 `
   },
   {
-    title: "Eksplorasi Perjalanan Hidup Kemal Avicenna Faza: Lini Masa Alternatif",
-    summary: "Eksplorasi perjalanan hidup Kemal Avicenna Faza dalam lini masa alternatif: dari 'Prime Era' hingga pencapaian 'MAXXED VERSION'.",
+    title: "Kemal Avicenna Faza MAXXED VERSION - OBAMA V2",
+    summary: "Kemal Avicenna Faza MAXXED VERSION - OBAMA V2: Perjalanan dari 'Prime Era' hingga pencapaian 'MAXXED VERSION'.",
     date: "2025-05-17",
     image: multiverseImg,
     content: `
-# Eksplorasi perjalanan hidup Kemal Avicenna Faza dalam lini masa alternatif: dari 'Prime Era' hingga pencapaian 'MAXXED VERSION'
+# Kemal Avicenna Faza MAXXED VERSION - OBAMA V2
 
 ## Fase 1: Benih yang Tumbuh di Luar Arus (2006-2017)
 Kemal Avicenna Faza terlahir sebagai anak biasa di Semarang pada tanggal 17 Mei 2006 dengan kecenderungan karakter yang sangat introver. Titik balik transformasinya baru dimulai pada 12 Februari 2017, saat ia pertama kali mengunduh game osu! dan mulai menenggelamkan diri ke dalam ekosistem internet global melalui story games seperti Animal Crossing dan Zelda, sembari aktif mengonsumsi konten-konten kreator asal Amerika Serikat. Ketika memasuki SMP Al-Azhar di akhir tahun 2017, Kemal sempat mencoba mengikuti les piano formal. Namun, karena merasa bosan dengan kurikulum yang kaku, ia memilih keluar setelah satu tahun dan memutuskan untuk mendalami instrumen tersebut secara otodidak lewat panduan YouTube.
@@ -365,6 +372,215 @@ Tahun 2023 kemudian hadir sebagai panggung transendensi dan pembuktian mutlak st
 ## Fase 5: Prime Era: "Obama V2" (2025-Sekarang)
 Kini, Kemal telah sepenuhnya memasuki Prime Era dalam hidupnya. Fisiknya telah bertransformasi menjadi Maxxed Version dengan tinggi 185 cm, berat 82 kg, kadar lemak tubuh 11%, serta skor ketampanan PSL murni di angka 6.5-7.0, yang membuatnya mendapatkan julukan ikonik "Young Obama V2" dari mahasiswa di lingkungan kampus ITB. Tepat pada hari ulang tahunnya yang ke-19 di tanggal 17 Mei 2025, karier siber di osu! mencapai titik kulminasi tertinggi setelah berhasil mengunci posisi Peringkat Global #53 Dunia (Top 0.01%) dengan total akumulasi 2.573 jam bermain. Dari sektor bisnis dan finansial, game Octavia meledak hebat di pasar internasional. Per Desember 2025, game tersebut berhasil menembus angka 1 Juta unduhan. Alih-alih menjual asetnya kepada investor, Kemal memilih untuk tetap memegang kepemilikan penuh atas Octavia, yang berhasil meraup keuntungan sekitar Rp20 Miliar melalui model bisnis *full unlock*, sistem langganan, dan pembelian dalam aplikasi lainnya. Kekayaan yang ia bangun secara mandiri ini langsung ia putar untuk membangun infrastruktur masa depannya, mulai dari membeli rumah futuristik di Bandung sebagai markas kuliah, hingga mendirikan hunian mandiri berbasis off-grid yang disokong penuh oleh panel surya di kawasan Gunungpati, Semarang. Garasi rumahnya kini tengah bersiap menyambut kedatangan supercar Mercedes-AMG GT 3 dengan modifikasi visual bertema Miku Racing, selagi ia fokus mematangkan proyek akademis utamanya di ITB: sebuah Aplikasi Mengaji berbasis kecerdasan buatan (AI) yang mampu mengoreksi makhraj serta pelafalan ayat suci secara real-time.
 `
-  }
+  },
+  {
+    title: "Achmad Jackson's Gap Year Plan",
+    summary: "Strategi komprehensif gap year Achmad Jackson menuju FTMD ITB 2026, mencakup manajemen waktu, fase pengembangan diri, dan target harian (Cerita Fiksi).",
+    date: "2025-06-27",
+    image: achmadImg,
+    content: `
+# Achmad Jackson's Gap Year Plan
+
+## CETAK BIRU STRATEGIS & MANAJEMEN WAKTU
+
+### I. PROFIL DAN TARGET SUBJEK
+
+#### Profil Akademik & Fisik
+*   **Pendidikan**: Alumni SMA Al Azhar Syifa Budi Parahyangan. Peringkat top 7 dari 29 murid di kelas dengan nilai rata-rata rapor 90,63. Eks-peserta OSNK Astronomi (gagal kabupaten).
+*   **Kondisi Fisik**: Tinggi badan 173 cm, berat badan 67 kg, dan body fat 16% (kondisi atletis dan ideal) dan mirip Wileno.
+*   **Status Kelulusan**: Sudah lulus jalur Mandiri Teknik Mesin Universitas Diponegoro (Undip), namun gagal pada SNBT dan Jalur Mandiri Rapor FTMD ITB.
+*   **Orang Tua**: Bapak seorang Tentara berpangkat Kolonel, sedangkan Ibu bekerja sebagai Bankir.
+*   **Ketentuan Jadwal**: Jika ada acara seperti pergi, maka jadwalnya tetap sama tapi hangus.
+*   **Domisili**: Tinggal di Bandung, dan memiliki saudara di Semarang.
+
+#### Status Kompetitif & Hiburan
+*   **Skor SNBT 2025**: 652.
+*   **Osu! Standard**: Global Rank 21.782.
+*   **Mobile Legends (MLBB)**: Mitik tertinggi 58 Bintang.
+*   **Chess.com**: Elo Rapid 912.
+*   **Geometry Dash (GD)**: Tingkatan tertinggi berhasil menaklukkan "Acu".
+*   **Piano**: Mampu memainkan lagu selevel Turkish March.
+*   **Game Lain**: Sudah menamatkan Elden Ring, GTA V, dan game sejenisnya.
+*   **Manga & Anime**: One Piece berada di Manga Chapter 763, anime Re:Zero, serta telah menonton anime musiman lainnya.
+
+#### Misi Utama (Garis Finish - Juli 2026)
+1.  **Akademik**: Lolos FTMD ITB dengan mendongkrak skor SNBT / lolos jalur Ujian Mandiri ITB.
+2.  **Osu! Standard**: Menembus peringkat 4 digit atas hingga 3 digit global (#999 - #4.999).
+3.  **MLBB**: Mengamankan target Mythic Immortal 100 bintang + sebelum pensi total.
+
+---
+
+### II. DAFTAR KEGIATAN AKTIF & PEMBAGIAN SISTEM
+
+Seluruh aktivitas didistribusikan ke dalam pola harian yang bersifat *fixed blueprint* (pedoman dasar, jika ada acara lain maka jadwal terpotong secara natural tanpa perlu diulang):
+
+*   **Kegiatan Tetap (Setiap Hari)**: Gym, Mandi Sore, Makan Malam.
+*   **Sistem Roda Bergantian (Rolling)**:
+    *   **Prioritas 1**: Slot Belajar (SNBT / Ujian Mandiri ITB / Materi TPB), Osu! Standard, dan Geometry Dash. Ketiga kegiatan ini di-rolling secara konsisten di seluruh fase.
+    *   **Prioritas 2**: Piano, Catur, dan Mobile Legends (MLBB khusus Fase 1).
+    *   **Prioritas 3**: Film, Buku, dan Game.
+    *   **Prioritas 4**: Project Game dan Ngaji.
+*   **Aktivitas Gabut**: Dialihkan saat treadmill 6 kmh dan pada setiap jeda transisi 15 menit dengan iPad di atas treadmill.
+
+---
+
+### III. LINIMASA & PEMBAGIAN 5 FASE STRATEGIS
+
+#### Fase 1: Pemantapan Awal & Mekanik (Juli – September 2025)
+*   **Durasi**: 90 Hari.
+*   **Aturan**: Penerapan sistem rolling murni untuk Prioritas 1 (Belajar SNBT, Osu!, GD).
+*   **Kondisi MLBB**: Masuk ke dalam sistem rolling sore bersama Piano dan Catur.
+
+#### Fase 2: Push Brutal MLBB (Oktober – Desember 2025)
+*   **Durasi**: 92 Hari.
+*   **Aturan**: Sistem rolling murni Prioritas 1 (Belajar SNBT, Osu!, GD) tetap berjalan di slot pagi/siang.
+*   **Kondisi MLBB**: Menjadi fokus utama di sore hari untuk push rank secara brutal habis-habisan demi mengejar target sebelum pergantian tahun.
+
+#### Fase 3: Inkubasi Intensif UTBK-SNBT & Pensi MLBB (Januari – April 2026)
+*   **Durasi**: 120 Hari.
+*   **Aturan**: Sistem rolling murni tetap aktif (Prioritas 1: Belajar SNBT, Osu!, GD) dengan porsi ekstra.
+*   **Kondisi MLBB**: Pensi Total (0 Jam). MLBB resmi dihapus dari jadwal harian. Slot sore dialihkan kembali untuk fokus Piano/Catur.
+
+#### Fase 4: Pasca-SNBT & Gempur Ujian Mandiri ITB (Mei 2026)
+*   **Durasi**: 31 Hari.
+*   **Aturan**: Sistem rolling murni tetap dipertahankan untuk menjaga stabilitas mekanik dan fokus utama.
+*   **Perubahan Materi**: Slot belajar UTBK-SNBT diganti total menjadi materi persiapan Ujian Mandiri ITB.
+
+#### Fase 5: Transisi Kampus & Dasar TPB (Juni – Juli 2026)
+*   **Durasi**: 61 Hari.
+*   **Aturan**: Structure jadwal dikembalikan persis seperti Fase 1 (sistem rolling penuh).
+*   **Perubahan Materi**: Slot belajar diganti menjadi persiapan Materi Dasar Kuliah / TPB (Kalkulus dan Fisika Dasar Teknik Mesin). MLBB tetap 0 jam karena sudah pensi.
+
+---
+
+### IV. CETAK BIRU JADWAL HARIAN OPERASIONAL PER FASE
+
+#### Jadwal Harian Fase 1 (Juli – September 2025)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas 2) Rolling: Piano / Catur / MLBB
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas 2) Rolling: Piano / Catur / MLBB
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas 3) Film / Buku / Game
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 20:45**: (Prioritas 4) Ngaji / Project Game
+*   **20:45 – 21:00**: Jeda Transisi
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+#### Jadwal Harian Fase 2 (Oktober – Desember 2025)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas Utama) MLBB Push Brutal
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas Utama) MLBB Push Brutal
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas Utama) MLBB Push Brutal
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 20:45**: (Prioritas 4) Ngaji / Project Game
+*   **20:45 – 21:00**: Jeda Transisi
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+#### Jadwal Harian Fase 3 (Januari – April 2026)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas 2) Rolling: Piano / Catur
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas 3) Film / Buku / Game
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 20:45**: (Prioritas 4) Ngaji / Project Game
+*   **20:45 – 21:00**: Jeda Transisi
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+#### Jadwal Harian Fase 4 (Mei 2026)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: Ujian Mandiri ITB / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: Ujian Mandiri ITB / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas 2) Rolling: Piano / Catur
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas 1) Rolling Extra Session
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas 3) Film / Buku / Game
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 21:00**: (Prioritas 4) Ngaji / Project Game
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+#### Jadwal Harian Fase 5 (Juni – Juli 2026)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: Dasar TPB Kalkulus & Fisika / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: Dasar TPB Kalkulus & Fisika / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas 2) Rolling: Piano / Catur
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas 2) Rolling: Piano / Catur
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas 3) Film / Buku / Game
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 20:45**: (Prioritas 4) Ngaji / Project Game
+*   **20:45 – 21:00**: Jeda Transisi
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+---
+
+### V. TABEL AKUMULASI TOTAL PLAY HOURS PER SUBJEK (394 HARI KUMULATIF)
+
+Kalkulasi total jam bersih dari Juli 2025 hingga Juli 2026 yang dihitung presisi satu per satu subjek sesuai porsi rotasi harian:
+
+| Nama Subjek / Aktivitas Spesifik | Akumulasi Waktu Bersih |
+| :--- | :--- |
+| Osu! Standard | 707 Jam |
+| Geometry Dash (GD) | 707 Jam |
+| Belajar UTBK-SNBT (Fase 1, 2, dan 3) | 543,3 Jam |
+| Mobile Legends (MLBB) | 458 Jam |
+| Gym | 394 Jam |
+| ISHOMA | 394 Jam |
+| Ngaji | 397,9 Jam |
+| Project Game | 397,9 Jam |
+| Jeda Transisi (Sesi iPad di atas Treadmill 15 menit) | 344,75 Jam |
+| Piano | 332,5 Jam |
+| Catur | 332,5 Jam |
+| Film | 232 Jam |
+| Buku | 232 Jam |
+| Game Lain / Hiburan | 232 Jam |
+| Mandi Sore | 197 Jam |
+| Makan Malam | 197 Jam |
+| Belajar Dasar TPB Kalkulus & Fisika (Fase 5) | 101,6 Jam |
+| Belajar Ujian Mandiri ITB (Fase 4) | 62 Jam |
+`
+  },
 ];
 

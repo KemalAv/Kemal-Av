@@ -93,7 +93,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
 
   // View Your Position State
   const [calcInput, setCalcInput] = useState<string>('');
-  const [calcSubject, setCalcSubject] = useState<string>('IRT SNBT');
+  const [calcSubject, setCalcSubject] = useState<keyof ComparisonRow>('skorIRT');
   
   // Alternative value tracking for multi-value results (calculator and table)
   const [altIndices, setAltIndices] = useState<Record<string, number>>({});
@@ -112,19 +112,19 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   
   // Axis selection for All Charts
   const chartableMetrics = useMemo(() => columns.filter(c => c.isChartable), []);
-  const [xAxisMetric, setXAxisMetric] = useState<string>('Rank MLBB'); 
-  const [yAxisMetrics, setYAxisMetrics] = useState<Set<string>>(new Set(['IRT SNBT']));
+  const [xAxisMetric, setXAxisMetric] = useState<keyof ComparisonRow | 'Rank MLBB'>('rankSNBT'); 
+  const [yAxisMetrics, setYAxisMetrics] = useState<Set<keyof ComparisonRow>>(new Set(['skorIRT']));
 
   const [visibleColumns, setVisibleColumns] = useState<Set<keyof ComparisonRow>>(
     new Set(columns.map(c => c.key))
   );
 
-  const toggleYMetric = (label: string) => {
+  const toggleYMetric = (key: keyof ComparisonRow) => {
     const newSet = new Set(yAxisMetrics);
-    if (newSet.has(label)) {
-      if (newSet.size > 1) newSet.delete(label);
+    if (newSet.has(key)) {
+      if (newSet.size > 1) newSet.delete(key);
     } else {
-      newSet.add(label);
+      newSet.add(key);
     }
     setYAxisMetrics(newSet);
   };
@@ -156,9 +156,9 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       return parseFloat(res);
     };
 
-    // Handle ranges like "140-149" or "3.000-4.000"
-    if (cleaned.includes('-')) {
-      const parts = cleaned.split('-').map(p => processNumber(p));
+    // Handle ranges like "140–149" or "140-149" or "3.000-4.000"
+    if (cleaned.includes('-') || cleaned.includes('–')) {
+      const parts = cleaned.split(/[-–]/).map(p => processNumber(p));
       if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
         return Math.min(parts[0], parts[1]);
       }
@@ -190,8 +190,10 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       return entry;
     });
 
-    if (xAxisMetric !== 'Rank MLBB') {
-      data = [...data].sort((a, b) => (a[xAxisMetric] || 0) - (b[xAxisMetric] || 0));
+    if (xAxisMetric !== 'rankSNBT') {
+      const xCol = columns.find(c => c.key === xAxisMetric);
+      const xLabel = xCol ? xCol.label : xAxisMetric;
+      data = [...data].sort((a, b) => (a[xLabel] || 0) - (b[xLabel] || 0));
     } else {
       data = [...data].reverse();
     }
@@ -235,29 +237,46 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   }, [filteredData, isNormalized, xAxisMetric, t]);
 
   const colToInterpKey: Record<string, keyof InterpolationPoint> = useMemo(() => ({
-    [t.cols.jumlahBenar]: 'benar',
-    [t.cols.rankSNBT]: 'mlbb',
-    [t.cols.skorIRT]: 'irt',
-    [t.cols.posisiNasional]: 'rank',
-    [t.cols.gdDifficulty]: 'gd',
-    [t.cols.osuPP]: 'pp',
-    [t.cols.keketatan]: 'sel',
-    [t.cols.osuStar]: 'star',
-    [t.cols.sat]: 'sat',
-    [t.cols.playHour]: 'jam',
-    [t.cols.percentile]: 'pct',
-    [t.cols.compoundDifficulty]: 'comp',
-    [t.cols.iq]: 'iq',
-    [t.cols.psl]: 'psl',
-    [t.cols.asetBersih]: 'asetBersih',
-    [t.cols.chessElo]: 'elo',
-    [t.cols.statusPenerimaan]: 'univ',
-    [t.cols.gdMap]: 'map'
-  }), [t]);
+    jumlahBenar: 'benar',
+    rankSNBT: 'mlbb',
+    skorIRT: 'irt',
+    posisiNasional: 'rank',
+    gdDifficulty: 'gd',
+    osuPP: 'pp',
+    keketatan: 'sel',
+    osuStar: 'star',
+    sat: 'sat',
+    playHour: 'jam',
+    percentile: 'pct',
+    compoundDifficulty: 'comp',
+    iq: 'iq',
+    psl: 'psl',
+    asetBersih: 'asetBersih',
+    chessElo: 'elo',
+    statusPenerimaan: 'univ',
+    gdMap: 'map'
+  }), []);
 
   const interpolationResult = useMemo(() => {
     if (!calcInput) return null;
-    const inputNum = parseFloat(calcInput);
+    const cleanNumLocal = (s: string) => {
+      if (!s) return 0;
+      // Remove symbols like $, ★, etc.
+      let res = s.replace(/[$\★]/g, '');
+      // Handle thousand separators: if a dot/comma is followed by 3 digits, it's a separator
+      res = res.replace(/[\.,](\d{3})(?![0-9])/g, '$1');
+      // Handle "1:X" format typically used for selectivity
+      if (res.includes(':')) {
+        const parts = res.split(':');
+        res = parts[parts.length - 1];
+      }
+      // Normalize remaining comma to dot for decimal
+      res = res.replace(',', '.');
+      const match = res.match(/[\d\.]+/);
+      return match ? parseFloat(match[0]) : 0;
+    };
+
+    const inputNum = cleanNumLocal(calcInput);
     if (isNaN(inputNum)) return null;
 
     const subjectKey = colToInterpKey[calcSubject];
@@ -301,8 +320,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     const lVal = lower[subjectKey] as number;
     const uVal = upper[subjectKey] as number;
     
-    // Avoid division by zero
-    const t_factor = uVal === lVal ? 0 : (inputNum - lVal) / (uVal - lVal);
+    // Clamp t_factor between 0 and 1
+    const t_factor = uVal === lVal ? 0 : Math.max(0, Math.min(1, (inputNum - lVal) / (uVal - lVal)));
 
     const result: any = { _t: t_factor, _lower: lower, _upper: upper };
     
@@ -398,7 +417,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     if (!interpolationResult) return null;
     const benar = interpolationResult.benar;
     
-    let tierId = "1-4";
+    let tierId = "1-9";
     if (benar >= 150) tierId = "150-160";
     else if (benar >= 140) tierId = "140-149";
     else if (benar >= 130) tierId = "130-139";
@@ -412,14 +431,21 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     else if (benar >= 60) tierId = "60-69";
     else if (benar >= 50) tierId = "50-59";
     else if (benar >= 40) tierId = "40-49";
-    else if (benar >= 5) tierId = "5-39";
+    else if (benar >= 10) tierId = "10-39";
     
-    return TIER_VISUAL_DATA[tierId] || null;
+    return TIER_VISUAL_DATA[tierId] || TIER_VISUAL_DATA["75-79"] || null;
   }, [interpolationResult]);
 
   const activeColumns = columns.filter(col => visibleColumns.has(col.key));
 
   const formatValue = (val: any, colKey: string) => {
+    // Early return for pre-formatted strings, EXCEPT for assets which need currency conversion
+    if (colKey !== 'asetBersih' && colKey !== 'aset') {
+      if (typeof val === 'string' && (val.includes('-') || val.includes('–') || val.includes('★'))) {
+        return val;
+      }
+    }
+
     if (colKey === 'percentile' || colKey === 'pct') {
       if (typeof val === 'string' && val.includes('-')) return val;
       const numVal = typeof val === 'number' ? val : parseFloat(String(val).replace(/[%]/g, ''));
@@ -431,30 +457,18 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       const numVal = typeof val === 'number' ? val : parseFloat(String(val));
       if (isNaN(numVal)) return val;
       
-      const pslTiers: Record<number, string> = {
-        8.0: 'Gigachad / Elite Chad',
-        7.5: 'High-Tier Chad',
-        7.0: 'Chad',
-        6.5: 'Chadlite',
-        6.0: 'High-Tier Normie / HTN',
-        5.5: 'Above Average Normie',
-        5.0: 'True Normie / MTN',
-        4.5: 'Low-Mid Tier Normie',
-        4.0: 'Low-Tier Normie / LTN',
-        3.5: 'High-Tier Sub5',
-        3.0: 'Sub5 / Trucel Tier',
-        2.5: 'Low-Tier Sub5',
-        2.0: 'Saint Tier / Very Low',
-        1.5: 'Near Subhuman',
-        1.0: 'Subhuman'
-      };
-
-      // Find the closest tier match
-      const tiers = Object.keys(pslTiers).map(Number).sort((a, b) => b - a);
-      const matchedTier = tiers.find(t => numVal >= t) || tiers[tiers.length - 1];
-      const tierLabel = pslTiers[matchedTier] || '';
+      let tierLabel = '';
+      if (numVal >= 7.0) tierLabel = 'Gigachad';
+      else if (numVal >= 6.0) tierLabel = 'Chad';
+      else if (numVal >= 5.5) tierLabel = 'Chadlite';
+      else if (numVal >= 5.0) tierLabel = 'High Tier Normie';
+      else if (numVal >= 4.0) tierLabel = 'Mid Tier Normie';
+      else if (numVal >= 3.0) tierLabel = 'Low Tier Normie';
+      else if (numVal >= 2.0) tierLabel = 'Truecel';
+      else if (numVal >= 1.0) tierLabel = 'Saint';
+      else tierLabel = 'Subhuman';
       
-      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} (${tierLabel})`;
+      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${tierLabel})`;
     }
 
     if (colKey === 'mlbb' || colKey === 'rankSNBT') {
@@ -512,8 +526,11 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       margin: { top: 20, right: 30, left: 90, bottom: 100 }
     };
 
-    const isXNumeric = xAxisMetric !== 'Rank MLBB';
-    const activeYLabels = Array.from(yAxisMetrics);
+    const isXNumeric = xAxisMetric !== 'rankSNBT';
+    const activeYLabels = Array.from(yAxisMetrics).map(k => {
+      const col = columns.find(c => c.key === k);
+      return col ? col.label : k as string;
+    });
     const yAxisLabelText = activeYLabels.length > 2 
       ? "Selected Metrics" 
       : activeYLabels.join(', ');
@@ -561,15 +578,20 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       const scatterY = (activeYLabels[0] || 'IRT SNBT') as string;
       const yAxisProps = getYAxisProps();
       
+      const isXNumericValue = xAxisMetric !== 'rankSNBT';
+      const xAxisDataKey = isXNumericValue ? (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric) : 'Rank MLBB';
+      const xAxisLabelText = xAxisMetric === 'rankSNBT' ? t.cols.rankSNBT : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric);
+
       return (
         <ScatterChart {...commonProps}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
           <XAxis 
-            type={"category"} 
-            dataKey={xAxisMetric === 'Rank MLBB' ? 'Rank MLBB' : (xAxisMetric + 'Label')} 
-            name={xAxisMetric} 
+            type={isXNumericValue ? "number" : "category"} 
+            dataKey={isXNumericValue ? xAxisDataKey : "Rank MLBB"} 
+            name={xAxisLabelText} 
+            domain={isXNumericValue ? ['auto', 'auto'] : undefined}
             unit={isNormalized ? '%' : ''} 
-            label={{ value: xAxisMetric, position: 'insideBottom', offset: -80, fontSize: 12, fill: '#64748b', fontWeight: 800 }} 
+            label={{ value: xAxisLabelText, position: 'insideBottom', offset: -80, fontSize: 12, fill: '#64748b', fontWeight: 800 }} 
             tick={{ fontSize: 10, fill: '#94a3b8' }}
           />
           <YAxis 
@@ -597,11 +619,12 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const item = payload[0].payload as any;
+                const xLabel = xAxisLabelText;
                 return (
                   <div className="bg-white p-3 rounded-xl shadow-xl border border-slate-100">
                     <p className="font-black text-slate-800 border-b pb-1 mb-2 text-xs">{item.name}</p>
                     <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tight">
-                      {xAxisMetric}: {isXNumeric ? getOriginalValue(item, xAxisMetric) : item[xAxisMetric]}
+                      {xLabel}: {xAxisMetric === 'rankSNBT' ? item['Rank MLBB'] : getOriginalValue(item, xLabel)}
                     </p>
                     <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">
                       {scatterY}: {getOriginalValue(item, scatterY)}
@@ -618,14 +641,26 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     }
 
     const XComponent = <XAxis 
-      dataKey={xAxisMetric === 'Rank MLBB' ? 'Rank MLBB' : (xAxisMetric + 'Label')} 
+      dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (
+        (() => {
+          const col = columns.find(c => c.key === xAxisMetric);
+          return col ? col.label + 'Label' : xAxisMetric + 'Label';
+        })()
+      )} 
       type={"category"}
       angle={-45} 
       textAnchor="end" 
       interval={0} 
       height={100} 
       tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} 
-      label={{ value: xAxisMetric, position: 'insideBottom', offset: -25, fontSize: 10, fontWeight: 800, fill: '#94a3b8' }}
+      label={{ 
+        value: xAxisMetric === 'rankSNBT' ? t.cols.rankSNBT : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric), 
+        position: 'insideBottom', 
+        offset: -25, 
+        fontSize: 10, 
+        fontWeight: 800, 
+        fill: '#94a3b8' 
+      }}
     />;
 
     const CustomTooltip = ({ active, payload, label }: any) => {
@@ -1293,11 +1328,11 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                       <span className={`text-[10px] font-black uppercase tracking-tighter ${activeTierVisual ? 'text-white/30' : 'text-slate-400'}`}>X:</span>
                       <select 
                         value={xAxisMetric}
-                        onChange={(e) => setXAxisMetric(e.target.value)}
+                        onChange={(e) => setXAxisMetric(e.target.value as any)}
                         className={`text-xs font-bold bg-transparent border-none outline-none cursor-pointer transition-colors max-w-[80px] truncate ${activeTierVisual ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
                       >
-                        <option value="Rank MLBB">Rank MLBB</option>
-                        {chartableMetrics.map(m => <option key={m.label} value={m.label} className="bg-slate-900 text-white">{m.label}</option>)}
+                        <option value="rankSNBT">{t.cols.rankSNBT}</option>
+                        {chartableMetrics.filter(m => m.key !== 'rankSNBT').map(m => <option key={m.key} value={m.key} className="bg-slate-900 text-white">{m.label}</option>)}
                       </select>
                     </div>
                     <div className="w-[1px] h-4 bg-white/10" />
@@ -1306,9 +1341,9 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                       <div className="flex items-center gap-1">
                         {chartableMetrics.map(m => (
                           <button
-                            key={m.label}
-                            onClick={() => toggleYMetric(m.label)}
-                            className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase transition-all border whitespace-nowrap ${yAxisMetrics.has(m.label) ? (activeTierVisual ? 'bg-white border-white text-black' : 'bg-blue-600 border-blue-600 text-white shadow-sm') : (activeTierVisual ? 'bg-white/5 border-white/5 text-white/30 hover:border-white/20' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300')}`}
+                            key={m.key}
+                            onClick={() => toggleYMetric(m.key)}
+                            className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase transition-all border whitespace-nowrap ${yAxisMetrics.has(m.key) ? (activeTierVisual ? 'bg-white border-white text-black' : 'bg-blue-600 border-blue-600 text-white shadow-sm') : (activeTierVisual ? 'bg-white/5 border-white/5 text-white/30 hover:border-white/20' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300')}`}
                           >
                             {m.label}
                           </button>
@@ -1477,7 +1512,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`rounded-3xl shadow-2xl border overflow-hidden max-w-6xl mx-auto backdrop-blur-2xl transition-all duration-500 ${activeTierVisual ? 'bg-transparent border-transparent shadow-none' : 'bg-white border-slate-100 shadow-xl'}`}
+            className={`rounded-3xl shadow-2xl border max-w-6xl mx-auto backdrop-blur-2xl transition-all duration-500 ${activeTierVisual ? 'bg-transparent border-transparent shadow-none' : 'bg-white border-slate-100 shadow-xl'}`}
           >
             <div className="lg:grid lg:grid-cols-12 min-h-[650px] gap-8">
               <div className={`lg:col-span-4 p-8 rounded-3xl border transition-all duration-500 ${activeTierVisual ? 'bg-black/60 border-white/10 backdrop-blur-2xl' : 'bg-slate-50/50 border-slate-100'}`}>
@@ -1491,11 +1526,11 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                     <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>{t.chooseSubject}</label>
                     <select 
                       value={calcSubject}
-                      onChange={(e) => setCalcSubject(e.target.value)}
+                      onChange={(e) => setCalcSubject(e.target.value as keyof ComparisonRow)}
                       className={`w-full border rounded-2xl px-5 py-4 outline-none transition-all font-bold ${activeTierVisual ? 'bg-black/60 border-white/20 text-white' : 'bg-white border-slate-200 text-slate-700'}`}
                     >
-                      {chartableMetrics.map(m => (
-                        <option key={m.label} value={m.label} className="bg-slate-900 text-white">{m.label}</option>
+                      {columns.filter(c => c.isChartable || c.key === 'rankSNBT').map(m => (
+                        <option key={m.key} value={m.key} className="bg-slate-900 text-white">{m.label}</option>
                       ))}
                     </select>
                   </div>
@@ -1503,7 +1538,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                   <div>
                     <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>{t.inputScore}</label>
                     <input 
-                      type="number"
+                      type="text"
                       placeholder={t.scorePlaceholder}
                       value={calcInput}
                       onChange={(e) => setCalcInput(e.target.value)}
@@ -1519,10 +1554,18 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                 </div>
 
                 {interpolationResult && (
-                  <PercentileBellCurve 
-                    percentile={interpolationResult.pct} 
-                    themeColor={activeTierVisual?.ui.hexCode || '#3b82f6'} 
-                  />
+                  <div className="flex flex-col items-center">
+                    <PercentileBellCurve 
+                      percentile={interpolationResult.pct} 
+                      themeColor={activeTierVisual?.ui.hexCode || '#3b82f6'} 
+                    />
+                    <div className="mt-10 px-8 text-center w-full">
+                      <div className={`h-px w-full mb-6 ${activeTierVisual ? 'bg-white/10' : 'bg-slate-200'}`} />
+                      <p className={`text-xs italic font-bold leading-relaxed transition-colors duration-500 ${activeTierVisual ? 'text-white/50' : 'text-slate-500'}`}>
+                        {t.calcDisclaimer}
+                      </p>
+                    </div>
+                  </div>
                 )}
               </div>
 
