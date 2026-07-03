@@ -8,6 +8,7 @@ import simulacraImg from './assets/simulacra.png';
 import werewolfImg from './assets/werewolfzone.png';
 import multiverseImg from './assets/MULTIVERSE.jpg';
 import achmadImg from './assets/achmad.png';
+import kretekImg from './assets/kretek.png';
 
 export const profile: Profile = {
   name: "Kemal Avicenna Faza",
@@ -580,6 +581,268 @@ Kalkulasi total jam bersih dari Juli 2025 hingga Juli 2026 yang dihitung presisi
 | Makan Malam | 197 Jam |
 | Belajar Dasar TPB Kalkulus & Fisika (Fase 5) | 101,6 Jam |
 | Belajar Ujian Mandiri ITB (Fase 4) | 62 Jam |
+`
+  },
+  {
+    title: "Kretek Mistis",
+    summary: "KRETEK MISTIS: THE SALVIA PARADOX - Sebuah perjalanan surealis tentang konsekuensi eksistensial dan ilusi waktu.",
+    date: "2026-07-02",
+    image: kretekImg,
+    content: `
+# KRETEK MISTIS: THE SALVIA PARADOX
+**KARYA: KEMAL AV**
+
+
+## BABAK I: PROLOG SABOTASE & KEGAGALAN RIAN
+
+### SCENE 1. PABRIK ROKOK KRETEK KONVENSIONAL - MALAM
+LOGLINE VISUAL: Suasana pabrik pengap, dipenuhi kabut tipis beraroma cengkih dan tembakau pekat. Ribuan batang rokok bergerak teratur di atas ban berjalan.
+AUDIO: Suara bising mesin linting otomatis bergemuruh konstan dan berdentang sangat keras, menciptakan dengung yang memekakkan telinga.
+
+MUKLIS (42 tahun) berdiri mematung di depan mesin. Matanya merah, sayu, dikelilingi kantung mata hitam berat akibat jam lembur yang tidak manusiawi. Keringat menetes dari dahinya ke lantai berdebu.
+
+Muklis melirik cepat ke kanan dan kiri, memastikan MANDOR BERKUMIS TEBAL yang sedang mencatat log produksi tidak melihatnya.
+
+Dengan gerakan cepat, Muklis merogoh kantong celana kainnya yang robek. Ia mengeluarkan BOTOL KACA KECIL 5ml tanpa label berisi remahan daun hijau pekat—ekstrak murni Salvia divinorum berkonsentrasi tinggi.
+
+Wajah Muklis datar dan dingin. Menggunakan pinset baja karat, ia menjepit TIGA BATANG ROKOK acak dari ban berjalan. Ia mengeluarkan sedikit tembakau dari ujungnya, menyuntikkan sejumput ekstrak Salvia, lalu memadatkannya kembali hingga terlihat 100% normal.
+
+Muklis menatap ketiga rokok jebakan itu. Sebuah senyuman kosong dan bodoh mengembang tipis di wajahnya—senyum keputusasaan eksistensial.
+
+MUKLIS
+(Berbisik, lirih)
+Mari kita lihat... apakah takdir benar-benar bekerja.
+
+Muklis melemparkan kembali ketiga batang rokok itu ke jalur pengepakan secara acak. Salah satu batang rokok meluncur masuk ke dalam kotak kemasan bermerek "Kretek Jaya" dengan stempel distribusi: JAWA TENGAH.
+
+**CUT TO:**
+
+### SCENE 2. KAMAR RIAN - MALAM (2025)
+Kamar ukuran 3x3 meter sangat berantakan. Bungkus mi instan kosong berserakan di pojok lantai tanah. Satu-satunya cahaya berasal dari pendaran monitor laptop yang menyala merah membara, menampilkan pengumuman fatal:
+*"Anda Dinyatakan Tidak Lulus Teknik Mesin UGM/Undip 2025."*
+
+RIAN (19 tahun) duduk meringkuk di kursi plastik dengan rambut acak-acakan dan mata bengkak. Ia bernapas berat, menatap layar seperti melihat tulisan Game Over.
+
+Dengan tangan bergetar, Rian mengambil selembar kertas HVS kosong yang panjang. Menggunakan pulpen hitam, ia menulis sebuah judul besar di bagian atas dengan gaya antarmuka RPG:
+“Save File Checkpoint: Umur 12 Tahun.”
+
+Ia mulai menulis daftar poin imajiner di bawahnya:
+1. Belajar giat dari SMP, jangan terlalu banyak main MMORPG.
+2. Mulai diet ketat dan olahraga (looksmaxxing awal).
+3. Beli saham teknologi/crypto saat harganya masih di bawah seribu rupiah.
+4. Dapatkan nilai bagus di sekolah, focus belajar SNBT, dan lolos SNBT Teknik Mesin UGM tanpa gap year.
+
+Rian menatap kertas itu, lalu tertawa getir dan melemparnya ke dalam laci meja belajarnya yang berdecit. Ia menutup laci itu rapat-rapat.
+
+Rian berbaring di kasur tanpa sprei, membuka ponsel, dan menjelajahi TikTok. Algoritma menampilkan video meme luar negeri tentang efek gila tanaman Salvia divinorum. Video menampilkan animasi surealis orang yang salah mengisap zat tersebut langsung mengalami disorientasi parah dan jiwanya tersesat menjadi gorden, tiang listrik, atau ubin lantai selama ratusan tahun di dalam kepalanya sendiri.
+
+Rian mendengus meremehkan.
+
+RIAN
+(Bergumam sinis)
+Hiperbola demi penonton. Alay.
+
+Rian mematikan ponselnya dan tertidur dalam depresi pekat.
+
+**FAST FADE TO:**
+
+
+
+## BABAK II: TRAGEDI WARKOP & ILUSI PANJANG LAYER 1
+
+### SCENE 3. WARUNG KOPI LOKAL - SORE (TIGA MINGGU KEMUDIAN)
+Waktu menunjukkan pukul 16:45. Warkop pinggiran kota ramai oleh asap rokok dan obrolan mahasiswa. Rian duduk nongkrong bersama tiga temannya.
+
+Di atas meja kayu yang basah oleh tumpahan kopi, terletak satu bungkus rokok "Kretek Jaya" yang baru dibeli dari warung Madura dekat kosan. Rian mengambil satu batang rokok dari dalam bungkus tersebut—rokok jebakan Muklis.
+
+Rian menyalakan korek api gas, membakar ujungnya, dan melakukan isapan pertama. Ia mengembuskan asap tebal.
+
+RIAN
+Rasanya normal. Agak gurih.
+
+Pukul 16:59:55. Rian melakukan isapan kedua, menarik asap tebal itu dalam-dalam ke paru-parunya.
+
+AUDIO: Efek Time Dilation ekstrem. Suara petikan gitar teman Rian dan gelak tawa warkop mendadak melambat secara brutal, berubah menjadi reverb panjang, berat, dan bergaung menyerupai suara monster besi dari bawah tanah.
+VISUAL: Pandangan Rian membeku total. Otot tubuhnya mengalami kelumpuhan total, dan perspektif kamera miring secara ekstrem.
+
+Tepat pukul 17:00, tubuh Rian ambruk dari kursinya, jatuh berdebum ke lantai tanah warkop dengan mata melotot kosong tanpa berkedip.
+
+**MATCH CUT TO:**
+
+### SCENE 4. KAMAR MASA KECIL RIAN - PAGI (ILUSI LAYER 1)
+Rian tersentak bangun. Suara bising warkop hilang total. Ia berada di tempat tidur kecil dengan selimut bermotif karakter kartun jadul yang hangat. Sinar matahari pagi menerobos masuk dari sela jendela kayu.
+
+Rian melihat tangannya—kecil, halus, tanpa kapalan. Efek neurotoxin Salvia telah menghapus seluruh memorinya tentang realitas 2025, kegagalan SNBT, dan warkop. Di otaknya, ia adalah anak 12 tahun yang baru terbangun dari tidur biasa.
+
+Saat merapikan seprai yang kusut, kakinya menyenggol selembar kertas HVS panjang agak kusam di lantai. Rian memungutnya dan membaca tulisan di atasnya:
+“Save File Checkpoint: Umur 12 Tahun.”
+
+Tulisan itu 100% tulisan tangannya sendiri, berisi panduan masa depan yang sangat detail. Rian kecil yang ketakutan mengira ini adalah "Sistem Game Gaib".
+
+RIAN (12 TAHUN)
+(Gemetar, ketakutan)
+Gua... gua harus ikuti ini semua. Kalau melanggar, gua bisa kuwalat dan bawa petaka...
+
+**MONTAGE ADEGAN CEPAT (TRANSISI WAKTU HALUS & DINGIN):**
+1. Rian remaja melakukan diet ketat dan olahraga hingga tubuhnya tegap.
+2. Rian dengan dingin menolak ajakan main game atau nongkrong tidak jelas dari teman sebanyanya.
+3. Rian mencoret poin-poin di kertas menggunakan pulpen hitam dengan rapi.
+**END OF MONTAGE**
+
+### SCENE 5. KAMAR RIAN (SIMULASI) - MALAM (2024)
+Rian membuka laptopnya. Layar pengumuman seleksi nasional menyala biru terang dengan teks: “Selamat! Anda Dinyatakan Lulus Teknik Mesin UGM.”
+
+Rian melangkah masuk ke kluster teknik Bulaksumur dengan aura disiplin yang kaku. Di kertas kusamnya, tertulis instruksi fase kampus: “Lulus dalam 4 tahun, IPK di atas 3.75, kuasai software CAD, jangan pacaran.”
+
+**MONTAGE PERJUANGAN KAMPUS:**
+1. Rian mengunci diri di kamar kos, berkutat dengan tumpukan buku Kalkulus, Termodinamika, dan Mekanika Fluida di saat teman kosnya pergi ke Malioboro atau Kopi Klotok.
+2. Rian menghabiskan malam di laboratorium manufaktur, berlumur aroma oli, deru mesin bubut, dan kilatan las. Ia memimpin praktikum dengan disiplin besi.
+3. Rian direkrut menjadi asisten lab Mekanika Struktur oleh dosen karena analitisnya yang tajam.
+4. Rian berada di bengkel tim mobil formula mahasiswa UGM, menganalisis simulasi aerodinamika dan merancang sistem transmisi kendaraan di depan monitor selama berjam-jam.
+**END OF MONTAGE**
+
+Rian berdiri di atas podium wisuda yang megah mengenakan toga dengan samir kuning-biru khas UGM, menerima predikat Cumlaude sebagai lulusan terbaik di hadapan ratusan pasang mata.
+
+**FAST MATCH CUT TO:**
+
+### SCENE 6. KANTOR JAKARTA & RUMAH ELITE - MONTAGE
+1. Rian bekerja di perusahaan otomotif multinasional Jakarta sebagai Insinyur Perancangan Mobil. Kariernya melejit menjadi manajer teknik muda yang sukses dan kaya raya.
+2. Rian membeli rumah di kawasan elite, berkendara dengan mobil mewah.
+3. Rian bertemu SARI, wanita anggun bidang finansial. Mereka menikah dalam pernikahan megah, dan beberapa tahun kemudian dikaruniai anak perempuan lucu bernama NADIA.
+4. Kehidupan domestik yang sangat nyata: Rian merasakan kehangatan kulit istrinya, tawa renyah Nadia, dan aroma kopi di rumahnya.
+**END OF MONTAGE**
+
+
+
+## BABAK III: JALAN BUNTU MEKANIS LAYER 2
+
+### SCENE 7. HOTEL MEWAH LAS VEGAS - MALAM (BELASAN TAHUN KEMUDIAN)
+Rian berada di Amerika Serikat untuk menghadiri pameran teknologi otomotif global atas prestasinya merancang mesin mobil listrik terbaru.
+
+Rian duduk di tepi ranjang hotel mewah Las Vegas, mengeluarkan kertas HVS masa kecilnya dari dompet. Semua poin dari pertama hingga terakhir telah ia coret selesai. Rian tersenyum lebar dan mengembusen napas panjang.
+
+RIAN
+(Penuh kepuasan)
+Gua bebas. Gua udah memenangkan permainan hidup ini.
+
+### SCENE 8. APARTEMEN DANI (AS) - MALAM
+Suasana santai diiringi musik jazz lembut dari piringan hitam. Rian berkunjung ke apartemen rekan kerjanya, DANI. Dani dan kawannya duduk di sofa kulit sambil mengeluarkan pipa kaca kecil berisi zat herbal komersial resmi dari apotek lokal.
+
+Dani menoleh dan menyodorkan pipa tersebut ke Rian.
+
+DANI
+Eh Yan, mumpung lu lagi di Amerika dan di negara bagian sini zat ini legal, cobain deh. Ini Salvia, zat herbal murni sekali pakai. Cuma buat mind-trip bentar beberapa menit, gak bikin kecanduan sama sekali.
+
+Rian yang kelelahan dan didorong oleh ego insinyurnya yang sangat logis merasa memiliki kendali penuh atas otaknya. Ia menerima pipa tersebut, memantik apinya, dan mengisap asap tebal itu dalam-dalam.
+
+VISUAL FX: Tiga detik setelah asap masuk ke tenggorokan, efek Salvia konsentrasi tinggi menyerang sistem saraf simulasinya secara brutal. Terjadi malafungsi sistemik.
+
+Memori tentang kesuksesan Layer 1, Amerika, Sari, dan Nadia terkelupas habis hingga menyisakan kesadaran murni tanpa nama. Fokus visual terakhir Rian sebelum pandangannya membeku adalah menatap ke arah celah mekanis berputar dari roda gigi di dalam mesin jam dinding kuno di apartemen Dani.
+
+Kesadaran Rian hancur berkeping-keping dan tersedot jatuh ke dimensi yang lebih dalam.
+
+**CUT TO:**
+
+### SCENE 9. DIMENSI JALAN BUNTU MEKANIS - (LAYER 2)
+VISUAL: Dimensi ruang hampa tak terbatas dengan atmosfer monokromatik berkarat yang dipenuhi warna cokelat tua dan abu-abu logam. Rian tidak memiliki tubuh ragawi. Ia amnesia total tingkat akut—tidak tahu apa itu manusia, bahasa, atau nama.
+
+Wujud eksistensinya saat ini adalah sebuah RODA GIGI BAJA RAKSASA BERDIAMETER 50 METER yang tertanam di dalam mesin jam mekanis raksasa penopang peradaban masa depan.
+
+AUDIO: Suara gesekan logam berat dan detak jam makro bergemuruh konstan memekakkan telinga imajinernya.
+
+Karena wujudnya benda mati, tidak ada mulut untuk berteriak atau tangan untuk bergerak melepaskan diri. Kesadarannya terjebak lumpuh total di dalam dinginnya besi berkarat.
+
+**DISTORSI WAKTU EKSTREM:** Satu detik di dunia nyata terasa seperti puluhan tahun di dimensi ini. Selama ratusan tahun di dalam kepalanya, Rian dipaksa berputar konstan secara monoton dan bergesekan dengan roda gigi baja lain. Ia menyaksikan era berganti di luar sana, peradaban dibangun dan runtuh, sementara ia tetap menjadi besi yang berputar tanpa henti.
+
+Siksaan kesunyian ini berjalan sangat lama hingga di titik puncaknya, kompleks jam raksasa itu usang dan dihancurkan oleh mesin pembongkar alat berat dalam suara ledakan logam yang memekakkan. Dimensi roda gigi itu hancur berantakan.
+
+**CUT TO:**
+
+
+
+## BABAK IV: TRAGEDI PESAWAT BOEING
+
+### SCENE 10. APARTEMEN DANI - MALAM (KEMBALI KE LAYER 1)
+Kesadaran Rian terlempar ke atas secara instan seperti pegas yang dilepas. Rian versi insinyur sukses tersentak bangun di sofa kulit apartemen Dani. Tangannya gemetar hebat, menjatuhkan pipa kaca ke atas karpet mahal.
+
+Aturan main efek zat telah habis di layer ini: seluruh banjir memori belasan tahun sebagai insinyur, suami Sari, dan ayah Nadia langsung masuk kembali ke otaknya secara masif dalam satu detik!
+
+Rian menangis histeris, napasnya memburu cepat akibat serangan panik. Ia meraba saku celananya dengan liar, mengeluarkan dompet kulit, dan menatap foto kecil Nadia serta Sari dengan air mata membanjiri pipi.
+
+RIAN
+Anjir! Gua punya anak! Gua punya istri! Jadi... jadi siksaan menjadi roda gigi besi berkarat berabad-abad barusan ternyata cuma halusinasi buruk dari Salvia selama sepuluh menit?!
+
+Rian memeluk foto keluarganya dengan rasa syukur yang teramat dalam karena mengira telah berhasil kembali ke kehidupan nyatanya yang sukses dan mapan. Ia bertekad malam itu juga untuk segera pulang ke Indonesia.
+
+**CUT TO:**
+
+### SCENE 11. KABIN PESAWAT BOEING (KELAS BISNIS) - SIANG
+Rian duduk di kursi kelas bisnis pesawat komersial Boeing raksasa rute Los Angeles - Jakarta. Ia menatap ke luar jendela melihat hamparan awan putih yang indah.
+
+AUDIO: BOOM! Sebuah dentuman keras terdengar dari arah sayap kiri pesawat. Alarm kabin berbunyi nyaring, lampu merah berkedip-kedip darurat.
+
+PRAMUGARI (V.O)
+(Melalui interkom, panik)
+"Attention all passengers, please fasten your seatbelts immediately!"
+
+Pesawat mengalami gagal mesin total, kehilangan daya angkat, dan langsung menukik jatuh bebas dari langit secara horor. Kabin mendadak kacau balau, dipenuhi jeritan histeris ratusan penumpang, barang-barang berterbangan, dan masker oksigen jatuh bergelantungan.
+
+Rian mencengkeram sabuk pengamannya erat-erat dengan mata terpejam rapat. Pikiran terakhir yang melintas di benaknya di tengah guncangan hebat adalah wajah tersenyum manis Nadia dan Sari yang menunggunya di Bandara Soekarno-Hatta.
+
+Tepat saat moncong pesawat menghantam permukaan bumi dan memicu ledakan dahsyat yang menghancurkan segalanya—**CRAASH!**—kesadaran Rian di Layer 1 mati seketika.
+
+**MATCH CUT TO:**
+
+
+
+## BABAK V: REALITAS NYATA 2025
+
+### SCENE 12. WARUNG KOPI LOKAL - SORE (REALITAS UTAMA)
+Rian versi remaja 19 tahun tersentak bangun dari lantai warkop sambil berteriak histeris dengan lengkingan suara yang sangat ketakutan! Tubuhnya melengkung ke atas, dadanya naik-turun memburu oksigen, dan seluruh bajunya basah kuyup oleh keringat dingin.
+
+Teman-teman tongkrongannya terkejut setengah mati, langsung memegangi pundak dan lengan Rian yang gemetaran sambil tertawa geli campur cemas.
+
+DEDI
+Astaga Yan! Istighfar Yan! Lu kenapa melompat dan teriak kaya orang gila gitu?! Lu habis makan kecubung apa gimana, cok? Baru dua isap rokok tadi muka lu langsung pucat pasi terus lu kejang-kejang dan pingsan lima belas menit di lantai warkop ini!
+
+Rian tidak mendengarkan ucapan mereka. Jiwanya masih terguncang hebat. Dengan jemari gemetar, ia melihat sisa puntung rokok "Kretek Jaya" yang tergeletak di lantai tanah.
+
+Rian menangis kejer, air matanya menetes deras membasahi debu lantai. Ia segera memeriksa jari manis tangan kanannya—kulitnya polos, tidak ada cincin kawin perak yang tadinya melingkar di sana.
+
+Kesuksesan karier di Jakarta, gelar cumlaude UGM, siksaan roda gigi baja selama ratusan tahun, serta pelukan hangat istri dan anak perempuannya selama belasan tahun kemarin ternyata hanyalah simulasi otak bawah sadarnya yang korsleting hebat selama 15 menit akibat racun Salvia!
+
+**CUT TO:**
+
+### SCENE 13. KAMAR RIAN - MALAM
+Rian masuk ke kamarnya yang berantakan dengan langkah kaki lemas dan gemetar seolah tanpa tulang. Ia langsung membuka laci meja belajarnya yang berdecit, merobek bagian dalam laci, dan mengambil selembar catatan list poin angan-angan save file umur 12 tahun yang dia tulis beberapa minggu lalu.
+
+Rian memegangnya dengan tangan bergetar, menangis ngeri sekaligus takjub melihat struktur tulisan, coretan tinta, dan urutan poinnya sama persis 100% dengan kertas panduan gaib yang ia temukan di Layer 1 kamarnya dulu. Otak bawah sadarnya telah merajut neraka simulasi, memanfaatkan delusi dan penyesalannya sendiri untuk menghukum pikirannya yang suka berandai-andai dan tidak menerima kenyataan hidup.
+
+Rian menarik napas dalam-dalam, menyeka air mata dan keringat di wajah remajanya yang kini tampak jauh lebih dewasa akibat beban psikologis "ratusan tahun" halusinasi. Ia menatap kertas angan-angan itu untuk terakhir kalinya.
+
+Dengan gerakan perlahan namun pasti, Rian meremas kertas save file itu kuat-kuat di dalam genggamannya hingga menjadi gumpalan kecil, lalu melemparkannya ke dalam tempat sampah di bawah meja.
+
+RIAN
+(Tegas, meskipun suara bergetar)
+Hidup yang nyata... gak pernah punya tombol Load Game.
+
+**CUT TO:**
+
+### SCENE 14. JALANAN KOTA - SIANG
+Rian mengenakan baju kaus sederhana, bekerja keras memeras keringat di bawah terik matahari menjadi sopir kurir pengantar paket logistik, mengendarai mobil boks melewati kemacetan jalanan kota. Wajahnya lelah, namun matanya memancarkan keteguhan. Ia memutuskan mengambil langkah gap year dengan kepala tegak tanpa rasa malu lagi pada lingkungan sosialnya.
+
+### SCENE 15. KAMAR RIAN - MALAM
+Kamar Rian kini sudah rapi dan bersih. Di bawah pendaran lampu belajar yang temaram dan hangat, Rian duduk dengan tatapan mata fokus, serius, dan matang.
+
+Ia membuka buku tebal materi persiapan SNBT, memegang pensilnya, dan mulai belajar dengan gigih demi memperjuangkan mimpinya masuk Teknik Mesin UGM yang asli secara nyata. Kamera perlahan bergerak mundur menjauh dari wajah Rian yang fokus belajar.
+
+**FADE OUT TO BLACK.**
+
+________________________________________
+
+**TEKS DI LAYAR (PERINGATAN RESMI):**
+PERINGATAN RESMI BADAN NARKOTIKA NASIONAL (BNN) & KEMENTERIAN KESEHATAN RI
+*Penyalahgunaan tanaman psikotropika ilegal seperti Salvia Divinorum dan peredaran produk tanpa izin dilarang keras oleh hukum Republik Indonesia. Zat Salvinorin A memicu kerusakan saraf permanen, halusinasi psikotik berbahaya, dan gangguan mental kronis. Hadapi realitas dengan sehat, sayangi dirimu dan masa depanmu. Katakan TIDAK pada Narkoba!*
 `
   },
 ];

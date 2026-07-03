@@ -32,7 +32,9 @@ import {
   Activity,
   ShieldAlert,
   Thermometer,
-  CloudLightning
+  CloudLightning,
+  Dices,
+  Sparkles
 } from 'lucide-react';
 import {
   BarChart,
@@ -78,7 +80,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     { key: 'playHour', label: t.cols.playHour, icon: <Clock className="w-4 h-4" />, isChartable: true },
     { key: 'percentile', label: t.cols.percentile, icon: <Percent className="w-4 h-4" />, isChartable: true },
     { key: 'compoundDifficulty', label: t.cols.compoundDifficulty, icon: <Brain className="w-4 h-4" />, isChartable: true },
-    { key: 'iq', label: t.cols.iq, icon: <Brain className="w-4 h-4" />, isChartable: true },
+    { key: 'iq', label: t.cols.iq, icon: <Target className="w-4 h-4" />, isChartable: true },
     { key: 'psl', label: t.cols.psl, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true },
     { key: 'asetBersih', label: t.cols.asetBersih, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true },
   ];
@@ -94,6 +96,9 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   // View Your Position State
   const [calcInput, setCalcInput] = useState<string>('');
   const [calcSubject, setCalcSubject] = useState<keyof ComparisonRow>('skorIRT');
+  const [isPulling, setIsPulling] = useState(false);
+  const [pullHistory, setPullHistory] = useState<{value: string, p: number}[]>([]);
+  const [selectedGachaIdx, setSelectedGachaIdx] = useState<number | null>(null);
   
   // Alternative value tracking for multi-value results (calculator and table)
   const [altIndices, setAltIndices] = useState<Record<string, number>>({});
@@ -205,7 +210,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         [t.cols.percentile]: 100,
         [t.cols.posisiNasional]: 1000000, 
         [t.cols.sat]: 1600,
-        [t.cols.iq]: 160,
+        [t.cols.iq]: 200,
         [t.cols.playHour]: 5000,
         [t.cols.chessElo]: 3000,
         [t.cols.osuPP]: 1500,
@@ -249,7 +254,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     playHour: 'jam',
     percentile: 'pct',
     compoundDifficulty: 'comp',
-    iq: 'iq',
+    iq: 'benar',
     psl: 'psl',
     asetBersih: 'asetBersih',
     chessElo: 'elo',
@@ -417,26 +422,147 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     if (!interpolationResult) return null;
     const benar = interpolationResult.benar;
     
-    let tierId = "1-9";
-    if (benar >= 150) tierId = "150-160";
-    else if (benar >= 140) tierId = "140-149";
-    else if (benar >= 130) tierId = "130-139";
-    else if (benar >= 120) tierId = "120-129";
-    else if (benar >= 110) tierId = "110-119";
-    else if (benar >= 100) tierId = "100-109";
-    else if (benar >= 90) tierId = "90-99";
-    else if (benar >= 80) tierId = "80-89";
-    else if (benar >= 75) tierId = "75-79";
-    else if (benar >= 70) tierId = "70-74";
-    else if (benar >= 60) tierId = "60-69";
-    else if (benar >= 50) tierId = "50-59";
-    else if (benar >= 40) tierId = "40-49";
-    else if (benar >= 10) tierId = "10-39";
+    let tierId = "40-74";
+    if (benar >= 150) tierId = "145-200";
+    else if (benar >= 140) tierId = "135-145";
+    else if (benar >= 130) tierId = "130-134";
+    else if (benar >= 120) tierId = "125-129";
+    else if (benar >= 110) tierId = "120-124";
+    else if (benar >= 100) tierId = "115-119";
+    else if (benar >= 90) tierId = "110-114";
+    else if (benar >= 80) tierId = "105-109";
+    else if (benar >= 75) tierId = "100-104";
+    else if (benar >= 70) tierId = "95-99";
+    else if (benar >= 60) tierId = "90-94";
+    else if (benar >= 50) tierId = "87-89";
+    else if (benar >= 40) tierId = "85-86";
+    else if (benar >= 10) tierId = "75-84";
     
-    return TIER_VISUAL_DATA[tierId] || TIER_VISUAL_DATA["75-79"] || null;
+    return TIER_VISUAL_DATA[tierId] || TIER_VISUAL_DATA["40-74"] || null;
   }, [interpolationResult]);
 
   const activeColumns = columns.filter(col => visibleColumns.has(col.key));
+
+  const handlePull = (count: number = 1) => {
+    if (isPulling) return;
+    setIsPulling(true);
+    setSelectedGachaIdx(null);
+    if (count === 10) setPullHistory([]);
+
+    const generateOne = () => {
+        // 1. PersentilAcak murni (0-100)
+        const PersentilAcak = Math.random() * 100;
+        
+        // 2. Get Subject and interpolation points
+        const subjectKey = colToInterpKey[calcSubject] as keyof InterpolationPoint;
+        const sorted = [...INTERPOLATION_DATA].sort((a, b) => a.pct - b.pct);
+        
+        // Find interval
+        let lower = sorted[0];
+        let upper = sorted[sorted.length - 1];
+        for (let j = 0; j < sorted.length - 1; j++) {
+          if (PersentilAcak >= sorted[j].pct && PersentilAcak <= sorted[j+1].pct) {
+            lower = sorted[j];
+            upper = sorted[j+1];
+            break;
+          }
+        }
+        
+        const t_val = (PersentilAcak - lower.pct) / (upper.pct - lower.pct || 1);
+        
+        const cleanVal = (val: any) => {
+          if (typeof val === 'number') return val;
+          const m = String(val).match(/[\d\.]+/);
+          return m ? parseFloat(m[0]) : 0;
+        };
+
+        const valLow = cleanVal(lower[subjectKey]);
+        const valHigh = cleanVal(upper[subjectKey]);
+        
+        // Interpolate value
+        const resultValue = valLow + t_val * (valHigh - valLow);
+        
+        const finalValue = ['osuStar', 'psl'].includes(calcSubject) 
+          ? resultValue.toFixed(2) 
+          : Math.round(resultValue).toString();
+
+        return { value: finalValue, p: PersentilAcak };
+      };
+
+    if (count === 1) {
+      const result = generateOne();
+      let frames = 0;
+      const maxFrames = 20;
+      
+      const subjectKey = colToInterpKey[calcSubject] as keyof InterpolationPoint;
+      const sorted = [...INTERPOLATION_DATA].sort((a, b) => a.pct - b.pct);
+      const cleanVal = (val: any) => {
+        if (typeof val === 'number') return val;
+        const m = String(val).match(/[\d\.]+/);
+        return m ? parseFloat(m[0]) : 0;
+      };
+      const AngkaMin = cleanVal(sorted[0][subjectKey]);
+      const AngkaMax = cleanVal(sorted[sorted.length - 1][subjectKey]);
+
+      const interval = setInterval(() => {
+        frames++;
+        if (frames < maxFrames) {
+          const tempP = Math.random() * 100;
+          const tempValNum = AngkaMin + (AngkaMax - AngkaMin) * (tempP / 100);
+          const tempVal = ['osuStar', 'psl'].includes(calcSubject) 
+            ? tempValNum.toFixed(2) 
+            : Math.round(tempValNum).toString();
+          setCalcInput(tempVal);
+        } else {
+          clearInterval(interval);
+          setCalcInput(result.value);
+          setIsPulling(false);
+          setPullHistory([result]);
+        }
+      }, 50);
+    } else {
+      // Pull 10
+      const results = Array.from({ length: 10 }, () => generateOne());
+      let currentIdx = 0;
+      const interval = setInterval(() => {
+        if (currentIdx < 10) {
+          setPullHistory(prev => [...prev, results[currentIdx]]);
+          setCalcInput(results[currentIdx].value);
+          currentIdx++;
+        } else {
+          clearInterval(interval);
+          setIsPulling(false);
+        }
+      }, 120);
+    }
+  };
+
+  const handleAdjustment = (direction: 'up' | 'down') => {
+    const currentVal = parseFloat(calcInput) || 0;
+    // Determine step size based on subject
+    let step = 1;
+    if (['osuStar', 'psl'].includes(calcSubject)) {
+      step = 0.1;
+    } else if (calcSubject === 'rankSNBT') {
+      step = 500;
+    } else if (calcSubject === 'sat') {
+      step = 10;
+    } else if (calcSubject === 'iq') {
+      step = 1;
+    }
+    
+    const newVal = direction === 'up' ? currentVal + step : currentVal - step;
+    
+    // Format based on subject
+    let formatted = "";
+    if (['osuStar', 'psl'].includes(calcSubject)) {
+      formatted = newVal.toFixed(2);
+    } else {
+      formatted = Math.max(0, Math.round(newVal)).toString();
+    }
+    
+    setCalcInput(formatted);
+  };
 
   const formatValue = (val: any, colKey: string) => {
     // Early return for pre-formatted strings, EXCEPT for assets which need currency conversion
@@ -561,7 +687,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         else if (label === t.cols.jumlahBenar) props.domain = [0, 160];
         else if (label === t.cols.percentile) props.domain = [0, 100];
         else if (label === t.cols.sat) props.domain = [400, 1600];
-        else if (label === t.cols.iq) props.domain = [40, 160];
+        else if (label === t.cols.iq) props.domain = [0, 160];
         else if (label === t.cols.playHour) props.domain = [0, 'auto'];
         else if (label === t.cols.posisiNasional) {
           props.domain = [0, 'auto'];
@@ -1016,7 +1142,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                       fill="none"
                       opacity="0.1"
                       animate={{ opacity: [0.05, 0.2, 0.05], d: ["M0,300 Q250,100 500,300 T1000,300", "M0,350 Q250,150 500,350 T1000,350"] }}
-                      transition={{ repeat: Infinity, duration: 5 + i, alternate: true }}
+                      transition={{ repeat: Infinity, duration: 5 + i, repeatType: "reverse" }}
                     />
                   ))}
                   {/* ISS Silhouette */}
@@ -1115,7 +1241,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       <motion.div 
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 0.9 }}
-        className="absolute bottom-20 right-[5%] lg:right-[15%] z-0 pointer-events-none select-none hidden md:block"
+        className="absolute bottom-10 right-10 lg:right-20 z-0 pointer-events-none select-none hidden md:block"
       >
         <svg width="300" height="400" viewBox="0 0 100 130" className="drop-shadow-2xl">
           <defs>
@@ -1167,7 +1293,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     <div className="min-h-screen relative font-sans overflow-x-hidden transition-colors duration-1000" style={{ backgroundColor: activeTierVisual?.ui.dominantColor || '#f8fafc' }}>
       
       {/* IMMERSIVE FULL-SCREEN BACKGROUND LAYER */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {activeTierVisual && (
           <motion.div 
             key={activeTierVisual.tierId}
@@ -1219,8 +1345,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
               </div>
 
               {/* Tier Specific Overlays (Heat Distortion, Scanlines) */}
-              {activeTierVisual.tierId === "<2" || activeTierVisual.tierId.includes("39") ? (
-                <div className="absolute inset-0 bg-red-900/10 backdrop-blur-[1px] animate-pulse" />
+              {activeTierVisual.tierId === "1-9" || activeTierVisual.tierId === "10-39" ? (
+                <div className="absolute inset-0 bg-red-900/10 animate-pulse" />
               ) : null}
               
               <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
@@ -1230,9 +1356,9 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             <motion.div 
               initial={{ x: 100, opacity: 0 }}
               animate={{ x: 0, opacity: 0.15 }}
-              className="absolute -right-20 bottom-0 select-none pointer-events-none"
+              className="absolute -right-10 bottom-0 select-none pointer-events-none"
             >
-              <Rocket className="w-[600px] h-[600px] rotate-45 text-white blur-3xl" />
+              <Rocket className="w-[400px] h-[400px] rotate-45 blur-2xl" style={{ color: activeTierVisual.ui.hexCode }} />
             </motion.div>
           </motion.div>
         )}
@@ -1394,7 +1520,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
           <motion.div 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
-            className={`rounded-3xl shadow-2xl border overflow-hidden backdrop-blur-xl transition-all duration-500 ${activeTierVisual ? 'bg-black/40 border-white/10 shadow-black/40' : 'bg-white border-slate-100'}`}
+            className={`rounded-3xl shadow-2xl border overflow-hidden transition-all duration-500 ${activeTierVisual ? 'bg-black/40 border-white/10 shadow-black/40' : 'bg-white border-slate-100'}`}
           >
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -1450,7 +1576,22 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -5 }}
-                                    className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg ${col.key === 'statusPenerimaan' && String(val).includes('ACCEPTED') ? (activeTierVisual ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-emerald-50 text-emerald-700 font-bold') : ''} ${col.key === 'iq' && String(val).includes('145') ? (activeTierVisual ? 'bg-indigo-500/20 text-indigo-300 font-black' : 'bg-indigo-50 text-indigo-700 font-black') : ''} ${isAltSupported ? (activeTierVisual ? 'hover:bg-white/10' : 'hover:bg-slate-100') : ''}`}
+                                    className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg ${
+                                      col.key === 'statusPenerimaan' && String(val).includes('ACCEPTED') 
+                                        ? (activeTierVisual ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-emerald-50 text-emerald-700 font-bold') 
+                                        : ''
+                                    } ${
+                                      (col.key === 'jumlahBenar')
+                                        ? (() => {
+                                            const numericVal = parseInt(String(val).split('-')[0]);
+                                            if (numericVal >= 130) return activeTierVisual ? 'bg-amber-500/40 text-amber-300 font-black shadow-[0_0_15px_rgba(245,158,11,0.3)] ring-1 ring-amber-400/50' : 'bg-amber-100 text-amber-900 font-black ring-1 ring-amber-200';
+                                            if (numericVal >= 110) return activeTierVisual ? 'bg-purple-500/40 text-purple-300 font-bold shadow-[0_0_12px_rgba(168,85,247,0.2)] ring-1 ring-purple-400/50' : 'bg-purple-100 text-purple-900 font-bold ring-1 ring-purple-200';
+                                            if (numericVal >= 90) return activeTierVisual ? 'bg-blue-500/30 text-blue-300 font-medium ring-1 ring-blue-400/30' : 'bg-blue-100 text-blue-900 font-medium ring-1 ring-blue-200';
+                                            if (numericVal >= 75) return activeTierVisual ? 'bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-400/30' : 'bg-emerald-100 text-emerald-900 ring-1 ring-emerald-200';
+                                            return activeTierVisual ? 'text-white/60 bg-white/5' : 'text-slate-600 bg-slate-50';
+                                          })()
+                                        : ''
+                                    } ${isAltSupported ? (activeTierVisual ? 'hover:bg-white/10' : 'hover:bg-slate-100') : ''}`}
                                   >
                                     {formatValue(currentVal, col.key)}
                                     {isAltSupported && <Zap className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400 animate-pulse" />}
@@ -1476,7 +1617,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
           <motion.div 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
-            className={`rounded-3xl shadow-2xl border p-6 md:p-8 min-h-[600px] flex flex-col backdrop-blur-xl transition-all duration-500 ${activeTierVisual ? 'bg-black/60 border-white/10' : 'bg-white border-slate-100'}`}
+            className={`rounded-3xl shadow-2xl border p-6 md:p-8 min-h-[600px] flex flex-col transition-all duration-500 ${activeTierVisual ? 'bg-black/60 border-white/10' : 'bg-white border-slate-100'}`}
           >
             <div className="w-full h-[500px] relative">
               <div className="absolute inset-0">
@@ -1494,8 +1635,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                 </p>
                 <p className={`text-xs leading-relaxed font-medium transition-colors duration-500 ${activeTierVisual ? 'text-white/60' : 'text-slate-500'}`}>
                   {isNormalized 
-                    ? "Currently in Normalized Mode: All subjects (IQ, SAT, etc.) are scaled to 0-100. This allows you to compare the relative difficulty curves of different subjects side-by-side."
-                    : "Currently in Absolute Mode: Charts show raw values. Note that higher point values will dwarf smaller ones."}
+                    ? "Currently in Normalized Mode: All subjects (Correct Ans, SAT, etc.) are scaled to 0-100."
+                    : "Currently in Absolute Mode: Charts show raw values (e.g., Correct Ans 0-160)."}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -1512,10 +1653,10 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`rounded-3xl shadow-2xl border max-w-6xl mx-auto backdrop-blur-2xl transition-all duration-500 ${activeTierVisual ? 'bg-transparent border-transparent shadow-none' : 'bg-white border-slate-100 shadow-xl'}`}
+            className={`rounded-3xl shadow-2xl border max-w-6xl mx-auto transition-all duration-500 ${activeTierVisual ? 'bg-transparent border-transparent shadow-none' : 'bg-white border-slate-100 shadow-xl'}`}
           >
             <div className="lg:grid lg:grid-cols-12 min-h-[650px] gap-8">
-              <div className={`lg:col-span-4 p-8 rounded-3xl border transition-all duration-500 ${activeTierVisual ? 'bg-black/60 border-white/10 backdrop-blur-2xl' : 'bg-slate-50/50 border-slate-100'}`}>
+              <div className={`lg:col-span-4 p-8 rounded-3xl border transition-all duration-500 ${activeTierVisual ? 'bg-black/60 border-white/10' : 'bg-slate-50/50 border-slate-100'}`}>
                 <div className="mb-10">
                   <h2 className={`text-2xl font-black mb-2 uppercase tracking-tight transition-colors duration-500 ${activeTierVisual ? 'text-white' : 'text-slate-900'}`}>{t.calcTitle}</h2>
                   <p className={`text-sm font-medium transition-colors duration-500 ${activeTierVisual ? 'text-white/60' : 'text-slate-500'}`}>{t.calcSubtitle}</p>
@@ -1529,7 +1670,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                       onChange={(e) => setCalcSubject(e.target.value as keyof ComparisonRow)}
                       className={`w-full border rounded-2xl px-5 py-4 outline-none transition-all font-bold ${activeTierVisual ? 'bg-black/60 border-white/20 text-white' : 'bg-white border-slate-200 text-slate-700'}`}
                     >
-                      {columns.filter(c => c.isChartable || c.key === 'rankSNBT').map(m => (
+                      {columns.filter(c => (c.isChartable || c.key === 'rankSNBT') && !['rankSNBT'].includes(c.key)).map(m => (
                         <option key={m.key} value={m.key} className="bg-slate-900 text-white">{m.label}</option>
                       ))}
                     </select>
@@ -1537,13 +1678,183 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                   
                   <div>
                     <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>{t.inputScore}</label>
-                    <input 
-                      type="text"
-                      placeholder={t.scorePlaceholder}
-                      value={calcInput}
-                      onChange={(e) => setCalcInput(e.target.value)}
-                      className={`w-full border rounded-2xl px-5 py-4 outline-none transition-all font-mono font-bold text-2xl ${activeTierVisual ? 'bg-black/60 border-white/20 text-white placeholder:text-white/20' : 'bg-white border-slate-200 text-slate-700'}`}
-                    />
+                    <div className="relative group/input">
+                      <input 
+                        type="text"
+                        placeholder={t.scorePlaceholder}
+                        value={calcInput}
+                        onChange={(e) => setCalcInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            handleAdjustment('up');
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            handleAdjustment('down');
+                          }
+                        }}
+                        className={`w-full border rounded-2xl pl-5 pr-16 py-4 outline-none transition-all font-mono font-bold text-2xl ${activeTierVisual ? 'bg-black/60 border-white/20 text-white placeholder:text-white/20' : 'bg-white border-slate-200 text-slate-700'}`}
+                      />
+                      
+                      {/* Adjustment Buttons */}
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                        <button 
+                          onClick={() => handleAdjustment('up')}
+                          className={`p-1 rounded-md transition-colors ${activeTierVisual ? 'hover:bg-white/10 text-white/40 hover:text-white' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleAdjustment('down')}
+                          className={`p-1 rounded-md transition-colors ${activeTierVisual ? 'hover:bg-white/10 text-white/40 hover:text-white' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className={`absolute right-16 bottom-4 flex items-center gap-2 transition-opacity duration-500 ${calcInput ? 'opacity-100' : 'opacity-0'}`}>
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${activeTierVisual ? 'bg-white' : 'bg-blue-500'}`} />
+                        <span className={`text-[8px] font-black uppercase tracking-widest ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>Active</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mt-4">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={isPulling}
+                        onClick={() => handlePull(1)}
+                        className={`flex-1 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 group relative overflow-hidden ${
+                          activeTierVisual 
+                            ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                            : 'bg-slate-900 hover:bg-slate-800 text-white shadow-lg'
+                        } ${isPulling ? 'opacity-50 cursor-wait' : ''}`}
+                      >
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={isPulling ? "pulling" : "idle"}
+                            initial={{ rotate: 0 }}
+                            animate={isPulling ? { rotate: 360 } : { rotate: 0 }}
+                            transition={isPulling ? { repeat: Infinity, duration: 0.5, ease: "linear" } : { type: "spring", stiffness: 200 }}
+                          >
+                            <Dices className="w-5 h-5" />
+                          </motion.div>
+                        </AnimatePresence>
+                        <span className="font-black uppercase tracking-[0.2em] text-[10px]">Pull 1</span>
+                        {!isPulling && <Sparkles className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />}
+                        
+                        <motion.div 
+                          className="absolute inset-0 bg-white/20"
+                          initial={{ x: '-100%' }}
+                          whileHover={{ x: '100%' }}
+                          transition={{ duration: 0.5 }}
+                        />
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={isPulling}
+                        onClick={() => handlePull(10)}
+                        className={`flex-1 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 group relative overflow-hidden ${
+                          activeTierVisual 
+                            ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30' 
+                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20'
+                        } ${isPulling ? 'opacity-50 cursor-wait' : ''}`}
+                      >
+                        <div className="flex -space-x-1">
+                          <Dices className="w-4 h-4" />
+                          <Dices className="w-4 h-4 opacity-50" />
+                        </div>
+                        <span className="font-black uppercase tracking-[0.2em] text-[10px]">Pull 10</span>
+                        <div className="absolute top-1 right-2 text-[8px] font-bold opacity-30 italic">BONUS</div>
+                      </motion.button>
+                    </div>
+
+                    <AnimatePresence>
+                      {pullHistory.length > 0 && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="mt-6 overflow-hidden"
+                        >
+                          <div className={`text-[8px] font-black uppercase tracking-[0.3em] mb-3 text-center opacity-40`}>Gacha Results (Correct Ans)</div>
+                          <div className="grid grid-cols-5 gap-2">
+                            {pullHistory.map((res, i) => {
+                              if (!res) return null;
+                              // Calculate Jumlah Benar equivalent to determine rarity color
+                              const sortedData = [...INTERPOLATION_DATA].sort((a, b) => a.pct - b.pct);
+                              let lower = sortedData[0];
+                              let upper = sortedData[sortedData.length - 1];
+                              for (let j = 0; j < sortedData.length - 1; j++) {
+                                if (res.p >= sortedData[j].pct && res.p <= sortedData[j+1].pct) {
+                                  lower = sortedData[j];
+                                  upper = sortedData[j+1];
+                                  break;
+                                }
+                              }
+                              const t_val = (res.p - lower.pct) / (upper.pct - lower.pct || 1);
+                              const benarVal = lower.benar + t_val * (upper.benar - lower.benar);
+
+                              // Sync with User Specified Rarity Colors (Correct Answers / Jumlah Benar)
+                              let colorClass = "";
+
+                              if (benarVal >= 130) {
+                                // Gold (130-160): Amber-500 theme with heavy metallic glow (shadow-[0_0_40px]), internal highlights, and a scale-up effect
+                                colorClass = "bg-amber-500 border-amber-200 text-white shadow-[0_0_40px_rgba(245,158,11,0.8),inset_0_0_20px_rgba(255,255,255,0.4)] ring-4 ring-amber-400 font-black scale-110 z-20 backdrop-blur-md";
+                              } else if (benarVal >= 110) {
+                                // Purple (110-129): Vibrant Purple theme with neon accents and high-intensity outer glows
+                                colorClass = "bg-purple-600 border-purple-200 text-white shadow-[0_0_30px_rgba(168,85,247,0.9),inset_0_0_15px_rgba(255,255,255,0.3)] ring-2 ring-purple-400 font-bold scale-105 z-10 backdrop-blur-md";
+                              } else if (benarVal >= 90) {
+                                // Light Blue (90-109): Modern blue theme with increased opacity and refined shadow work
+                                colorClass = "bg-blue-600 border-blue-300 text-white shadow-[0_0_20px_rgba(59,130,246,0.7)] font-bold backdrop-blur-sm opacity-95";
+                              } else if (benarVal >= 75) {
+                                // Light Green (75-89): Emerald Green theme with enhanced vibrancy
+                                colorClass = "bg-emerald-500 border-emerald-300 text-white shadow-[0_0_20px_rgba(16,185,129,0.7)] font-bold backdrop-blur-sm";
+                              } else {
+                                // Gray (0-74): Clean slate/gray theme for standard results
+                                colorClass = "bg-slate-600/60 border-slate-500/50 text-slate-200 font-medium";
+                              }
+
+                              const isSelected = selectedGachaIdx === i;
+                              const isUltraRare = benarVal >= 110;
+                              
+                              return (
+                                <motion.button
+                                  key={i}
+                                  initial={{ scale: 0, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  transition={{ delay: i * 0.05 }}
+                                  onClick={() => {
+                                    if (res) {
+                                      setCalcInput(res.value);
+                                      setSelectedGachaIdx(i);
+                                    }
+                                  }}
+                                  className={`aspect-square rounded-lg flex flex-col items-center justify-center border transition-all relative group/res ${
+                                    isSelected
+                                      ? activeTierVisual ? 'bg-white border-white text-black' : 'bg-slate-900 border-slate-900 text-white'
+                                      : colorClass
+                                  }`}
+                                >
+                                  <span className={`text-[10px] font-mono font-bold leading-none ${calcSubject !== 'iq' ? 'drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' : ''}`}>{res?.value}</span>
+                                  <span className={`text-[6px] font-black opacity-70 mt-0.5 ${isSelected ? 'text-inherit' : ''}`}>{res ? Math.round(res.p) : 0}%</span>
+                                  
+                                  {isUltraRare && !isSelected && (
+                                    <motion.div 
+                                      animate={{ opacity: [0.5, 1, 0.5] }}
+                                      transition={{ repeat: Infinity, duration: 1 }}
+                                      className={`absolute -top-1 -right-1 w-2 h-2 rounded-full blur-[1px] ${benarVal >= 130 ? 'bg-amber-400 shadow-[0_0_8px_#fbbf24]' : 'bg-purple-400 shadow-[0_0_8px_#a855f7]'}`} 
+                                    />
+                                  )}
+                                </motion.button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
@@ -1605,7 +1916,10 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                              className="absolute inset-0"
                              style={{ backgroundColor: activeTierVisual.ui.hexCode }}
                            />
-                           <Rocket className="w-10 h-10 text-white relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+                           <Rocket 
+                             className="w-10 h-10 relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+                             style={{ color: activeTierVisual.ui.hexCode }} 
+                           />
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-2">
@@ -1741,8 +2055,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                                   initial={{ opacity: 0, x: -5 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: 5 }}
-                                  className="text-lg sm:text-xl font-black text-white italic leading-tight break-words group-hover:scale-[1.02] origin-left transition-transform" 
-                                  style={{ textShadow: `0 0 10px ${activeTierVisual.ui.hexCode}33` }}
+                                  className={`text-lg sm:text-xl font-black text-white leading-tight break-words group-hover:scale-[1.02] origin-left transition-transform ${metric.key !== 'iq' ? 'italic' : ''}`} 
+                                  style={{ textShadow: metric.key !== 'iq' ? `0 0 10px ${activeTierVisual.ui.hexCode}33` : 'none' }}
                                 >
                                   {formatValue(currentVal, metric.key === 'sel' ? 'sel' : metric.key)}
                                 </motion.p>

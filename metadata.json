@@ -1,6 +1,6 @@
 {
   "name": "Personal Roadmap Kemal Avicenna Faza",
-  "description": "Dashboard interaktif Rencana Induk (Master Plan) Kemal Avicenna Faza mencakup pendidikan, karir hibrida tekno-finansial, dan proyek kemandirian energi off-grid.",
+  "description": "Dashboard interaktif Kemal Avicenna Faza dengan arsitektur multi-app dan dukungan subdomain untuk artikel, Al-Qur'an, dan alat pembelajaran.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

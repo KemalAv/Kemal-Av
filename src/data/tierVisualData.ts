@@ -1,44 +1,32 @@
 export interface TierVisualInfo {
   tierId: string;
   name: string;
-  background: {
-    description: string;
-    elements: string[];
-  };
-  astronaut: {
-    physicalState: string;
-    pose: string;
-    suitCondition: string;
-    helmetStatus: string;
-    expression: string;
+  description: string;
+  visual: {
+    environment: string;
+    astronautAction: string;
     props: string[];
   };
   ui: {
     themeColor: string;
-    hexCode: string; // Active Hex
-    neonGlow: string;
+    hexCode: string;
     dominantColor: string;
+    neonGlow: string;
   };
   motion: {
     cameraBehavior: string;
-    animationReaction: string;
+    particleEffect: string;
   };
 }
 
 export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
-  "150-160": {
-    tierId: "150-160",
-    name: "Luar Angkasa Jauh",
-    background: {
-      description: "Ruang angkasa terdalam dengan latar belakang galaksi spiral emas-biru dan black hole yang memicu distorsi ruang.",
-      elements: ["Spiral Galaxy", "Black Hole", "Space Distortion", "Cosmic Dust"]
-    },
-    astronaut: {
-      physicalState: "Floating / God Pose",
-      pose: "Melayang bebas dengan pose agung (god pose), tanpa tali penambat",
-      suitCondition: "Baju astronot putih mengilap bersih (immaculate)",
-      helmetStatus: "Visor aktif dengan pantulan galaksi",
-      expression: "Mata menyala biru melalui visor",
+  "145-200": {
+    tierId: "145-200",
+    name: "GALACTIC LEGEND",
+    description: "Satu langkah lagi menuju keabadian. Anda berada di puncak evolusi kognitif.",
+    visual: {
+      environment: "Nebula berwarna ungu-emas yang berputar lambat",
+      astronautAction: "Mengambang tenang dengan aura cahaya putih",
       props: ["Piala Emas Raksasa"]
     },
     ui: {
@@ -49,22 +37,16 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Pergerakan kamera sangat tenang dan megah",
-      animationReaction: "Pulsa cahaya kosmis yang menyebar perlahan"
+      particleEffect: "Debu bintang keemasan yang berkilau"
     }
   },
-  "140-149": {
-    tierId: "140-149",
-    name: "Sabuk Satelit",
-    background: {
-      description: "Sabuk tata surya dengan latar belakang planet Saturnus yang megah dan komet yang melintas.",
-      elements: ["Saturn", "Icy Rings", "Passing Comets", "Solar Wind"]
-    },
-    astronaut: {
-      physicalState: "Relaxed / Superior",
-      pose: "Duduk bersila di atas meteor yang meluncur cepat",
-      suitCondition: "Pristine condition, desain futuristik karbon",
-      helmetStatus: "Visor bening transparan",
-      expression: "Senyum meremehkan (smirk) penuh percaya diri",
+  "135-145": {
+    tierId: "135-145",
+    name: "COSMIC OVERLORD",
+    description: "Kekuatan intelektual Anda melengkungkan ruang dan waktu.",
+    visual: {
+      environment: "Hujan meteor yang membeku di udara",
+      astronautAction: "Duduk bersila di atas meteor besar",
       props: ["Hologram Smartphone / UI Slate"]
     },
     ui: {
@@ -75,22 +57,16 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Kamera mengikuti meteor with getaran halus",
-      animationReaction: "Komet melesat cepat di latar belakang"
+      particleEffect: "Garis-garis cahaya ungu cepat"
     }
   },
-  "130-139": {
-    tierId: "130-139",
-    name: "Batas Awal Angkasa",
-    background: {
-      description: "Batas eksosfer dengan latar belakang lengkungan bumi yang biru and hujan mikrometeoroid.",
-      elements: ["Earth Curve", "Micrometeoroid Rain", "Ionization Tails", "Satellites"]
-    },
-    astronaut: {
-      physicalState: "Vertical Drift",
-      pose: "Melayang vertikal dengan tali kabel penambat yang tegang",
-      suitCondition: "Baju mengkilap dengan sedikit debu angkasa",
-      helmetStatus: "Visor helm reflektif penuh mencerminkan bumi",
-      expression: "Gaze serius dan bertekad",
+  "130-134": {
+    tierId: "130-134",
+    name: "STAR-BOUND VOYAGER",
+    description: "Batas bumi sudah tidak lagi berlaku untuk Anda.",
+    visual: {
+      environment: "Cincin planet yang bersinar terang di belakang",
+      astronautAction: "Meluncur cepat melewati kamera",
       props: ["Alat Pelacak Sinyal Kosmis"]
     },
     ui: {
@@ -101,74 +77,56 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Drift upward lambat dengan hambatan",
-      animationReaction: "Hujan meteoroid jatuh secara miring"
+      particleEffect: "Gelombang kejut transparan"
     }
   },
-  "120-129": {
-    tierId: "120-129",
-    name: "Orbit Stasiun Luar Angkasa",
-    background: {
-      description: "Lapisan termosfer dengan latar belakang stasiun luar angkasa (ISS) and aurora hijau yang menari.",
-      elements: ["ISS Modules", "Green Aurora", "Solar Panels", "Orbital Junks"]
-    },
-    astronaut: {
-      physicalState: "Braced / Determined",
-      pose: "Berpegangan kuat pada besi satelit atau stasiun ISS",
-      suitCondition: "Industrial plating, putih cerah",
-      helmetStatus: "Helm dibuka penuh (visor up), wajah terekspos",
-      expression: "Muka serius menatap tajam ke atas",
+  "125-129": {
+    tierId: "125-129",
+    name: "AURORA EXPLORER",
+    description: "Anda menari di antara cahaya langit yang paling murni.",
+    visual: {
+      environment: "Lautan awan dengan aurora hijau yang menari",
+      astronautAction: "Berjalan santai di atas awan",
       props: ["Cetak Biru (Blueprint) Kampus"]
     },
     ui: {
       themeColor: "Hijau Aurora",
-      hexCode: "#00FF66",
+      hexCode: "#9333ea",
       dominantColor: "#0B133A",
-      neonGlow: "0 0 12px #00FF66, 0 0 25px #00CCFF",
+      neonGlow: "0 0 12px #9333ea, 0 0 25px #a855f7",
     },
     motion: {
       cameraBehavior: "Goncangan kamera saat aurora berdenyut",
-      animationReaction: "Efek shimmer aurora di seluruh layar"
+      particleEffect: "Butiran energi hijau menguap"
     }
   },
-  "110-119": {
-    tierId: "110-119",
-    name: "Tempat Meteor Terbakar",
-    background: {
-      description: "Lapisan mesosfer dengan latar belakang meteor terbakar and awan es tipis noctilucent.",
-      elements: ["Burning Meteors", "Noctilucent Clouds", "Transition Sky"]
-    },
-    astronaut: {
-      physicalState: "High-speed Entry",
-      pose: "Terbang horizontal meluncur cepat ke bawah",
-      suitCondition: "Baju ada bekas gesekan baret halus dan singe marks",
-      helmetStatus: "Visor gelap dengan HUD peringatan suhu",
-      expression: "Ekspresi fokus penuh perhitungan",
+  "120-124": {
+    tierId: "120-124",
+    name: "NEON NAVIGATOR",
+    description: "Setiap rintangan adalah koordinat yang sudah Anda petakan.",
+    visual: {
+      environment: "Grid digital yang memanjang ke cakrawala",
+      astronautAction: "Menyentuh layar virtual di depan",
       props: ["Navigation Wrist Device"]
     },
     ui: {
       themeColor: "Sian Elektrik",
-      hexCode: "#00CCFF",
+      hexCode: "#2563eb",
       dominantColor: "#0E1C4E",
-      neonGlow: "0 0 18px #00CCFF, 0 0 35px #FFFF00",
+      neonGlow: "0 0 18px #2563eb, 0 0 35px #3b82f6",
     },
     motion: {
       cameraBehavior: "Vibrasi frekuensi tinggi pada layar",
-      animationReaction: "Garis-garis angin melintas sangat cepat"
+      particleEffect: "Bit data melayang (0 and 1)"
     }
   },
-  "100-109": {
-    tierId: "100-109",
-    name: "Jalur Pesawat Jet",
-    background: {
-      description: "Lapisan stratosfer dengan latar belakang hamparan awan putih tebal yang luas and jet tempur.",
-      elements: ["Thick Cloud Sea", "Fighter Jets", "Condensation Trails", "Ultra Blue Sky"]
-    },
-    astronaut: {
-      physicalState: "Skydiving / Freefall",
-      pose: "Pose terjun bebas (skydiving) yang ekstrem",
-      suitCondition: "Bergetar hebat karena tekanan udara",
-      helmetStatus: "Wajah terekspos angin kencang",
-      expression: "Muka nyengir ambis and antusias",
+  "115-119": {
+    tierId: "115-119",
+    name: "CYBER SCHOLAR",
+    description: "Pengetahuan adalah bahan bakar roket Anda.",
+    visual: {
+      environment: "Sirkuit raksasa yang menyala di kegelapan",
+      astronautAction: "Membaca buku hologram yang melayang",
       props: ["Tas punggung isi tumpukan buku tebal dengan kabel baja"]
     },
     ui: {
@@ -179,22 +137,16 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Pergerakan parallax cepat pada lapisan awan",
-      animationReaction: "Efek motion blur pada elemen jet tempur"
+      particleEffect: "Percikan listrik kuning"
     }
   },
-  "90-99": {
-    tierId: "90-99",
-    name: "Zona Awan Tinggi",
-    background: {
-      description: "Lapisan troposfer bawah dengan latar belakang langit biru cerah and kawanan burung elang.",
-      elements: ["Azure Sky", "Soaring Eagles", "Cumulus Clouds", "Sunbeams"]
-    },
-    astronaut: {
-      physicalState: "Parachute Glide",
-      pose: "Meluncur santai menggunakan parasut yang terbuka lebar",
-      suitCondition: "Matte finish, bersih terkena angin",
-      helmetStatus: "Helm dilepas longgar (neck seal released)",
-      expression: "Senyum ambisius menatap ke atas",
+  "110-114": {
+    tierId: "110-114",
+    name: "AMBER ASCENDANT",
+    description: "Cahaya keberhasilan mulai menyinari cakrawala Anda.",
+    visual: {
+      environment: "Matahari terbit di orbit bumi",
+      astronautAction: "Melihat ke arah matahari dengan tangan di atas mata",
       props: ["Teropong (Binoculars) di leher"]
     },
     ui: {
@@ -205,22 +157,16 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Ayunan kamera seperti gantung parasut",
-      animationReaction: "Burung elang terbang melintas secara acak"
+      particleEffect: "Suar lensa (lens flare) lembut"
     }
   },
-  "80-89": {
-    tierId: "80-89",
-    name: "Zone Nyaman (High)",
-    background: {
-      description: "Latar belakang lapangan rumput hijau, tiang listrik, sunset sore yang hangat, and siluet kampus Unnes.",
-      elements: ["Green Field", "Power Poles", "Warm Sunset", "Unnes Silhouette", "Fence"]
-    },
-    astronaut: {
-      physicalState: "Casual Hybrid",
-      pose: "Berdiri tegak di atas tanah, membumi",
-      suitCondition: "Baju astronot bawah, bagian atas memakai hoodie santai",
-      helmetStatus: "Helm dilepas (ditenteng di tangan)",
-      expression: "Muka datar, lempeng, unbothered",
+  "105-109": {
+    tierId: "105-109",
+    name: "CLOUDWALKER",
+    description: "Anda sudah berada di atas rata-rata, teruslah mendaki.",
+    visual: {
+      environment: "Awan kumulonimbus putih yang padat",
+      astronautAction: "Berpose 'victory' sambil memegang bendera",
       props: ["Smartphone (Social Media)", "Es Kopi (Iced Coffee) dengan sedotan"]
     },
     ui: {
@@ -231,49 +177,17 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Statis, tenang, tanpa guncangan",
-      animationReaction: "Efek lens flare sunset yang lembut"
+      particleEffect: "Tetesan air/embun halus"
     }
   },
-  "75-79": {
-    tierId: "75-79",
-    name: "Zona Nyaman Manusia",
-    background: {
-      description: "Latar belakang lapangan rumput hijau, tiang listrik, sunset sore yang hangat, and siluet kampus Unnes.",
-      elements: ["Green Field", "Power Poles", "Warm Sunset", "Unnes Silhouette", "Fence"]
-    },
-    astronaut: {
-      physicalState: "Casual Hybrid",
-      pose: "Berdiri tegak di atas tanah, membumi",
-      suitCondition: "Baju astronot bawah, bagian atas memakai hoodie santai",
-      helmetStatus: "Helm dilepas (ditenteng di tangan)",
-      expression: "Muka datar, lempeng, unbothered",
-      props: ["Smartphone (Social Media)", "Es Kopi (Iced Coffee) dengan sedotan"]
-    },
-    ui: {
-      themeColor: "Putih Bersih",
-      hexCode: "#FFFFFF",
-      dominantColor: "#2E5A44",
-      neonGlow: "0 0 12px #FFFFFF, 0 0 20px #A6A6A6",
-    },
-    motion: {
-      cameraBehavior: "Statis, tenang, tanpa guncangan",
-      animationReaction: "Efek lens flare sunset yang lembut"
-    }
-  },
-  "70-74": {
-    tierId: "70-74",
-    name: "Tanah Humus & Pipa Air",
-    background: {
-      description: "Lapisan tanah atas dengan latar belakang tanah humus cokelat and akar-akar pohon besar.",
-      elements: ["Tree Roots", "Humus Soil", "Worms", "Ancient Fossils"]
-    },
-    astronaut: {
-      physicalState: "Cramped / Sweaty",
-      pose: "Jongkok karena atap tanah yang sempit and rendah",
-      suitCondition: "Baju putih penuh bercak tanah cokelat",
-      helmetStatus: "Helm dipasang, visor baret kena batu",
-      expression: "Muka keringatan and kelelahan fisik",
-      props: ["Sekop (Shovel) di samping badan"]
+  "100-104": {
+    tierId: "100-104",
+    name: "ATMOSPHERE CADET",
+    description: "Udara mulai menipis, tapi tekad Anda tetap menebal.",
+    visual: {
+      environment: "Langit biru tua dengan gradasi ke hitam",
+      astronautAction: "Melakukan push-up di gravitasi rendah",
+      props: ["Oksigen Tank portabel", "Stiker 'Almost There'"]
     },
     ui: {
       themeColor: "Perak Redup",
@@ -283,23 +197,17 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Getaran tanah sporadis",
-      animationReaction: "Efek debu tanah yang berjatuhan"
+      particleEffect: "Debu cokelat melayang"
     }
   },
-  "60-69": {
-    tierId: "60-69",
-    name: "Zona Tambang Dalam & Batu Induk",
-    background: {
-      description: "Lapisan batu induk (bedrock) dengan latar belakang dinding gua batu sedimen yang padat and stalaktit kecil.",
-      elements: ["Sediment Wall", "Bedrock", "Stalactites", " Stone Layers"]
-    },
-    astronaut: {
-      physicalState: "Narrow Crawl",
-      pose: "Merangkak di celah sempit di antara himpitan batu",
-      suitCondition: "Baju kotor penuh lumpur and debu batu abu-abu",
-      helmetStatus: "Visor penuh goresan dalam",
-      expression: "Muka panik and nafas tersenggal",
-      props: ["Lampu Senter Proyek di pundak (beam tajam)"]
+  "95-99": {
+    tierId: "95-99",
+    name: "STRATO-STRIVER",
+    description: "Bertahanlah, pemandangan dari atas sana sangat indah.",
+    visual: {
+      environment: "Puncak gunung yang tertutup salju di bawah",
+      astronautAction: "Mendaki dinding batu di luar angkasa",
+      props: ["Sekop (Shovel) di samping badan"]
     },
     ui: {
       themeColor: "Besi Tua",
@@ -309,23 +217,17 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Gerak perlahan and sesak di antara celah",
-      animationReaction: "Kilatan cahaya senter yang bergoyang"
+      particleEffect: "Uap panas dari mesin"
     }
   },
-  "50-59": {
-    tierId: "50-59",
-    name: "Patahan Lempeng & Lubang Bor",
-    background: {
-      description: "Lapisan litosfer atas dengan latar belakang retakan lempeng tektonik and asap belerang.",
-      elements: ["Tectonic Cracks", "Sulfur Clouds", "Magma Glow", "Rock Sparks"]
-    },
-    astronaut: {
-      physicalState: "Trapped / Squeezed",
-      pose: "Terjepit di celah batu yang sempit",
-      suitCondition: "Kain baju tertarik and tegang, penuh debu vulkanik",
-      helmetStatus: "Visor memantulkan strobe darurat",
-      expression: "Muka kelelahan luar biasa",
-      props: ["Lampu Sirine Merah (kedip)", "Layar Dada Eror"]
+  "90-94": {
+    tierId: "90-94",
+    name: "THERMO-TOILER",
+    description: "Panasnya kompetisi hanya akan menempa Anda jadi lebih kuat.",
+    visual: {
+      environment: "Lava yang mengalir di retakan tanah",
+      astronautAction: "Berlari menghindari semburan uap",
+      props: ["Lampu Senter Proyek di pundak (beam tajam)"]
     },
     ui: {
       themeColor: "Oranye Magma",
@@ -335,23 +237,17 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Guncangan tektonik periodik (rumble)",
-      animationReaction: "Efek distorsi panas yang mulai muncul"
+      particleEffect: "Bara api kecil"
     }
   },
-  "40-49": {
-    tierId: "40-49",
-    name: "Zona Litosfer Bertekanan Tinggi",
-    background: {
-      description: "Kerak bumi tengah dengan latar belakang batuan kristal berkilau bawah tekanan tinggi and nuansa merah tua.",
-      elements: ["Glowing Crystals", "Quartz Veins", "Dark Red Rock", "Heat Shimmer"]
-    },
-    astronaut: {
-      physicalState: "Failing / Weak",
-      pose: "Bersandarkan lemas di dinding kristal",
-      suitCondition: "Baju mulai hangus (singe marks) di beberapa bagian",
-      helmetStatus: "Kaca helm retak seribu (spiderweb crack)",
-      expression: "Muka cemas di bawah bayangan merah",
-      props: ["Sample Extractor yang rusak"]
+  "87-89": {
+    tierId: "87-89",
+    name: "CORE DRILLER",
+    description: "Anda sedang menggali potensi terdalam yang Anda miliki.",
+    visual: {
+      environment: "Gua kristal merah yang bercahaya",
+      astronautAction: "Mencoba memperbaiki panel yang rusak",
+      props: ["Lampu Sirine Merah (kedip)", "Layar Dada Eror"]
     },
     ui: {
       themeColor: "Merah Hiper",
@@ -361,23 +257,17 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Zoom in pelan memberikan kesan sesak",
-      animationReaction: "Cahaya kristal berdenyut dalam warna merah"
+      particleEffect: "Sinyal 'WARNING' merah tipis"
     }
   },
-  "10-39": {
-    tierId: "10-39",
-    name: "Zona Aliran Magma Cair",
-    background: {
-      description: "Mantel atas dekat magma dengan latar belakang batuan pecah dialiri urat lava merah menyala and abu vulkanik.",
-      elements: ["Lava Veins", "Volcanic Ash", "Shattered Rock", "Intense Ember"]
-    },
-    astronaut: {
-      physicalState: "Defeated / Despair",
-      pose: "Berlutut pasrah meratapi nasib",
-      suitCondition: "Baju gosong kehitaman, robek, and mengeluarkan asap",
-      helmetStatus: "Helm pecah parah, wajah terekspos panas",
-      expression: "Muka nangis meratapi buku-buku yang terbakar",
-      props: ["Buku-buku UTBK yang terbakar abu"]
+  "85-86": {
+    tierId: "85-86",
+    name: "ABYSSAL APPRENTICE",
+    description: "Kegelapan ini hanyalah persiapan sebelum Anda bersinar.",
+    visual: {
+      environment: "Ruang hampa hitam pekat dengan distorsi merah",
+      astronautAction: "Terseret arus gravitasi yang tidak terlihat",
+      props: ["Sample Extractor yang rusak"]
     },
     ui: {
       themeColor: "Merah Darah",
@@ -387,23 +277,17 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Distorsi panas hebat (heat waves)",
-      animationReaction: "Partikel abu naik memenuhi layar"
+      particleEffect: "Abu hitam berjatuhan"
     }
   },
-  "1-9": {
-    tierId: "1-9",
-    name: "Pusat Lava Panas Ekstrem",
-    background: {
-      description: "Inti bumi / magma cair dengan latar belakang kolam lava mendidih total penuh asap hitam tanpa pijakan.",
-      elements: ["Liquid Magma", "Black Fire", "Core Void", "Boiling Lava"]
-    },
-    astronaut: {
-      physicalState: "Absolute Core Sinking",
-      pose: "Tenggelam setengah badan di dalam lava cair",
-      suitCondition: "Baju hancur meleleh, kabel sirkuit korsleting",
-      helmetStatus: "Helm hilang total, wajah terekspos lava",
-      expression: "Mata merem pasrah lahir batin",
-      props: ["Sisa Puing HUD yang meleleh"]
+  "75-84": {
+    tierId: "75-84",
+    name: "BEDROCK BOUND",
+    description: "Jangan menyerah sekarang. Pondasi yang kuat sedang dibangun.",
+    visual: {
+      environment: "Puing-puing bangunan yang melayang di kehampaan",
+      astronautAction: "Berpegangan pada kabel baja agar tidak jatuh",
+      props: ["Buku-buku UTBK yang terbakar abu"]
     },
     ui: {
       themeColor: "Merah Gelap (Eror)",
@@ -413,7 +297,27 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     },
     motion: {
       cameraBehavior: "Slow sinking animation effect",
-      animationReaction: "Pesan Error Terminal: [ CRITICAL SYSTEM FAILURE ]"
+      particleEffect: "Glitches visual (statik)"
+    }
+  },
+  "40-74": {
+    tierId: "40-74",
+    name: "CRITICAL FAILURE",
+    description: "Sistem kritis. Inisialisasi ulang semangat Anda segera.",
+    visual: {
+      environment: "Layar peringatan merah yang retak di mana-mana",
+      astronautAction: "Tertunduk diam dalam kegelapan",
+      props: ["Sisa Puing HUD yang meleleh"]
+    },
+    ui: {
+      themeColor: "Hitam Absolut",
+      hexCode: "#260000",
+      dominantColor: "#000000",
+      neonGlow: "0 0 40px #260000, 0 0 80px #000000",
+    },
+    motion: {
+      cameraBehavior: "Kamera miring (Dutch angle) ekstrim",
+      particleEffect: "Layar berkedip gelap-terang"
     }
   }
 };

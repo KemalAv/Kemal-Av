@@ -25,7 +25,7 @@ export default function Hero() {
               className="relative w-40 h-40 md:w-56 md:h-56 shrink-0"
             >
               <div className="absolute inset-0 bg-blue-500 rounded-full blur-3xl opacity-30 animate-pulse" />
-              <div className="absolute inset-0 border-2 border-blue-400 rounded-full animate-[spin_10s_linear_infinite]" style={{ borderDasharray: '20 40' }} />
+              <div className="absolute inset-0 border-2 border-blue-400 border-dashed rounded-full animate-[spin_10s_linear_infinite]" />
               <img 
                 src={profilePic} 
                 alt={profile.name}

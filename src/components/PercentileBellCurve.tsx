@@ -112,14 +112,12 @@ export const PercentileBellCurve: React.FC<PercentileBellCurveProps> = ({ percen
                 stroke="white" 
                 strokeOpacity={0.15}
                 strokeDasharray="2 2" 
-                isFront={true}
               />
             ))}
             <ReferenceLine 
               x={targetX} 
               stroke="white" 
               strokeDasharray="4 4" 
-              isFront={true}
               label={{ 
                 value: "YOU", 
                 position: 'top', 

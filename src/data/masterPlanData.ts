@@ -104,7 +104,7 @@ export const masterPlanData: MasterPlanData = {
     {
       phase: "Fase 3 (Masa Depan)",
       title: "CEO Gurita Bisnis",
-      description: "Terapkan Operations Management & ML untuk prediksi penjualan di 3 gerai Alfamart/Indomaret."
+      description: "Terapkan Operations Management & ML untuk prediksi penjualan di 3 gerai Alfamart/Indomaret, saham, dan penginapan."
     }
   ],
   offGrid: {
@@ -147,7 +147,7 @@ export const masterPlanData: MasterPlanData = {
         "Jeda Semester: Belajar Cash Flow retail & Properti di bawah bimbingan Ayah.",
         "Gaming: Osu! 3-digit (1000pp), GD Top Extreme Demon, Catur 2000 Elo.",
         "Hafalan Al-Qur'an: Mutqin >8 Juz via Self Recitation.",
-        "Story: Tamat GTA V, HSR, Minecraft, Baldi's Basics."
+        "Story: Tamat berbagai macam game."
       ],
       status: "in-progress"
     },
@@ -191,17 +191,17 @@ export const masterPlanData: MasterPlanData = {
       skills: [
         { name: "Osu!", target: "3 Digit Global / 1000pp", plan: "Pemanasan akurasi, stamina, maraton. Max 5 retry." },
         { name: "Geometry Dash", target: "Top Extreme Demon", plan: "5 level Demon per tingkat kesulitan, practice run min attempts." },
-        { name: "Chess", target: "Rating 2000 / Puzzle 3000", plan: "Tactic puzzle, AI Analysis, Aturan waktu 20/40/40." },
-        { name: "Mobile Legends", target: "Mythic Immortal 100+", plan: "Push rank konsisten, pelajari meta/item terbaru." }
+        { name: "Chess", target: "Rating 2000 / Puzzle 3000", plan: "Tactic puzzle, AI Analysis, Aturan waktu 20/40/40, belajar via chess.com, lichess, dan chesscompass." },
+        { name: "Mobile Legends", target: "Mythic Immortal 100", plan: "Push rank konsisten, pelajari meta/item terbaru." }
       ]
     },
     {
       category: "Self Development",
       skills: [
-        { name: "Piano", target: "Advanced Play by Ear", plan: "Sight reading, fingering, penjiwaan emosi via OctaviaPiano." },
+        { name: "Piano", target: "Play Complex Pieces", plan: "Sight reading, fingering, play by ear via OctaviaPiano." },
         { name: "Al-Qur'an", target: ">8 Juz Mutqin", plan: "Murajaah rutin & Murattal Self Recitation (kemalav.vercel.app)." },
         { name: "Literasi", target: "Deep Story Analysis", plan: "Rangkuman mandiri vs ulasan YouTube, Kuis evaluasi AI." },
-        { name: "Game Story", target: "Tamat All Lore", plan: "Fokus misi utama (GTA V, HSR, Minecraft, Baldi's Basics)." }
+        { name: "Game Story", target: "Tamat", plan: "Fokus misi utama (GTA V, HSR, Minecraft, Baldi's Basics)." }
       ]
     }
   ],

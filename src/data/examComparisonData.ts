@@ -101,7 +101,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
     posisiNasional: "50-499",
     gdDifficulty: "Top 250 Extreme (10★)",
     osuPP: "900-1.200",
-    keketatan: "1:50 - 1:100",
+    keketatan: "1:5 - 1:10",
     osuStar: "9.0★-10.0★",
     statusPenerimaan: "ACCEPTED ALL",
     gdMap: "Bloodlust / Arctic Lights",
@@ -291,7 +291,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
     percentile: "37,50% - 46,87%",
     compoundDifficulty: "4-7.9",
     iq: "90-94",
-    psl: "3.5-3.99 Low Tier Normie)",
+    psl: "3.5-3.99 (Low Tier Normie)",
     asetBersih: "$10.000 - $24.999",
   },
   {
@@ -311,7 +311,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
     percentile: "25,00% - 37,49%",
     compoundDifficulty: "3-3.9",
     iq: "87-89",
-    psl: "3-3.49 Low Tier Normie)",
+    psl: "3-3.49 (Low Tier Normie)",
     asetBersih: "$5.000 - $9.999",
   },
   {
