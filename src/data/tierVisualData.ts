@@ -85,15 +85,15 @@ export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
     name: "AURORA EXPLORER",
     description: "Anda menari di antara cahaya langit yang paling murni.",
     visual: {
-      environment: "Lautan awan dengan aurora hijau yang menari",
-      astronautAction: "Berjalan santai di atas awan",
-      props: ["Cetak Biru (Blueprint) Kampus"]
+      environment: "Lautan cahaya aurora ungu dan sian yang menari di atas lengkungan bumi",
+      astronautAction: "Mengambang bebas di luar stasiun luar angkasa (spacewalk)",
+      props: ["Cetak Biru (Blueprint) Kampus Hologram", "Modul Stasiun Luar Angkasa"]
     },
     ui: {
       themeColor: "Hijau Aurora",
-      hexCode: "#9333ea",
+      hexCode: "#4ade80",
       dominantColor: "#0B133A",
-      neonGlow: "0 0 12px #9333ea, 0 0 25px #a855f7",
+      neonGlow: "0 0 15px #4ade80, 0 0 30px #22c55e, 0 0 45px #166534",
     },
     motion: {
       cameraBehavior: "Goncangan kamera saat aurora berdenyut",
