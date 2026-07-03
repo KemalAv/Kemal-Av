@@ -104,6 +104,34 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   const [altIndices, setAltIndices] = useState<Record<string, number>>({});
   const [currencyMode, setCurrencyMode] = useState<'USD' | 'IDR'>(language === 'id' ? 'IDR' : 'USD');
 
+  // Sync Currency with Language changes
+  React.useEffect(() => {
+    setCurrencyMode(language === 'id' ? 'IDR' : 'USD');
+  }, [language]);
+
+  // Persistent State Sync
+  React.useEffect(() => {
+    const savedInput = localStorage.getItem('exam_calc_input');
+    const savedSubject = localStorage.getItem('exam_calc_subject');
+    const savedMode = localStorage.getItem('exam_view_mode');
+
+    if (savedInput) setCalcInput(savedInput);
+    if (savedSubject) setCalcSubject(savedSubject as keyof ComparisonRow);
+    if (savedMode) setViewMode(savedMode as ViewMode);
+  }, []);
+
+  React.useEffect(() => {
+    if (calcInput) localStorage.setItem('exam_calc_input', calcInput);
+  }, [calcInput]);
+
+  React.useEffect(() => {
+    localStorage.setItem('exam_calc_subject', calcSubject);
+  }, [calcSubject]);
+
+  React.useEffect(() => {
+    localStorage.setItem('exam_view_mode', viewMode);
+  }, [viewMode]);
+
   const toggleCurrency = () => {
     setCurrencyMode(prev => prev === 'USD' ? 'IDR' : 'USD');
   };
@@ -1552,7 +1580,18 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                 </thead>
                 <tbody className={`divide-y transition-colors duration-500 ${activeTierVisual ? 'divide-white/5' : 'divide-slate-50'}`}>
                   {filteredData.map((row, idx) => (
-                    <motion.tr key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.01 }} className={`transition-all group ${activeTierVisual ? 'hover:bg-white/5' : 'hover:bg-slate-50/80'}`}>
+                    <motion.tr 
+                      key={idx} 
+                      initial={{ opacity: 0, x: -10 }} 
+                      animate={{ opacity: 1, x: 0 }} 
+                      transition={{ delay: idx * 0.01 }} 
+                      onClick={() => {
+                        // Sync this row to the calculator
+                        setCalcInput(String(row.skorIRT).split('-')[0]);
+                        setCalcSubject('skorIRT');
+                      }}
+                      className={`transition-all group cursor-pointer ${activeTierVisual ? 'hover:bg-white/10' : 'hover:bg-slate-50/80'}`}
+                    >
                         {activeColumns.map((col) => {
                           const val = row[col.key];
                           const isCurrency = col.key === 'asetBersih';
@@ -1878,6 +1917,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                     <PercentileBellCurve 
                       percentile={interpolationResult.pct} 
                       themeColor={activeTierVisual?.ui.hexCode || '#3b82f6'} 
+                      isPulling={isPulling}
                     />
                     <div className="mt-10 px-8 text-center w-full">
                       <div className={`h-px w-full mb-6 ${activeTierVisual ? 'bg-white/10' : 'bg-slate-200'}`} />

@@ -4,9 +4,10 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceL
 interface PercentileBellCurveProps {
   percentile: number;
   themeColor: string;
+  isPulling?: boolean;
 }
 
-export const PercentileBellCurve: React.FC<PercentileBellCurveProps> = ({ percentile, themeColor }) => {
+export const PercentileBellCurve: React.FC<PercentileBellCurveProps> = ({ percentile, themeColor, isPulling = false }) => {
   // Generate normal distribution data points
   // We'll use a range of -4 to 4 sigma
   const points = 200; // Increased for smoother decimal handling
@@ -102,7 +103,7 @@ export const PercentileBellCurve: React.FC<PercentileBellCurveProps> = ({ percen
               stroke="none" 
               fill="url(#highlightGrad)" 
               fillOpacity={0.6}
-              isAnimationActive={true}
+              isAnimationActive={!isPulling}
               animationDuration={1500}
             />
             {decileLines.map(line => (
