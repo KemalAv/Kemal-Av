@@ -41,15 +41,15 @@ export const INTERPOLATION_DATA: InterpolationPoint[] = [
   { benar: 100, mlbb: "Mythic Glory (50-99★)", gd: "Insane Demon (10★)", irt: 650, rank: 39999, pp: 400, star: 6.5, elo: 1350, sat: 1300, jam: 800, pct: 95.00, comp: 256.0, sel: 11, iq: 115, univ: "Pembangunan Wilayah - UGM / Hukum - Unpad", map: "Future Funk II / Magma Bound", psl: 5.5, asetBersih: 250000 },
   { benar: 109, mlbb: "Mythic Glory (50-99★)", gd: "Insane Demon (10★)", irt: 679, rank: 20000, pp: 499, star: 6.9, elo: 1599, sat: 1399, jam: 1099, pct: 97.49, comp: 511.0, sel: 14, iq: 119, univ: "Pembangunan Wilayah - UGM / Hukum - Unpad", map: "Future Funk II / Magma Bound", psl: 5.99, asetBersih: 499999 },
   { benar: 110, mlbb: "Mythic Immortal (100-149★)", gd: "Extreme Demon (10★)", irt: 680, rank: 19999, pp: 500, star: 7.0, elo: 1600, sat: 1400, jam: 1100, pct: 97.50, comp: 512.0, sel: 15, iq: 120, univ: "Manajemen - Undip / Teknik Mesin - ITS", map: "Acu / Cataclysm", psl: 6.0, asetBersih: 500000 },
-  { benar: 119, mlbb: "Mythic Immortal (100-149★)", gd: "Extreme Demon (10★)", irt: 699, rank: 10000, pp: 599, star: 7.4, elo: 1799, sat: 1499, jam: 1499, pct: 98.74, comp: 4095.0, sel: 19, iq: 124, univ: "Manajemen - Undip / Teknik Mesin - ITS", map: "Acu / Cataclysm", psl: 6.49, asetBersih: 999999 },
-  { benar: 120, mlbb: "Mythic Immortal (150-200★)", gd: "True Extreme (10★)", irt: 700, rank: 9999, pp: 600, star: 7.5, elo: 1800, sat: 1500, jam: 1500, pct: 98.75, comp: 4096.0, sel: 20, iq: 125, univ: "Teknik Sipil - UI / STEI-R - ITB", map: "Bloodbath / Blade of Justice", psl: 6.5, asetBersih: 1000000 },
+  { benar: 119, mlbb: "Mythic Immortal (100-149★)", gd: "Extreme Demon (10★)", irt: 709, rank: 10000, pp: 599, star: 7.4, elo: 1799, sat: 1499, jam: 1499, pct: 98.74, comp: 4095.0, sel: 19, iq: 124, univ: "Manajemen - Undip / Teknik Mesin - ITS", map: "Acu / Cataclysm", psl: 6.49, asetBersih: 999999 },
+  { benar: 120, mlbb: "Mythic Immortal (150-200★)", gd: "True Extreme (10★)", irt: 710, rank: 9999, pp: 600, star: 7.5, elo: 1800, sat: 1500, jam: 1500, pct: 98.75, comp: 4096.0, sel: 20, iq: 125, univ: "Teknik Sipil - UI / STEI-R - ITB", map: "Bloodbath / Blade of Justice", psl: 6.5, asetBersih: 1000000 },
   { benar: 129, mlbb: "Mythic Immortal (150-200★)", gd: "True Extreme (10★)", irt: 739, rank: 2000, pp: 699, star: 8.4, elo: 1999, sat: 1549, jam: 1999, pct: 99.74, comp: 32767.0, sel: 29, iq: 129, univ: "Teknik Sipil - UI / STEI-R - ITB", map: "Bloodbath / Blade of Justice", psl: 6.99, asetBersih: 2499999 },
   { benar: 130, mlbb: "Mythic Immortal (200-499★)", gd: "High Extreme (10★)", irt: 740, rank: 1999, pp: 700, star: 8.5, elo: 2000, sat: 1550, jam: 2000, pct: 99.75, comp: 32768.0, sel: 30, iq: 130, univ: "FTTM - ITB / Kedokteran - UI", map: "Sonic Wave / Yatagarasu", psl: 7.0, asetBersih: 2500000 },
-  { benar: 139, mlbb: "Mythic Immortal (200-499★)", gd: "High Extreme (10★)", irt: 759, rank: 500, pp: 899, star: 8.9, elo: 2299, sat: 1589, jam: 2499, pct: 99.93, comp: 131071.0, sel: 49, iq: 134, univ: "FTTM - ITB / Kedokteran - UI", map: "Sonic Wave / Yatagarasu", psl: 7.49, asetBersih: 9999999 },
-  { benar: 140, mlbb: "Mythic Immortal (500-999★)", gd: "Top 250 Extreme (10★)", irt: 760, rank: 499, pp: 900, star: 9.0, elo: 2300, sat: 1590, jam: 2500, pct: 99.94, comp: 131072.0, sel: 50, iq: 135, univ: "ACCEPTED ALL", map: "Bloodlust / Arctic Lights", psl: 7.5, asetBersih: 10000000 },
+  { benar: 139, mlbb: "Mythic Immortal (200-499★)", gd: "High Extreme (10★)", irt: 769, rank: 500, pp: 899, star: 8.9, elo: 2299, sat: 1589, jam: 2499, pct: 99.93, comp: 131071.0, sel: 49, iq: 134, univ: "FTTM - ITB / Kedokteran - UI", map: "Sonic Wave / Yatagarasu", psl: 7.49, asetBersih: 9999999 },
+  { benar: 140, mlbb: "Mythic Immortal (500-999★)", gd: "Top 250 Extreme (10★)", irt: 770, rank: 499, pp: 900, star: 9.0, elo: 2300, sat: 1590, jam: 2500, pct: 99.94, comp: 131072.0, sel: 50, iq: 135, univ: "ACCEPTED ALL", map: "Bloodlust / Arctic Lights", psl: 7.5, asetBersih: 10000000 },
   { benar: 149, mlbb: "Mythic Immortal (500-999★)", gd: "Top 250 Extreme (10★)", irt: 794, rank: 50, pp: 1200, star: 10.0, elo: 2500, sat: 1594, jam: 3000, pct: 99.98, comp: 4194303.0, sel: 100, iq: 145, univ: "ACCEPTED ALL", map: "Bloodlust / Arctic Lights", psl: 7.74, asetBersih: 99999999 },
   { benar: 150, mlbb: "Mythic Immortal (1000-5000★)", gd: "Top 50 Extreme (10★)", irt: 795, rank: 49, pp: 1200, star: 10.0, elo: 2500, sat: 1595, jam: 3000, pct: 99.99, comp: 4194304.0, sel: 100, iq: 145, univ: "ACCEPTED ALL", map: "Slaughterhouse / KOCMOC", psl: 7.75, asetBersih: 100000000 },
-  { benar: 160, mlbb: "Mythic Immortal (1000-5000★)", gd: "Top 50 Extreme (10★)", irt: 850, rank: 1, pp: 2000, star: 12.0, elo: 3000, sat: 1600, jam: 6000, pct: 100.00, comp: 33554432.0, sel: 500, iq: 200, univ: "ACCEPTED ALL", map: "Slaughterhouse / KOCMOC", psl: 8.0, asetBersih: 10000000000 }
+  { benar: 160, mlbb: "Mythic Immortal (1000-5000★)", gd: "Top 50 Extreme (10★)", irt: 825, rank: 1, pp: 2000, star: 12.0, elo: 3000, sat: 1600, jam: 6000, pct: 100.00, comp: 33554432.0, sel: 500, iq: 200, univ: "ACCEPTED ALL", map: "Slaughterhouse / KOCMOC", psl: 8.0, asetBersih: 10000000000 }
 ];
 
 export interface ComparisonRow {
@@ -77,7 +77,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
   {
     jumlahBenar: "150-160",
     rankSNBT: "Mythic Immortal (1000-5000★)",
-    skorIRT: "795-850",
+    skorIRT: "795-825",
     posisiNasional: "1-49",
     gdDifficulty: "Top 50 Extreme (10★)",
     osuPP: "1.200-2.000",
@@ -97,7 +97,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
   {
     jumlahBenar: "140-149",
     rankSNBT: "Mythic Immortal (500-999★)",
-    skorIRT: "760-794",
+    skorIRT: "770-794",
     posisiNasional: "50-499",
     gdDifficulty: "Top 250 Extreme (10★)",
     osuPP: "900-1.200",
@@ -117,7 +117,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
   {
     jumlahBenar: "130-139",
     rankSNBT: "Mythic Immortal (200-499★)",
-    skorIRT: "740-759",
+    skorIRT: "740-769",
     posisiNasional: "500-1.999",
     gdDifficulty: "High Extreme (10★)",
     osuPP: "700-899",
@@ -137,7 +137,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
   {
     jumlahBenar: "120-129",
     rankSNBT: "Mythic Immortal (150-200★)",
-    skorIRT: "700-739",
+    skorIRT: "710-739",
     posisiNasional: "2.000-9.999",
     gdDifficulty: "True Extreme (10★)",
     osuPP: "600-699",
@@ -157,7 +157,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
   {
     jumlahBenar: "110-119",
     rankSNBT: "Mythic Immortal (100-149★)",
-    skorIRT: "680-699",
+    skorIRT: "680-709",
     posisiNasional: "10.000-19.999",
     gdDifficulty: "Extreme Demon (10★)",
     osuPP: "500-599",
