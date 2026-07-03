@@ -282,7 +282,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     playHour: 'jam',
     percentile: 'pct',
     compoundDifficulty: 'comp',
-    iq: 'benar',
+    iq: 'iq',
     psl: 'psl',
     asetBersih: 'asetBersih',
     chessElo: 'elo',
@@ -448,23 +448,23 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
 
   const activeTierVisual = useMemo(() => {
     if (!interpolationResult) return null;
-    const benar = interpolationResult.benar;
+    const iqValue = interpolationResult.iq;
     
     let tierId = "40-74";
-    if (benar >= 150) tierId = "145-200";
-    else if (benar >= 140) tierId = "135-145";
-    else if (benar >= 130) tierId = "130-134";
-    else if (benar >= 120) tierId = "125-129";
-    else if (benar >= 110) tierId = "120-124";
-    else if (benar >= 100) tierId = "115-119";
-    else if (benar >= 90) tierId = "110-114";
-    else if (benar >= 80) tierId = "105-109";
-    else if (benar >= 75) tierId = "100-104";
-    else if (benar >= 70) tierId = "95-99";
-    else if (benar >= 60) tierId = "90-94";
-    else if (benar >= 50) tierId = "87-89";
-    else if (benar >= 40) tierId = "85-86";
-    else if (benar >= 10) tierId = "75-84";
+    if (iqValue >= 145) tierId = "145-200";
+    else if (iqValue >= 135) tierId = "135-145";
+    else if (iqValue >= 130) tierId = "130-134";
+    else if (iqValue >= 125) tierId = "125-129";
+    else if (iqValue >= 120) tierId = "120-124";
+    else if (iqValue >= 115) tierId = "115-119";
+    else if (iqValue >= 110) tierId = "110-114";
+    else if (iqValue >= 105) tierId = "105-109";
+    else if (iqValue >= 100) tierId = "100-104";
+    else if (iqValue >= 95) tierId = "95-99";
+    else if (iqValue >= 90) tierId = "90-94";
+    else if (iqValue >= 87) tierId = "87-89";
+    else if (iqValue >= 85) tierId = "85-86";
+    else if (iqValue >= 75) tierId = "75-84";
     
     return TIER_VISUAL_DATA[tierId] || TIER_VISUAL_DATA["40-74"] || null;
   }, [interpolationResult]);
@@ -1848,11 +1848,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                               if (benarVal >= 130) {
                                 // Gold (130-160): Amber-500 theme with heavy metallic glow (shadow-[0_0_40px]), internal highlights, and a scale-up effect
                                 colorClass = "bg-amber-500 border-amber-200 text-white shadow-[0_0_40px_rgba(245,158,11,0.8),inset_0_0_20px_rgba(255,255,255,0.4)] ring-4 ring-amber-400 font-black scale-110 z-20 backdrop-blur-md";
-                              } else if (benarVal >= 125) {
-                                // Aurora (125-129): Space Station Orbit - Light Green Aurora theme
-                                colorClass = "bg-gradient-to-br from-green-400 via-emerald-500 to-teal-400 border-white/40 text-white shadow-[0_0_30px_rgba(74,222,128,0.8),0_0_50px_rgba(16,185,129,0.4)] ring-2 ring-green-300 font-black scale-110 z-10 backdrop-blur-md";
                               } else if (benarVal >= 110) {
-                                // Purple/Cyber (110-124): Vibrant Purple theme with neon accents
+                                // Purple/Cyber (110-129): Vibrant Purple theme with neon accents
                                 colorClass = "bg-purple-600 border-purple-200 text-white shadow-[0_0_30px_rgba(168,85,247,0.9),inset_0_0_15px_rgba(255,255,255,0.3)] ring-2 ring-purple-400 font-bold scale-105 z-10 backdrop-blur-md";
                               } else if (benarVal >= 90) {
                                 // Light Blue (90-109): Modern blue theme with increased opacity and refined shadow work
