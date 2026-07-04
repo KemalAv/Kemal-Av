@@ -109,27 +109,13 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     setCurrencyMode(language === 'id' ? 'IDR' : 'USD');
   }, [language]);
 
-  // Persistent State Sync
+  // Clear calculator state when switching modes
   React.useEffect(() => {
-    const savedInput = localStorage.getItem('exam_calc_input');
-    const savedSubject = localStorage.getItem('exam_calc_subject');
-    const savedMode = localStorage.getItem('exam_view_mode');
-
-    if (savedInput) setCalcInput(savedInput);
-    if (savedSubject) setCalcSubject(savedSubject as keyof ComparisonRow);
-    if (savedMode) setViewMode(savedMode as ViewMode);
-  }, []);
-
-  React.useEffect(() => {
-    if (calcInput) localStorage.setItem('exam_calc_input', calcInput);
-  }, [calcInput]);
-
-  React.useEffect(() => {
-    localStorage.setItem('exam_calc_subject', calcSubject);
-  }, [calcSubject]);
-
-  React.useEffect(() => {
-    localStorage.setItem('exam_view_mode', viewMode);
+    if (viewMode !== 'calculator') {
+      setCalcInput('');
+      setPullHistory([]);
+      setSelectedGachaIdx(null);
+    }
   }, [viewMode]);
 
   const toggleCurrency = () => {
@@ -2095,12 +2081,13 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                                   {isAltSupported && <Zap className="w-2 h-2 animate-pulse text-yellow-400 fill-yellow-400" />}
                                 </p>
                               </div>
-                              <AnimatePresence mode="wait">
+                              <AnimatePresence mode="popLayout">
                                 <motion.p 
                                   key={isCurrency ? currencyMode + currentVal : currentVal}
                                   initial={{ opacity: 0, x: -5 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: 5 }}
+                                  transition={{ duration: 0.2 }}
                                   className={`text-lg sm:text-xl font-black text-white leading-tight break-words group-hover:scale-[1.02] origin-left transition-transform ${metric.key !== 'iq' ? 'italic' : ''}`} 
                                   style={{ textShadow: metric.key !== 'iq' ? `0 0 10px ${activeTierVisual.ui.hexCode}33` : 'none' }}
                                 >
