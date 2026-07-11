@@ -1,1 +1,20 @@
-🌟 1. Header (Navigasi)Menu Kiri: Kemal Avicenna FazaMenu Kanan: Profil | Karya | Aplikasi | Dream Plan | Artikel👤 2. Profil Singkat (Hero Section)Halo, saya Kemal Avicenna FazaTentang Saya: Lahir pada 17 Mei 2008. Saya adalah seorang kreator konten, pengembang web, dan antusias teknologi yang suka membangun proyek digital bermanfaat.💻 3. Karya & Proyek (My Works)Octavia Piano 🎹Deskripsi: Platform web interaktif seputar piano.Link: octaviapiano.comCustom Web Background 🌐Deskripsi: Ekstensi Google Chrome untuk mengubah latar belakang web sesuai keinginan.Link: Chrome Web Store📱 4. Mini Apps (Aplikasi Interaktif)Practice-Questions-Text-Format(Tempat untuk deskripsi yang akan kamu isi nanti)Al-Qur-an-Self-Recitation(Tempat untuk deskripsi yang akan kamu isi nanti)🎥 5. Media Sosial & Konten (Social Media)YouTube - Kemal Avicenna Faza 📺Link: @kemalavicennafaza8985YouTube - Octavia Piano 🎹Link: @kemalavpiano4002TikTok - @kemalav_ 🎵Link: @kemalav_🚀 6. Dream Plan (Impian Saya)(Bagian kosong dengan desain list/kartu menarik yang bisa kamu isi sendiri kapan saja)✍️ 7. Artikel Random (Blog)(Bagian grid kartu untuk judul dan ringkasan artikel yang akan kamu tulis nanti)
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
+
+# Run and deploy your AI Studio app
+
+This contains everything you need to run your app locally.
+
+View your app in AI Studio: https://ai.studio/apps/302cc62d-ae84-47ab-8713-3f86d3b94f4e
+
+## Run Locally
+
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

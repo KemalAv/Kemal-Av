@@ -30,9 +30,9 @@ export const masterPlanData: MasterPlanData = {
       },
       {
         title: "Plan B (Jalur Makro Global)",
-        campus: "S1 Teknik Industri IUP ITB",
-        strategy: "Memanfaatkan persiapan IELTS/TOEFL dan tes skolastik (SAT/TPA) untuk menembus seleksi kelas internasional ITB.",
-        perks: "Prestise ITB, paparan global, kurikulum teknik + manajemen operasional (persiapan CEO)."
+        campus: "S1 Teknik Industri IUP UGM",
+        strategy: "Memanfaatkan persiapan IELTS/TOEFL dan tes skolastik (SAT/TPA) untuk menembus seleksi kelas internasional UGM.",
+        perks: "Prestise UGM, paparan global, kurikulum teknik + manajemen operasional (persiapan CEO)."
       },
       {
         title: "Plan C (Praktik Lapangan Terfokus)",

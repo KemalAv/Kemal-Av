@@ -20,8 +20,8 @@ export interface TierVisualInfo {
 }
 
 export const TIER_VISUAL_DATA: Record<string, TierVisualInfo> = {
-  "145-200": {
-    tierId: "145-200",
+  "145-160": {
+    tierId: "145-160",
     name: "GALACTIC LEGEND",
     description: "Satu langkah lagi menuju keabadian. Anda berada di puncak evolusi kognitif.",
     visual: {

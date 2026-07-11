@@ -103,8 +103,7 @@ export const PercentileBellCurve: React.FC<PercentileBellCurveProps> = ({ percen
               stroke="none" 
               fill="url(#highlightGrad)" 
               fillOpacity={0.6}
-              isAnimationActive={!isPulling}
-              animationDuration={1500}
+              isAnimationActive={false}
             />
             {decileLines.map(line => (
               <ReferenceLine 

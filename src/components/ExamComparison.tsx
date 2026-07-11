@@ -34,7 +34,9 @@ import {
   Thermometer,
   CloudLightning,
   Dices,
-  Sparkles
+  Sparkles,
+  Globe,
+  Flag
 } from 'lucide-react';
 import {
   BarChart,
@@ -57,36 +59,96 @@ import {
 type ViewMode = 'table' | 'chart' | 'calculator';
 type ChartType = 'bar' | 'line' | 'area' | 'scatter';
 
+const formatHeightValue = (valStr: string, unit: 'cm' | 'inch', currentGender: 'male' | 'female') => {
+  if (!valStr) return '';
+  
+  // If the input is already formatted in feet'inches (has a single quote), return as is
+  if (valStr.includes("'")) {
+    return valStr;
+  }
+
+  // Extract the part corresponding to the selected gender if there's a slash
+  let targetStr = valStr;
+  let isAlreadyGenderSpecific = false;
+  
+  if (valStr.includes('/')) {
+    const parts = valStr.split('/');
+    targetStr = currentGender === 'male' ? parts[0].trim() : (parts[1] ? parts[1].trim() : parts[0].trim());
+    isAlreadyGenderSpecific = true;
+  }
+
+  // If not pre-split and gender is female, adjust by subtracting 13 cm
+  if (!isAlreadyGenderSpecific && currentGender === 'female') {
+    targetStr = targetStr.replace(/([\d\.]+)/g, (match) => {
+      const num = parseFloat(match);
+      if (isNaN(num)) return match;
+      return (num - 13.0).toFixed(1);
+    });
+  }
+
+  // Clean up "cm" suffix and multiple spaces
+  targetStr = targetStr.replace(/\s*cm/g, '').replace(/\s+/g, ' ').trim();
+
+  if (unit === 'inch') {
+    return targetStr.replace(/([\d\.]+)/g, (match) => {
+      const cmVal = parseFloat(match);
+      if (isNaN(cmVal)) return match;
+      const totalInches = Math.round(cmVal / 2.54);
+      const feet = Math.floor(totalInches / 12);
+      const inches = totalInches % 12;
+      return `${feet}'${inches}`;
+    });
+  } else {
+    return targetStr + ' cm';
+  }
+};
+
 interface ExamComparisonProps {
   t: any;
   language: string;
 }
 
 export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) => {
+  const [gender, setGender] = useState<'male' | 'female'>('male');
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'inch'>('cm');
+
   // Column definitions
-  const columns: { key: keyof ComparisonRow; label: string; icon: React.ReactNode; isChartable?: boolean }[] = [
-    { key: 'jumlahBenar', label: t.cols.jumlahBenar, icon: <Target className="w-4 h-4" />, isChartable: true },
-    { key: 'rankSNBT', label: t.cols.rankSNBT, icon: <Gamepad2 className="w-4 h-4" /> },
-    { key: 'skorIRT', label: t.cols.skorIRT, icon: <GraduationCap className="w-4 h-4" />, isChartable: true },
-    { key: 'posisiNasional', label: t.cols.posisiNasional, icon: <Trophy className="w-4 h-4" />, isChartable: true },
-    { key: 'gdDifficulty', label: t.cols.gdDifficulty, icon: <Gamepad2 className="w-4 h-4" /> },
-    { key: 'osuPP', label: t.cols.osuPP, icon: <Gamepad2 className="w-4 h-4" />, isChartable: true },
-    { key: 'keketatan', label: t.cols.keketatan, icon: <Percent className="w-4 h-4" />, isChartable: true },
-    { key: 'osuStar', label: t.cols.osuStar, icon: <Gamepad2 className="w-4 h-4" />, isChartable: true },
-    { key: 'statusPenerimaan', label: t.cols.statusPenerimaan, icon: <Target className="w-4 h-4" /> },
-    { key: 'gdMap', label: t.cols.gdMap, icon: <Gamepad2 className="w-4 h-4" /> },
-    { key: 'chessElo', label: t.cols.chessElo, icon: <Brain className="w-4 h-4" />, isChartable: true },
-    { key: 'sat', label: t.cols.sat, icon: <GraduationCap className="w-4 h-4" />, isChartable: true },
-    { key: 'playHour', label: t.cols.playHour, icon: <Clock className="w-4 h-4" />, isChartable: true },
-    { key: 'percentile', label: t.cols.percentile, icon: <Percent className="w-4 h-4" />, isChartable: true },
-    { key: 'compoundDifficulty', label: t.cols.compoundDifficulty, icon: <Brain className="w-4 h-4" />, isChartable: true },
-    { key: 'iq', label: t.cols.iq, icon: <Target className="w-4 h-4" />, isChartable: true },
-    { key: 'psl', label: t.cols.psl, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true },
-    { key: 'asetBersih', label: t.cols.asetBersih, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true },
+  const columns: { key: keyof ComparisonRow; label: string; icon: React.ReactNode; isChartable?: boolean; group: 'global' | 'indonesian' }[] = [
+    // Global Leaderboard
+    { key: 'percentile', label: t.cols.percentile, icon: <Percent className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'rankSNBT', label: t.cols.rankSNBT, icon: <Gamepad2 className="w-4 h-4" />, group: 'global' },
+    { key: 'gdDifficulty', label: t.cols.gdDifficulty, icon: <Gamepad2 className="w-4 h-4" />, group: 'global' },
+    { key: 'gdMap', label: t.cols.gdMap, icon: <Gamepad2 className="w-4 h-4" />, group: 'global' },
+    { key: 'osuPP', label: t.cols.osuPP, icon: <Gamepad2 className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'osuStar', label: t.cols.osuStar, icon: <Gamepad2 className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'playHour', label: t.cols.playHour, icon: <Clock className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'chessElo', label: t.cols.chessElo, icon: <Brain className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'psl', label: t.cols.psl, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'iq', label: t.cols.iq, icon: <Target className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'asetBersih', label: t.cols.asetBersih, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'gajiBulanan', label: t.cols.gajiBulanan, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { 
+      key: 'tinggiBadan', 
+      label: gender === 'male' 
+        ? (language === 'id' ? 'Tinggi Laki-laki' : 'Male Height') 
+        : (language === 'id' ? 'Tinggi Perempuan' : 'Female Height'), 
+      icon: <LayoutGrid className="w-4 h-4" />, 
+      isChartable: true, 
+      group: 'global' 
+    },
+    { key: 'sat', label: t.cols.sat, icon: <GraduationCap className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'compoundDifficulty', label: t.cols.compoundDifficulty, icon: <Brain className="w-4 h-4" />, isChartable: true, group: 'global' },
+    
+    // Indonesian Leaderboard
+    { key: 'jumlahBenar', label: t.cols.jumlahBenar, icon: <Target className="w-4 h-4" />, isChartable: true, group: 'indonesian' },
+    { key: 'skorIRT', label: t.cols.skorIRT, icon: <GraduationCap className="w-4 h-4" />, isChartable: true, group: 'indonesian' },
+    { key: 'posisiNasional', label: t.cols.posisiNasional, icon: <Trophy className="w-4 h-4" />, isChartable: true, group: 'indonesian' },
+    { key: 'keketatan', label: t.cols.keketatan, icon: <Percent className="w-4 h-4" />, isChartable: true, group: 'indonesian' },
+    { key: 'statusPenerimaan', label: t.cols.statusPenerimaan, icon: <Target className="w-4 h-4" />, group: 'indonesian' },
   ];
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState<keyof ComparisonRow>('skorIRT');
+  const [sortField, setSortField] = useState<keyof ComparisonRow>('percentile');
   const [isSortedAsc, setIsSortedAsc] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [chartType, setChartType] = useState<ChartType>('bar');
@@ -130,7 +192,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   };
   
   // Axis selection for All Charts
-  const chartableMetrics = useMemo(() => columns.filter(c => c.isChartable), []);
+  const chartableMetrics = useMemo(() => columns.filter(c => c.isChartable), [columns]);
   const [xAxisMetric, setXAxisMetric] = useState<keyof ComparisonRow | 'Rank MLBB'>('rankSNBT'); 
   const [yAxisMetrics, setYAxisMetrics] = useState<Set<keyof ComparisonRow>>(new Set(['skorIRT']));
 
@@ -188,10 +250,129 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   };
 
   const filteredData = useMemo(() => {
-    return EXAM_COMPARISON_DATA.filter(row => 
+    const filtered = EXAM_COMPARISON_DATA.filter(row => 
       Object.values(row).some(val => val.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  }, [searchTerm]);
+
+    if (!sortField) return filtered;
+
+    return [...filtered].sort((a, b) => {
+      const valA = a[sortField];
+      const valB = b[sortField];
+
+      const numA = parseValue(valA);
+      const numB = parseValue(valB);
+
+      let comparison = 0;
+      if (!isNaN(numA) && !isNaN(numB)) {
+        comparison = numA - numB;
+      } else {
+        comparison = String(valA).localeCompare(String(valB));
+      }
+
+      return isSortedAsc ? comparison : -comparison;
+    });
+  }, [searchTerm, sortField, isSortedAsc]);
+
+  const formatValue = (val: any, colKey: string) => {
+    if (colKey === 'tinggiBadan' || colKey === 'tinggi') {
+      if (typeof val === 'number') {
+        const adjustedVal = gender === 'female' ? val - 13.0 : val;
+        if (heightUnit === 'inch') {
+          const totalInches = Math.round(adjustedVal / 2.54);
+          const feet = Math.floor(totalInches / 12);
+          const inches = totalInches % 12;
+          return `${feet}'${inches}`;
+        }
+        return `${adjustedVal.toFixed(1)} cm`;
+      }
+      return formatHeightValue(String(val), heightUnit, gender);
+    }
+
+    // Early return for pre-formatted strings, EXCEPT for assets and wage which need currency conversion
+    if (colKey !== 'asetBersih' && colKey !== 'aset' && colKey !== 'gajiBulanan' && colKey !== 'gaji') {
+      if (typeof val === 'string' && (val.includes('-') || val.includes('–') || val.includes('★'))) {
+        return val;
+      }
+    }
+
+    if (colKey === 'percentile' || colKey === 'pct') {
+      if (typeof val === 'string' && val.includes('-')) return val;
+      const numVal = typeof val === 'number' ? val : parseFloat(String(val).replace(/[%]/g, ''));
+      if (isNaN(numVal)) return val;
+      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+    }
+
+    if (colKey === 'psl') {
+      const numVal = typeof val === 'number' ? val : parseFloat(String(val));
+      if (isNaN(numVal)) return val;
+      
+      let tierLabel = '';
+      if (numVal >= 7.0) tierLabel = 'Gigachad';
+      else if (numVal >= 6.0) tierLabel = 'Chad';
+      else if (numVal >= 5.5) tierLabel = 'Chadlite';
+      else if (numVal >= 5.0) tierLabel = 'High Tier Normie';
+      else if (numVal >= 4.0) tierLabel = 'Mid Tier Normie';
+      else if (numVal >= 3.0) tierLabel = 'Low Tier Normie';
+      else if (numVal >= 2.0) tierLabel = 'Truecel';
+      else if (numVal >= 1.0) tierLabel = 'Saint';
+      else tierLabel = 'Subhuman';
+      
+      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${tierLabel})`;
+    }
+
+    if (colKey === 'mlbb' || colKey === 'rankSNBT') {
+      if (typeof val === 'string') {
+        if (language === 'en') {
+          let translated = val;
+          if (translated.includes('Zona Manusia')) {
+            translated = translated.replace('Zona Manusia', t.zones.humanZone || 'Human Zone');
+          }
+          return translated;
+        }
+      }
+    }
+
+    if (colKey === 'asetBersih' || colKey === 'aset' || colKey === 'gajiBulanan' || colKey === 'gaji') {
+      if (typeof val === 'number') {
+        if (currencyMode === 'IDR') {
+          const rupiah = val * 18000;
+          return `Rp ${Math.round(rupiah).toLocaleString('id-ID')}`;
+        }
+        return `$${Math.round(val).toLocaleString('en-US')}`;
+      }
+      if (typeof val === 'string') {
+        if (currencyMode === 'IDR') {
+          // Replace any $xxxx with Rp yyyy
+          return val.replace(/\$([\d\.,\s]+)/g, (match, p1) => {
+            const usdStr = p1.replace(/[\.,\s]/g, '');
+            const usd = parseFloat(usdStr);
+            if (isNaN(usd)) return match;
+            const idr = usd * 18000;
+            return `Rp ${Math.round(idr).toLocaleString('id-ID')}`;
+          });
+        }
+      }
+      return val;
+    }
+
+    if (typeof val === 'number') {
+      const formatted = val.toLocaleString('en-US', { 
+        maximumFractionDigits: (colKey === 'percentile' || colKey === 'pct') ? 2 : 1 
+      });
+      if (colKey === 'percentile' || colKey === 'pct') return `${formatted}%`;
+      if (colKey === 'posisiNasional' || colKey === 'rank') return `#${formatted}`;
+      if (colKey === 'osuStar' || colKey === 'star') return `${formatted}★`;
+      if (colKey === 'playHour' || colKey === 'jam') return `${formatted}h`;
+      if (colKey === 'tinggiBadan' || colKey === 'tinggi') return `${formatted} cm`;
+      if (colKey === 'keketatan' || colKey === 'sel') {
+        const selVal = val < 2 ? val.toFixed(1) : Math.round(val).toLocaleString('en-US');
+        return `1:${selVal}`;
+      }
+      return formatted;
+    }
+    return val;
+  };
 
   const chartData = useMemo(() => {
     let data = filteredData.map(row => {
@@ -202,8 +383,19 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       };
       columns.forEach(col => {
         if (col.isChartable) {
-          entry[col.label] = parseValue(row[col.key]);
-          entry[col.label + 'Label'] = row[col.key];
+          let rawVal = row[col.key];
+          let parsedVal = parseValue(rawVal);
+          if (col.key === 'tinggiBadan' && gender === 'female') {
+            parsedVal = parsedVal - 13.0;
+          }
+          if (col.key === 'tinggiBadan' && heightUnit === 'inch') {
+            parsedVal = parsedVal / 2.54;
+          }
+          if ((col.key === 'asetBersih' || col.key === 'gajiBulanan') && currencyMode === 'IDR') {
+            parsedVal = parsedVal * 18000;
+          }
+          entry[col.label] = parsedVal;
+          entry[col.label + 'Label'] = formatValue(rawVal, col.key);
         }
       });
       return entry;
@@ -231,6 +423,9 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         [t.cols.osuStar]: 12,
         [t.cols.keketatan]: 150,
         [t.cols.compoundDifficulty]: 5000000,
+        [t.cols.gajiBulanan]: currencyMode === 'IDR' ? 10700000 * 18000 : 10700000,
+        [t.cols.tinggiBadan]: heightUnit === 'inch' ? 220 / 2.54 : 220,
+        [t.cols.asetBersih]: currencyMode === 'IDR' ? 1000000000 * 18000 : 1000000000,
       };
 
       return data.map(d => {
@@ -253,7 +448,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     }
 
     return data;
-  }, [filteredData, isNormalized, xAxisMetric, t]);
+  }, [filteredData, isNormalized, xAxisMetric, t, gender, heightUnit, currencyMode]);
 
   const colToInterpKey: Record<string, keyof InterpolationPoint> = useMemo(() => ({
     jumlahBenar: 'benar',
@@ -271,6 +466,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     iq: 'iq',
     psl: 'psl',
     asetBersih: 'asetBersih',
+    gajiBulanan: 'gaji',
+    tinggiBadan: 'tinggi',
     chessElo: 'elo',
     statusPenerimaan: 'univ',
     gdMap: 'map'
@@ -295,8 +492,47 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       return match ? parseFloat(match[0]) : 0;
     };
 
-    const inputNum = cleanNumLocal(calcInput);
+    let inputNum = NaN;
+
+    if (calcSubject === 'tinggiBadan' && heightUnit === 'inch') {
+      const trimmed = calcInput.trim();
+      const matchFeetInches = trimmed.match(/^(\d+)'(\d+)?$/);
+      const matchSpace = trimmed.match(/^(\d+)\s+(\d+)$/);
+      if (matchFeetInches) {
+        const feet = parseInt(matchFeetInches[1]) || 0;
+        const inches = parseInt(matchFeetInches[2]) || 0;
+        inputNum = (feet * 12 + inches) * 2.54;
+      } else if (matchSpace) {
+        const feet = parseInt(matchSpace[1]) || 0;
+        const inches = parseInt(matchSpace[2]) || 0;
+        inputNum = (feet * 12 + inches) * 2.54;
+      } else {
+        const parsed = parseFloat(trimmed);
+        if (!isNaN(parsed)) {
+          if (parsed < 10) {
+            // Probably feet (e.g. 5.75)
+            inputNum = parsed * 12 * 2.54;
+          } else {
+            // Total inches (e.g. 70)
+            inputNum = parsed * 2.54;
+          }
+        }
+      }
+    } else {
+      inputNum = cleanNumLocal(calcInput);
+    }
+
     if (isNaN(inputNum)) return null;
+
+    // Convert currency input (IDR) to USD
+    if ((calcSubject === 'asetBersih' || calcSubject === 'gajiBulanan') && currencyMode === 'IDR') {
+      inputNum = inputNum / 18000;
+    }
+
+    // If subject is height and gender is female, translate input to male-equivalent scale
+    if (calcSubject === 'tinggiBadan' && gender === 'female') {
+      inputNum += 13.0;
+    }
 
     const subjectKey = colToInterpKey[calcSubject];
     if (!subjectKey) return null;
@@ -351,10 +587,30 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       const l = lower[key];
       const u = upper[key];
       
+      if (key === 'gd') {
+        const currentPct = lower.pct + t_factor * (upper.pct - lower.pct);
+        if (currentPct >= 99.94 && currentPct <= 99.98) {
+          const t = (currentPct - 99.94) / (99.98 - 99.94 || 1);
+          const gdRank = Math.round(250 - t * (250 - 50));
+          result[key] = `Top ${gdRank} Extreme (10★)`;
+          return;
+        } else if (currentPct >= 99.99 && currentPct <= 100.00) {
+          const t = (currentPct - 99.99) / (100.00 - 99.99 || 1);
+          const gdRank = Math.round(50 - t * (50 - 1));
+          result[key] = `Top ${gdRank} Extreme (10★)`;
+          return;
+        } else if (currentPct > 99.98 && currentPct < 99.99) {
+          const t = (currentPct - 99.98) / (99.99 - 99.98 || 1);
+          const gdRank = Math.round(50 - t * 0);
+          result[key] = `Top ${gdRank} Extreme (10★)`;
+          return;
+        }
+      }
+      
       if (typeof l === 'number' && typeof u === 'number') {
         const interpolated = l + t_factor * (u - l);
         // Round to nearest integer for these specific keys
-        if (['rank', 'comp', 'jam', 'benar', 'iq', 'pp', 'elo', 'sat', 'irt', 'sel', 'asetBersih'].includes(key)) {
+        if (['rank', 'comp', 'jam', 'benar', 'iq', 'pp', 'elo', 'sat', 'irt', 'sel', 'asetBersih', 'gaji'].includes(key)) {
           result[key] = Math.round(interpolated);
         } else {
           result[key] = Number(interpolated.toFixed(2));
@@ -437,7 +693,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     const iqValue = interpolationResult.iq;
     
     let tierId = "40-74";
-    if (iqValue >= 145) tierId = "145-200";
+    if (iqValue >= 145) tierId = "145-160";
     else if (iqValue >= 135) tierId = "135-145";
     else if (iqValue >= 130) tierId = "130-134";
     else if (iqValue >= 125) tierId = "125-129";
@@ -494,11 +750,34 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         const valHigh = cleanVal(upper[subjectKey]);
         
         // Interpolate value
-        const resultValue = valLow + t_val * (valHigh - valLow);
+        let resultValue = valLow + t_val * (valHigh - valLow);
+
+        // Subtract 13.0 if subject is height and gender is female
+        if (calcSubject === 'tinggiBadan' && gender === 'female') {
+          resultValue -= 13.0;
+        }
         
-        const finalValue = ['osuStar', 'psl'].includes(calcSubject) 
-          ? resultValue.toFixed(2) 
-          : Math.round(resultValue).toString();
+        let finalValue = "";
+        if (['osuStar', 'psl'].includes(calcSubject)) {
+          finalValue = resultValue.toFixed(2);
+        } else if (calcSubject === 'tinggiBadan') {
+          if (heightUnit === 'inch') {
+            const totalInches = Math.round(resultValue / 2.54);
+            const feet = Math.floor(totalInches / 12);
+            const inches = totalInches % 12;
+            finalValue = `${feet}'${inches}`;
+          } else {
+            finalValue = resultValue.toFixed(1);
+          }
+        } else if (calcSubject === 'asetBersih' || calcSubject === 'gajiBulanan') {
+          if (currencyMode === 'IDR') {
+            finalValue = Math.round(resultValue * 18000).toString();
+          } else {
+            finalValue = Math.round(resultValue).toString();
+          }
+        } else {
+          finalValue = Math.round(resultValue).toString();
+        }
 
         return { value: finalValue, p: PersentilAcak };
       };
@@ -522,10 +801,31 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         frames++;
         if (frames < maxFrames) {
           const tempP = Math.random() * 100;
-          const tempValNum = AngkaMin + (AngkaMax - AngkaMin) * (tempP / 100);
-          const tempVal = ['osuStar', 'psl'].includes(calcSubject) 
-            ? tempValNum.toFixed(2) 
-            : Math.round(tempValNum).toString();
+          let tempValNum = AngkaMin + (AngkaMax - AngkaMin) * (tempP / 100);
+          if (calcSubject === 'tinggiBadan' && gender === 'female') {
+            tempValNum -= 13.0;
+          }
+          let tempVal = "";
+          if (['osuStar', 'psl'].includes(calcSubject)) {
+            tempVal = tempValNum.toFixed(2);
+          } else if (calcSubject === 'tinggiBadan') {
+            if (heightUnit === 'inch') {
+              const totalInches = Math.round(tempValNum / 2.54);
+              const feet = Math.floor(totalInches / 12);
+              const inches = totalInches % 12;
+              tempVal = `${feet}'${inches}`;
+            } else {
+              tempVal = tempValNum.toFixed(1);
+            }
+          } else if (calcSubject === 'asetBersih' || calcSubject === 'gajiBulanan') {
+            if (currencyMode === 'IDR') {
+              tempVal = Math.round(tempValNum * 18000).toString();
+            } else {
+              tempVal = Math.round(tempValNum).toString();
+            }
+          } else {
+            tempVal = Math.round(tempValNum).toString();
+          }
           setCalcInput(tempVal);
         } else {
           clearInterval(interval);
@@ -552,6 +852,36 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   };
 
   const handleAdjustment = (direction: 'up' | 'down') => {
+    if (calcSubject === 'tinggiBadan' && heightUnit === 'inch') {
+      const trimmed = calcInput.trim();
+      const matchFeetInches = trimmed.match(/^(\d+)'(\d+)?$/);
+      let feet = 5;
+      let inches = 0;
+      if (matchFeetInches) {
+        feet = parseInt(matchFeetInches[1]) || 0;
+        inches = parseInt(matchFeetInches[2]) || 0;
+      } else {
+        const parsed = parseFloat(trimmed);
+        if (!isNaN(parsed)) {
+          if (parsed < 10) {
+            feet = Math.floor(parsed);
+            inches = Math.round((parsed - feet) * 12);
+          } else {
+            const totalInches = Math.round(parsed / 2.54);
+            feet = Math.floor(totalInches / 12);
+            inches = totalInches % 12;
+          }
+        }
+      }
+      let totalInches = feet * 12 + inches;
+      totalInches = direction === 'up' ? totalInches + 1 : totalInches - 1;
+      if (totalInches < 0) totalInches = 0;
+      const newFeet = Math.floor(totalInches / 12);
+      const newInches = totalInches % 12;
+      setCalcInput(`${newFeet}'${newInches}`);
+      return;
+    }
+
     const currentVal = parseFloat(calcInput) || 0;
     // Determine step size based on subject
     let step = 1;
@@ -563,6 +893,10 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       step = 10;
     } else if (calcSubject === 'iq') {
       step = 1;
+    } else if (calcSubject === 'gajiBulanan') {
+      step = 100;
+    } else if (calcSubject === 'tinggiBadan') {
+      step = 1;
     }
     
     const newVal = direction === 'up' ? currentVal + step : currentVal - step;
@@ -571,93 +905,13 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     let formatted = "";
     if (['osuStar', 'psl'].includes(calcSubject)) {
       formatted = newVal.toFixed(2);
+    } else if (calcSubject === 'tinggiBadan') {
+      formatted = Math.max(0, newVal).toFixed(1);
     } else {
       formatted = Math.max(0, Math.round(newVal)).toString();
     }
     
     setCalcInput(formatted);
-  };
-
-  const formatValue = (val: any, colKey: string) => {
-    // Early return for pre-formatted strings, EXCEPT for assets which need currency conversion
-    if (colKey !== 'asetBersih' && colKey !== 'aset') {
-      if (typeof val === 'string' && (val.includes('-') || val.includes('–') || val.includes('★'))) {
-        return val;
-      }
-    }
-
-    if (colKey === 'percentile' || colKey === 'pct') {
-      if (typeof val === 'string' && val.includes('-')) return val;
-      const numVal = typeof val === 'number' ? val : parseFloat(String(val).replace(/[%]/g, ''));
-      if (isNaN(numVal)) return val;
-      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
-    }
-
-    if (colKey === 'psl') {
-      const numVal = typeof val === 'number' ? val : parseFloat(String(val));
-      if (isNaN(numVal)) return val;
-      
-      let tierLabel = '';
-      if (numVal >= 7.0) tierLabel = 'Gigachad';
-      else if (numVal >= 6.0) tierLabel = 'Chad';
-      else if (numVal >= 5.5) tierLabel = 'Chadlite';
-      else if (numVal >= 5.0) tierLabel = 'High Tier Normie';
-      else if (numVal >= 4.0) tierLabel = 'Mid Tier Normie';
-      else if (numVal >= 3.0) tierLabel = 'Low Tier Normie';
-      else if (numVal >= 2.0) tierLabel = 'Truecel';
-      else if (numVal >= 1.0) tierLabel = 'Saint';
-      else tierLabel = 'Subhuman';
-      
-      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${tierLabel})`;
-    }
-
-    if (colKey === 'mlbb' || colKey === 'rankSNBT') {
-      if (typeof val === 'string') {
-        if (language === 'en') {
-          let translated = val;
-          if (translated.includes('Zona Manusia')) {
-            translated = translated.replace('Zona Manusia', t.zones.humanZone || 'Human Zone');
-          }
-          return translated;
-        }
-      }
-    }
-
-    if (colKey === 'asetBersih' || colKey === 'aset') {
-      if (typeof val === 'number') {
-        if (currencyMode === 'IDR') {
-          const rupiah = val * 18000;
-          return `Rp ${Math.round(rupiah).toLocaleString('id-ID')}`;
-        }
-        return `$${Math.round(val).toLocaleString('en-US')}`;
-      }
-      if (typeof val === 'string' && currencyMode === 'IDR' && val.includes('$')) {
-        // Handle range strings like "$50.000.000 - $100.000.000"
-        return val.replace(/\$([\d\.]+)/g, (match, p1) => {
-          const usd = parseFloat(p1.replace(/\./g, ''));
-          const idr = usd * 18000;
-          return `Rp ${Math.round(idr).toLocaleString('id-ID')}`;
-        });
-      }
-      // If string contains $ and we are in USD mode, just return or ensure it follows $format
-      return val;
-    }
-
-    if (typeof val === 'number') {
-      const formatted = val.toLocaleString('en-US', { 
-        maximumFractionDigits: (colKey === 'percentile' || colKey === 'pct') ? 2 : 1 
-      });
-      if (colKey === 'percentile' || colKey === 'pct') return `${formatted}%`;
-      if (colKey === 'posisiNasional' || colKey === 'rank') return `#${formatted}`;
-      if (colKey === 'osuStar' || colKey === 'star') return `${formatted}★`;
-      if (colKey === 'playHour' || colKey === 'jam') return `${formatted}h`;
-      if (colKey === 'keketatan' || colKey === 'sel') {
-        const selVal = val < 2 ? val.toFixed(1) : Math.round(val).toLocaleString('en-US');
-        return `1:${selVal}`;
-      }
-      return formatted;
-    }
-    return val;
   };
 
   const renderChart = () => {
@@ -690,7 +944,34 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       const props: any = {
         tick: { fontSize: 10, fill: '#94a3b8' },
         unit: isNormalized ? '%' : '',
-        label: { value: yAxisLabelText, angle: -90, position: 'insideLeft', offset: -70, fontSize: 10, fontWeight: 800, fill: '#94a3b8' }
+        label: { value: yAxisLabelText, angle: -90, position: 'insideLeft', offset: -70, fontSize: 10, fontWeight: 800, fill: '#94a3b8' },
+        tickFormatter: (val: any) => {
+          if (isNormalized) return `${val}%`;
+          if (activeYLabels.length === 1) {
+            const label = activeYLabels[0];
+            const col = columns.find(c => c.label === label);
+            if (col?.key === 'asetBersih' || col?.key === 'gajiBulanan') {
+              if (currencyMode === 'IDR') {
+                if (val >= 1000000000) return `Rp ${(val / 1000000000).toFixed(1)} Milyar`;
+                if (val >= 1000000) return `Rp ${(val / 1000000).toFixed(0)} jt`;
+                return `Rp ${val.toLocaleString('id-ID')}`;
+              }
+              if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
+              if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`;
+              return `$${val}`;
+            }
+            if (col?.key === 'tinggiBadan') {
+              if (heightUnit === 'inch') {
+                const totalInches = Math.round(val);
+                const feet = Math.floor(totalInches / 12);
+                const inches = totalInches % 12;
+                return `${feet}'${inches}`;
+              }
+              return `${val} cm`;
+            }
+          }
+          return typeof val === 'number' ? val.toLocaleString('en-US') : val;
+        }
       };
 
       if (isNormalized) {
@@ -710,6 +991,10 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         else if (label === t.cols.keketatan) props.domain = [0, 150];
         else if (label === t.cols.psl) props.domain = [1, 10];
         else if (label === t.cols.asetBersih) props.domain = [0, 'auto'];
+        else if (label === t.cols.gajiBulanan) props.domain = [0, 'auto'];
+        else if (label === t.cols.tinggiBadan) {
+          props.domain = heightUnit === 'inch' ? [40, 90] : [100, 220];
+        }
       }
       return props;
     };
@@ -733,6 +1018,28 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             unit={isNormalized ? '%' : ''} 
             label={{ value: xAxisLabelText, position: 'insideBottom', offset: -80, fontSize: 12, fill: '#64748b', fontWeight: 800 }} 
             tick={{ fontSize: 10, fill: '#94a3b8' }}
+            tickFormatter={(val) => {
+              if (xAxisMetric === 'tinggiBadan' && isXNumericValue && typeof val === 'number') {
+                if (heightUnit === 'inch') {
+                  const totalInches = Math.round(val);
+                  const feet = Math.floor(totalInches / 12);
+                  const inches = totalInches % 12;
+                  return `${feet}'${inches}`;
+                }
+                return `${val} cm`;
+              }
+              if ((xAxisMetric === 'asetBersih' || xAxisMetric === 'gajiBulanan') && isXNumericValue && typeof val === 'number') {
+                if (currencyMode === 'IDR') {
+                  if (val >= 1000000000) return `Rp ${(val / 1000000000).toFixed(1)}M`;
+                  if (val >= 1000000) return `Rp ${(val / 1000000).toFixed(0)} jt`;
+                  return `Rp ${val.toLocaleString('id-ID')}`;
+                }
+                if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
+                if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`;
+                return `$${val}`;
+              }
+              return typeof val === 'number' ? val.toLocaleString('en-US') : val;
+            }}
           />
           <YAxis 
             {...yAxisProps}
@@ -742,14 +1049,24 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             label={{ value: scatterY, angle: -90, position: 'insideLeft', offset: -70, fontSize: 12, fill: '#64748b', fontWeight: 800 }} 
             tickFormatter={(val) => {
               const col = columns.find(c => c.label === scatterY);
-              if (col?.key === 'asetBersih') {
+              if (col?.key === 'asetBersih' || col?.key === 'gajiBulanan') {
                 if (currencyMode === 'IDR') {
+                  if (val >= 1000000000) return `Rp ${(val / 1000000000).toFixed(1)} Milyar`;
                   if (val >= 1000000) return `Rp ${(val / 1000000).toFixed(0)} jt`;
                   return `Rp ${val.toLocaleString('id-ID')}`;
                 }
                 if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
                 if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`;
                 return `$${val}`;
+              }
+              if (col?.key === 'tinggiBadan') {
+                if (heightUnit === 'inch') {
+                  const totalInches = Math.round(val);
+                  const feet = Math.floor(totalInches / 12);
+                  const inches = totalInches % 12;
+                  return `${feet}'${inches}`;
+                }
+                return `${val} cm`;
               }
               return val.toLocaleString('en-US');
             }}
@@ -775,7 +1092,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
               return null;
             }}
           />
-          <Scatter name="Data" data={chartData} fill="#3b82f6" />
+          <Scatter name="Data" data={chartData} fill="#3b82f6" isAnimationActive={false} />
         </ScatterChart>
       );
     }
@@ -828,7 +1145,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
           <Legend wrapperStyle={{ paddingTop: '40px' }} />
           {activeYLabels.map((label, index) => (
-            <Bar key={label} dataKey={label as any} fill={`hsl(${210 + (index * 35)}, 75%, 55%)`} radius={[4, 4, 0, 0]} />
+            <Bar key={label} dataKey={label as any} fill={`hsl(${210 + (index * 35)}, 75%, 55%)`} radius={[4, 4, 0, 0]} isAnimationActive={false} />
           ))}
         </BarChart>
       );
@@ -843,7 +1160,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
           <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ paddingTop: '40px' }} />
           {activeYLabels.map((label, index) => (
-            <Line key={label} type="monotone" dataKey={label as any} stroke={`hsl(${210 + (index * 35)}, 75%, 55%)`} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+            <Line key={label} type="monotone" dataKey={label as any} stroke={`hsl(${210 + (index * 35)}, 75%, 55%)`} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} isAnimationActive={false} />
           ))}
         </LineChart>
       );
@@ -857,7 +1174,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         <Tooltip content={<CustomTooltip />} />
         <Legend wrapperStyle={{ paddingTop: '40px' }} />
         {activeYLabels.map((label, index) => (
-          <Area key={label} type="monotone" dataKey={label as any} stackId="1" stroke={`hsl(${210 + (index * 35)}, 75%, 55%)`} fill={`hsl(${210 + (index * 35)}, 75%, 55%)`} fillOpacity={0.6} />
+          <Area key={label} type="monotone" dataKey={label as any} stackId="1" stroke={`hsl(${210 + (index * 35)}, 75%, 55%)`} fill={`hsl(${210 + (index * 35)}, 75%, 55%)`} fillOpacity={0.6} isAnimationActive={false} />
         ))}
       </AreaChart>
     );
@@ -1475,25 +1792,54 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                       <select 
                         value={xAxisMetric}
                         onChange={(e) => setXAxisMetric(e.target.value as any)}
-                        className={`text-xs font-bold bg-transparent border-none outline-none cursor-pointer transition-colors max-w-[80px] truncate ${activeTierVisual ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+                        className={`text-xs font-bold bg-transparent border-none outline-none cursor-pointer transition-colors max-w-[100px] truncate ${activeTierVisual ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
                       >
-                        <option value="rankSNBT">{t.cols.rankSNBT}</option>
-                        {chartableMetrics.filter(m => m.key !== 'rankSNBT').map(m => <option key={m.key} value={m.key} className="bg-slate-900 text-white">{m.label}</option>)}
+                        <optgroup label="Global Leaderboard" className="bg-slate-900 text-white font-black">
+                          {columns.filter(c => c.group === 'global' && (c.isChartable || c.key === 'rankSNBT')).map(c => (
+                            <option key={c.key} value={c.key} className="bg-slate-900 text-white">{c.label}</option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="Indonesian Leaderboard" className="bg-slate-900 text-white font-black">
+                          {columns.filter(c => c.group === 'indonesian' && c.isChartable).map(c => (
+                            <option key={c.key} value={c.key} className="bg-slate-900 text-white">{c.label}</option>
+                          ))}
+                        </optgroup>
                       </select>
                     </div>
                     <div className="w-[1px] h-4 bg-white/10" />
-                    <div className="flex items-center gap-2 px-3 overflow-x-auto no-scrollbar max-w-[280px]">
+                    <div className="flex items-center gap-2 px-3 overflow-x-auto no-scrollbar max-w-[360px]">
                       <span className={`text-[10px] font-black uppercase tracking-tighter ${activeTierVisual ? 'text-white/30' : 'text-slate-400'}`}>Y:</span>
-                      <div className="flex items-center gap-1">
-                        {chartableMetrics.map(m => (
-                          <button
-                            key={m.key}
-                            onClick={() => toggleYMetric(m.key)}
-                            className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase transition-all border whitespace-nowrap ${yAxisMetrics.has(m.key) ? (activeTierVisual ? 'bg-white border-white text-black' : 'bg-blue-600 border-blue-600 text-white shadow-sm') : (activeTierVisual ? 'bg-white/5 border-white/5 text-white/30 hover:border-white/20' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300')}`}
-                          >
-                            {m.label}
-                          </button>
-                        ))}
+                      <div className="flex flex-col gap-1.5 py-1">
+                        <div className="flex items-center gap-1.5 flex-nowrap overflow-x-auto no-scrollbar">
+                          <span className={`text-[8px] font-bold uppercase tracking-wider ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>Global:</span>
+                          {chartableMetrics.filter(m => {
+                            const col = columns.find(c => c.key === m.key);
+                            return col?.group === 'global';
+                          }).map(m => (
+                            <button
+                              key={m.key}
+                              onClick={() => toggleYMetric(m.key)}
+                              className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase transition-all border whitespace-nowrap ${yAxisMetrics.has(m.key) ? (activeTierVisual ? 'bg-white border-white text-black' : 'bg-blue-600 border-blue-600 text-white shadow-sm') : (activeTierVisual ? 'bg-white/5 border-white/5 text-white/30 hover:border-white/20' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300')}`}
+                            >
+                              {m.label}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-nowrap overflow-x-auto no-scrollbar">
+                          <span className={`text-[8px] font-bold uppercase tracking-wider ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>Indo:</span>
+                          {chartableMetrics.filter(m => {
+                            const col = columns.find(c => c.key === m.key);
+                            return col?.group === 'indonesian';
+                          }).map(m => (
+                            <button
+                              key={m.key}
+                              onClick={() => toggleYMetric(m.key)}
+                              className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase transition-all border whitespace-nowrap ${yAxisMetrics.has(m.key) ? (activeTierVisual ? 'bg-white border-white text-black' : 'bg-blue-600 border-blue-600 text-white shadow-sm') : (activeTierVisual ? 'bg-white/5 border-white/5 text-white/30 hover:border-white/20' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300')}`}
+                            >
+                              {m.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1545,6 +1891,25 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
+                  {/* Group Header Row */}
+                  <tr className={`border-b transition-colors duration-500 ${activeTierVisual ? 'bg-white/5 border-white/10' : 'bg-slate-100/40 border-slate-200'}`}>
+                    {activeColumns.filter(c => c.group === 'global').length > 0 && (
+                      <th 
+                        colSpan={activeColumns.filter(c => c.group === 'global').length}
+                        className={`px-6 py-3 text-center text-[11px] font-black uppercase tracking-[0.25em] border-r transition-colors duration-500 ${activeTierVisual ? 'text-blue-400 border-white/10' : 'text-blue-700 border-slate-200'}`}
+                      >
+                        Global Leaderboard
+                      </th>
+                    )}
+                    {activeColumns.filter(c => c.group === 'indonesian').length > 0 && (
+                      <th 
+                        colSpan={activeColumns.filter(c => c.group === 'indonesian').length}
+                        className={`px-6 py-3 text-center text-[11px] font-black uppercase tracking-[0.25em] transition-colors duration-500 ${activeTierVisual ? 'text-indigo-400' : 'text-indigo-700'}`}
+                      >
+                        Indonesian Leaderboard
+                      </th>
+                    )}
+                  </tr>
                   <tr className={`border-b transition-colors duration-500 ${activeTierVisual ? 'bg-white/10 border-white/10' : 'bg-slate-50/50 border-slate-100'}`}>
                     {activeColumns.map((col) => (
                       <th 
@@ -1558,6 +1923,18 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                         <div className="flex items-center gap-2">
                           <span style={activeTierVisual ? { color: activeTierVisual.ui.hexCode } : {}}>{col.icon}</span>
                           <span>{col.label}</span>
+                          {col.key === 'tinggiBadan' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setGender(prev => prev === 'male' ? 'female' : 'male');
+                              }}
+                              className="p-1 rounded bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-400 border border-yellow-500/30 active:scale-90 transition-all ml-1"
+                              title="Toggle Height Scale (Male / Female)"
+                            >
+                              <Zap className="w-2.5 h-2.5 fill-yellow-400 animate-pulse text-yellow-400" />
+                            </button>
+                          )}
                           {sortField === col.key && (isSortedAsc ? <ChevronUp className="w-3" /> : <ChevronDown className="w-3" />)}
                         </div>
                       </th>
@@ -1579,24 +1956,31 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                       className={`transition-all group cursor-pointer ${activeTierVisual ? 'hover:bg-white/10' : 'hover:bg-slate-50/80'}`}
                     >
                         {activeColumns.map((col) => {
-                          const val = row[col.key];
-                          const isCurrency = col.key === 'asetBersih';
-                          const isAltSupported = (typeof val === 'string' && val.includes('/') && !val.includes('(')) || isCurrency;
-                          const options = isAltSupported ? (isCurrency ? [val] : (val as string).split('/').map(s => s.trim())) : [val];
+                          let val = row[col.key];
+                          const isCurrency = col.key === 'asetBersih' || col.key === 'gajiBulanan';
+                          const isAltSupported = col.key === 'tinggiBadan' || (typeof val === 'string' && val.includes('/') && !val.includes('(')) || isCurrency;
+                          const options = isAltSupported ? (isCurrency ? [val] : (col.key === 'tinggiBadan' ? [val] : (val as string).split('/').map(s => s.trim()))) : [val];
                           // Use a more stable key for table cell alternatives
                           const rowId = row.jumlahBenar; // jumlahBenar is unique per row
                           const cellKey = `table-${rowId}-${col.key}`;
-                          const currentVal = isCurrency ? val : options[(altIndices[cellKey] || 0) % options.length];
+                          const currentVal = col.key === 'tinggiBadan'
+                            ? val
+                            : (isCurrency ? val : options[(altIndices[cellKey] || 0) % options.length]);
 
                           return (
                             <td 
                               key={`${idx}-${col.key}`} 
                               className={`px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors duration-500 ${activeTierVisual ? 'text-white/70' : 'text-slate-600'} ${isAltSupported ? 'cursor-pointer active:scale-95 transition-transform group/cell' : ''}`}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 if (isCurrency) {
                                   toggleCurrency();
                                 } else if (isAltSupported) {
-                                  toggleAlt(cellKey, options.length);
+                                  if (col.key === 'tinggiBadan') {
+                                    setHeightUnit(prev => prev === 'cm' ? 'inch' : 'cm');
+                                  } else {
+                                    toggleAlt(cellKey, options.length);
+                                  }
                                 }
                               }}
                             >
@@ -1706,6 +2090,33 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                       ))}
                     </select>
                   </div>
+
+                  <AnimatePresence mode="popLayout">
+                    {calcSubject === 'tinggiBadan' && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, height: 'auto', scale: 1 }}
+                        exit={{ opacity: 0, height: 0, scale: 0.95 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        className={`p-4 rounded-2xl border border-dashed transition-all duration-500 overflow-hidden ${activeTierVisual ? 'bg-white/5 border-white/10' : 'bg-blue-50/50 border-blue-100'}`}
+                      >
+                        <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-3 transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>
+                          Height Scale Mode
+                        </label>
+                        <button
+                          onClick={() => setGender(prev => prev === 'male' ? 'female' : 'male')}
+                          className={`w-full py-3.5 rounded-xl border-b-4 flex items-center justify-center gap-3 font-black text-sm uppercase tracking-wider transition-all duration-300 active:scale-95 ${
+                            gender === 'male'
+                              ? 'bg-blue-500 border-blue-700 text-white shadow-lg shadow-blue-500/20'
+                              : 'bg-pink-500 border-pink-700 text-white shadow-lg shadow-pink-500/20'
+                          }`}
+                        >
+                          <Zap className="w-4 h-4 text-yellow-300 fill-yellow-300 animate-pulse" />
+                          <span>{gender === 'male' ? 'Male' : 'Female'}</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   
                   <div>
                     <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>{t.inputScore}</label>
@@ -2023,37 +2434,23 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                     {/* HUD SUB-CELLS - REMOVED PER USER REQUEST */}
                     
                     {/* INTERPOLATED METRICS HUD */}
-                    <div className="pt-8 border-t border-white/10">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-6">
-                        {/* Always include key metrics requested */}
-                        {[
-                          { key: 'benar', labelKey: 'jumlahBenar' },
-                          { key: 'mlbb', labelKey: 'rankSNBT' },
-                          { key: 'irt', labelKey: 'skorIRT' },
-                          { key: 'rank', labelKey: 'posisiNasional' },
-                          { key: 'gd', labelKey: 'gdDifficulty' },
-                          { key: 'pp', labelKey: 'osuPP' },
-                          { key: 'sel', labelKey: 'keketatan' },
-                          { key: 'star', labelKey: 'osuStar' },
-                          { key: 'univ', labelKey: 'statusPenerimaan' },
-                          { key: 'map', labelKey: 'gdMap' },
-                          { key: 'elo', labelKey: 'chessElo' },
-                          { key: 'sat', labelKey: 'sat' },
-                          { key: 'iq', labelKey: 'iq' },
-                          { key: 'jam', labelKey: 'playHour' },
-                          { key: 'pct', labelKey: 'percentile' },
-                          { key: 'comp', labelKey: 'compoundDifficulty' },
-                          { key: 'psl', labelKey: 'psl' },
-                          { key: 'asetBersih', labelKey: 'asetBersih' }
-                        ].map((metric, idx) => {
+                    <div className="pt-8 border-t border-white/10 space-y-8">
+                      {(() => {
+                        const renderMetricCard = (metric: { key: string; labelKey: string }) => {
                           const val = interpolationResult[metric.key];
                           if (val === undefined) return null;
 
-                          const label = t.cols[metric.labelKey] || metric.labelKey;
-                          const isCurrency = metric.key === 'asetBersih';
-                          const isAltSupported = (typeof val === 'string' && val.includes('/') && !val.includes('(')) || isCurrency;
-                          const options = isAltSupported ? (isCurrency ? [val] : (val as string).split('/').map(s => s.trim())) : [val];
-                          const currentVal = isCurrency ? val : options[(altIndices[metric.key] || 0) % options.length];
+                          let label = t.cols[metric.labelKey] || metric.labelKey;
+                          if (metric.key === 'tinggi') {
+                            label = gender === 'male'
+                              ? (language === 'id' ? 'Tinggi Laki-laki' : 'Male Height')
+                              : (language === 'id' ? 'Tinggi Perempuan' : 'Female Height');
+                          }
+                          const isCurrency = metric.key === 'asetBersih' || metric.key === 'gaji';
+                          const isHeight = metric.key === 'tinggi';
+                          const isAltSupported = (typeof val === 'string' && val.includes('/') && !val.includes('(')) || isCurrency || isHeight;
+                          const options = isAltSupported ? (isCurrency ? [val] : (isHeight ? [val] : (val as string).split('/').map(s => s.trim()))) : [val];
+                          const currentVal = (isCurrency || isHeight) ? val : options[(altIndices[metric.key] || 0) % options.length];
 
                           return (
                             <motion.div 
@@ -2068,6 +2465,9 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                                 if (isCurrency) {
                                   e.stopPropagation();
                                   toggleCurrency();
+                                } else if (isHeight) {
+                                  e.stopPropagation();
+                                  setHeightUnit(prev => prev === 'cm' ? 'inch' : 'cm');
                                 } else if (isAltSupported) {
                                   e.stopPropagation();
                                   toggleAlt(metric.key, options.length);
@@ -2083,7 +2483,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                               </div>
                               <AnimatePresence mode="popLayout">
                                 <motion.p 
-                                  key={isCurrency ? currencyMode + currentVal : currentVal}
+                                  key={isCurrency ? currencyMode + currentVal : (isHeight ? heightUnit + currentVal : currentVal)}
                                   initial={{ opacity: 0, x: -5 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: 5 }}
@@ -2096,13 +2496,70 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                               </AnimatePresence>
                               {isAltSupported && (
                                 <p className="text-[8px] font-bold text-white/40 uppercase mt-2 group-hover:text-white/80 transition-colors">
-                                  {isCurrency ? `TAP TO SWITCH TO ${currencyMode === 'USD' ? 'IDR' : 'USD'}` : `TAP FOR ALT (${((altIndices[metric.key] || 0) % options.length) + 1}/${options.length})`}
+                                  {isCurrency 
+                                    ? `TAP TO SWITCH TO ${currencyMode === 'USD' ? 'IDR' : 'USD'}` 
+                                    : (isHeight 
+                                      ? `TAP TO SWITCH TO ${heightUnit === 'cm' ? 'INCH/FEET' : 'CM'}` 
+                                      : `TAP FOR ALT (${((altIndices[metric.key] || 0) % options.length) + 1}/${options.length})`)}
                                 </p>
                               )}
                             </motion.div>
                           );
-                        })}
-                      </div>
+                        };
+
+                        return (
+                          <div className="space-y-8">
+                            {/* Global Leaderboard Section */}
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-2.5">
+                                <Globe className="w-4 h-4 animate-spin-slow" style={{ color: activeTierVisual.ui.hexCode }} />
+                                <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-blue-400">
+                                  Global Leaderboard
+                                </h4>
+                                <div className="flex-1 h-px bg-white/10" />
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-6">
+                                {[
+                                  { key: 'mlbb', labelKey: 'rankSNBT' },
+                                  { key: 'gd', labelKey: 'gdDifficulty' },
+                                  { key: 'map', labelKey: 'gdMap' },
+                                  { key: 'pp', labelKey: 'osuPP' },
+                                  { key: 'star', labelKey: 'osuStar' },
+                                  { key: 'jam', labelKey: 'playHour' },
+                                  { key: 'elo', labelKey: 'chessElo' },
+                                  { key: 'psl', labelKey: 'psl' },
+                                  { key: 'iq', labelKey: 'iq' },
+                                  { key: 'asetBersih', labelKey: 'asetBersih' },
+                                  { key: 'gaji', labelKey: 'gajiBulanan' },
+                                  { key: 'tinggi', labelKey: 'tinggiBadan' },
+                                  { key: 'sat', labelKey: 'sat' },
+                                  { key: 'comp', labelKey: 'compoundDifficulty' },
+                                ].map((metric) => renderMetricCard(metric))}
+                              </div>
+                            </div>
+
+                            {/* Indonesian Leaderboard Section */}
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-2.5">
+                                <Flag className="w-4 h-4 animate-pulse" style={{ color: activeTierVisual.ui.hexCode }} />
+                                <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-indigo-400">
+                                  Indonesian Leaderboard
+                                </h4>
+                                <div className="flex-1 h-px bg-white/10" />
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-6">
+                                {[
+                                  { key: 'benar', labelKey: 'jumlahBenar' },
+                                  { key: 'irt', labelKey: 'skorIRT' },
+                                  { key: 'rank', labelKey: 'posisiNasional' },
+                                  { key: 'sel', labelKey: 'keketatan' },
+                                  { key: 'univ', labelKey: 'statusPenerimaan' }
+                                ].map((metric) => renderMetricCard(metric))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 ) : (

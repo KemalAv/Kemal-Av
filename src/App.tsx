@@ -379,7 +379,7 @@ export default function App() {
         <Route path="/" element={<MainSite />} />
         <Route path="/app/:title" element={<AppRouter />} />
         <Route path="/articles/:title" element={<ArticleReader />} />
-        <Route path="/articles" element={<Navigate to="/" replace />} />
+        <Route path="/articles" element={<MainSite />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

@@ -93,7 +93,9 @@ export const translations = {
         compoundDifficulty: "Complexity",
         iq: "IQ Level",
         psl: "PSL",
-        asetBersih: "Net Worth"
+        asetBersih: "Net Worth",
+        gajiBulanan: "Wage per Month",
+        tinggiBadan: "Male Height"
       },
       zones: {
         humanZone: "Zona Manusia",
@@ -106,7 +108,7 @@ export const translations = {
         warrior: "Warrior"
       },
       tierNames: {
-        "145-200": "Luar Angkasa Jauh",
+        "145-160": "Luar Angkasa Jauh",
         "135-145": "Sabuk Satelit",
         "130-134": "Batas Awal Angkasa",
         "125-129": "Orbit Stasiun Luar Angkasa",
@@ -225,7 +227,9 @@ export const translations = {
         compoundDifficulty: "Complexity",
         iq: "IQ Level",
         psl: "PSL",
-        asetBersih: "Net Worth"
+        asetBersih: "Net Worth",
+        gajiBulanan: "Wage per Month",
+        tinggiBadan: "Male Height"
       },
       zones: {
         humanZone: "Human Zone",
@@ -238,7 +242,7 @@ export const translations = {
         warrior: "Warrior"
       },
       tierNames: {
-        "145-200": "Deep Space",
+        "145-160": "Deep Space",
         "135-145": "Satellite Belt",
         "130-134": "Edge of Space",
         "125-129": "Space Station Orbit",
