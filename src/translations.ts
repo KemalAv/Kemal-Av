@@ -94,7 +94,7 @@ export const translations = {
         iq: "IQ Level",
         psl: "PSL",
         asetBersih: "Net Worth",
-        gajiBulanan: "Wage per Month",
+        gajiBulanan: "Pendapatan Bulanan",
         tinggiBadan: "Male Height"
       },
       zones: {
@@ -228,7 +228,7 @@ export const translations = {
         iq: "IQ Level",
         psl: "PSL",
         asetBersih: "Net Worth",
-        gajiBulanan: "Wage per Month",
+        gajiBulanan: "Monthly Income",
         tinggiBadan: "Male Height"
       },
       zones: {
