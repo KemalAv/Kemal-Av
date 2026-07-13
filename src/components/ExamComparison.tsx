@@ -337,9 +337,11 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       if (typeof val === 'number') {
         if (currencyMode === 'IDR') {
           const rupiah = val * 18000;
-          return `Rp ${Math.round(rupiah).toLocaleString('id-ID')}`;
+          const formatted = Math.abs(Math.round(rupiah)).toLocaleString('id-ID');
+          return `${val < 0 ? '-' : ''}Rp ${formatted}`;
         }
-        return `$${Math.round(val).toLocaleString('en-US')}`;
+        const formatted = Math.abs(Math.round(val)).toLocaleString('en-US');
+        return `${val < 0 ? '-' : ''}$${formatted}`;
       }
       if (typeof val === 'string') {
         if (currencyMode === 'IDR') {
@@ -952,13 +954,17 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             const col = columns.find(c => c.label === label);
             if (col?.key === 'asetBersih' || col?.key === 'gajiBulanan') {
               if (currencyMode === 'IDR') {
-                if (val >= 1000000000) return `Rp ${(val / 1000000000).toFixed(1)} Milyar`;
-                if (val >= 1000000) return `Rp ${(val / 1000000).toFixed(0)} jt`;
-                return `Rp ${val.toLocaleString('id-ID')}`;
+                const absVal = Math.abs(val);
+                const prefix = val < 0 ? '-' : '';
+                if (absVal >= 1000000000) return `${prefix}Rp ${(absVal / 1000000000).toFixed(1)} Milyar`;
+                if (absVal >= 1000000) return `${prefix}Rp ${(absVal / 1000000).toFixed(0)} jt`;
+                return `${prefix}Rp ${absVal.toLocaleString('id-ID')}`;
               }
-              if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
-              if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`;
-              return `$${val}`;
+              const absVal = Math.abs(val);
+              const prefix = val < 0 ? '-' : '';
+              if (absVal >= 1000000) return `${prefix}$${(absVal / 1000000).toFixed(1)}M`;
+              if (absVal >= 1000) return `${prefix}$${(absVal / 1000).toFixed(1)}K`;
+              return `${prefix}$${absVal}`;
             }
             if (col?.key === 'tinggiBadan') {
               if (heightUnit === 'inch') {
@@ -1030,13 +1036,17 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
               }
               if ((xAxisMetric === 'asetBersih' || xAxisMetric === 'gajiBulanan') && isXNumericValue && typeof val === 'number') {
                 if (currencyMode === 'IDR') {
-                  if (val >= 1000000000) return `Rp ${(val / 1000000000).toFixed(1)}M`;
-                  if (val >= 1000000) return `Rp ${(val / 1000000).toFixed(0)} jt`;
-                  return `Rp ${val.toLocaleString('id-ID')}`;
+                  const absVal = Math.abs(val);
+                  const prefix = val < 0 ? '-' : '';
+                  if (absVal >= 1000000000) return `${prefix}Rp ${(absVal / 1000000000).toFixed(1)}M`;
+                  if (absVal >= 1000000) return `${prefix}Rp ${(absVal / 1000000).toFixed(0)} jt`;
+                  return `${prefix}Rp ${absVal.toLocaleString('id-ID')}`;
                 }
-                if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
-                if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`;
-                return `$${val}`;
+                const absVal = Math.abs(val);
+                const prefix = val < 0 ? '-' : '';
+                if (absVal >= 1000000) return `${prefix}$${(absVal / 1000000).toFixed(1)}M`;
+                if (absVal >= 1000) return `${prefix}$${(absVal / 1000).toFixed(1)}K`;
+                return `${prefix}$${absVal}`;
               }
               return typeof val === 'number' ? val.toLocaleString('en-US') : val;
             }}
@@ -1051,13 +1061,17 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
               const col = columns.find(c => c.label === scatterY);
               if (col?.key === 'asetBersih' || col?.key === 'gajiBulanan') {
                 if (currencyMode === 'IDR') {
-                  if (val >= 1000000000) return `Rp ${(val / 1000000000).toFixed(1)} Milyar`;
-                  if (val >= 1000000) return `Rp ${(val / 1000000).toFixed(0)} jt`;
-                  return `Rp ${val.toLocaleString('id-ID')}`;
+                  const absVal = Math.abs(val);
+                  const prefix = val < 0 ? '-' : '';
+                  if (absVal >= 1000000000) return `${prefix}Rp ${(absVal / 1000000000).toFixed(1)} Milyar`;
+                  if (absVal >= 1000000) return `${prefix}Rp ${(absVal / 1000000).toFixed(0)} jt`;
+                  return `${prefix}Rp ${absVal.toLocaleString('id-ID')}`;
                 }
-                if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
-                if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`;
-                return `$${val}`;
+                const absVal = Math.abs(val);
+                const prefix = val < 0 ? '-' : '';
+                if (absVal >= 1000000) return `${prefix}$${(absVal / 1000000).toFixed(1)}M`;
+                if (absVal >= 1000) return `${prefix}$${(absVal / 1000).toFixed(1)}K`;
+                return `${prefix}$${absVal}`;
               }
               if (col?.key === 'tinggiBadan') {
                 if (heightUnit === 'inch') {
