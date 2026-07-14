@@ -24,6 +24,12 @@ import {
   Settings2,
   Minimize2,
   Maximize2,
+  RefreshCw,
+  ZoomIn,
+  ZoomOut,
+  Square,
+  ChevronLeft,
+  ChevronRight,
   Share2,
   Terminal,
   Zap,
@@ -54,10 +60,12 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Brush,
 } from 'recharts';
 
 type ViewMode = 'table' | 'chart' | 'calculator';
 type ChartType = 'bar' | 'line' | 'area' | 'scatter';
+type CalcLayoutMode = 'grid' | 'single';
 
 const formatHeightValue = (valStr: string, unit: 'cm' | 'inch', currentGender: 'male' | 'female') => {
   if (!valStr) return '';
@@ -152,6 +160,36 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   const [isSortedAsc, setIsSortedAsc] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [chartType, setChartType] = useState<ChartType>('bar');
+  const [calcLayoutMode, setCalcLayoutMode] = useState<CalcLayoutMode>('grid');
+  const [calcActiveIndex, setCalcActiveIndex] = useState(0);
+
+  const calculatorMetrics = useMemo(() => [
+    { key: 'mlbb', labelKey: 'rankSNBT', group: 'global' },
+    { key: 'gd', labelKey: 'gdDifficulty', group: 'global' },
+    { key: 'map', labelKey: 'gdMap', group: 'global' },
+    { key: 'pp', labelKey: 'osuPP', group: 'global' },
+    { key: 'star', labelKey: 'osuStar', group: 'global' },
+    { key: 'jam', labelKey: 'playHour', group: 'global' },
+    { key: 'elo', labelKey: 'chessElo', group: 'global' },
+    { key: 'psl', labelKey: 'psl', group: 'global' },
+    { key: 'iq', labelKey: 'iq', group: 'global' },
+    { key: 'asetBersih', labelKey: 'asetBersih', group: 'global' },
+    { key: 'gaji', labelKey: 'gajiBulanan', group: 'global' },
+    { key: 'tinggi', labelKey: 'tinggiBadan', group: 'global' },
+    { key: 'sat', labelKey: 'sat', group: 'global' },
+    { key: 'comp', labelKey: 'compoundDifficulty', group: 'global' },
+    { key: 'benar', labelKey: 'jumlahBenar', group: 'indonesian' },
+    { key: 'irt', labelKey: 'skorIRT', group: 'indonesian' },
+    { key: 'rank', labelKey: 'posisiNasional', group: 'indonesian' },
+    { key: 'sel', labelKey: 'keketatan', group: 'indonesian' },
+    { key: 'univ', labelKey: 'statusPenerimaan', group: 'indonesian' },
+  ], []);
+
+  const handleNextCalc = () => setCalcActiveIndex(prev => (prev + 1) % calculatorMetrics.length);
+  const handlePrevCalc = () => setCalcActiveIndex(prev => (prev - 1 + calculatorMetrics.length) % calculatorMetrics.length);
+
+  const [chartZoomX, setChartZoomX] = useState(1);
+  const [chartZoomY, setChartZoomY] = useState(1);
   const [isNormalized, setIsNormalized] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -1107,6 +1145,13 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             }}
           />
           <Scatter name="Data" data={chartData} fill="#3b82f6" isAnimationActive={false} />
+          <Brush 
+            dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric)} 
+            height={30} 
+            stroke={activeTierVisual ? "#3b82f6" : "#cbd5e1"}
+            fill={activeTierVisual ? "rgba(0,0,0,0.4)" : "#f8fafc"}
+            padding={{ top: 20, bottom: 0, left: 0, right: 0 }}
+          />
         </ScatterChart>
       );
     }
@@ -1161,6 +1206,13 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
           {activeYLabels.map((label, index) => (
             <Bar key={label} dataKey={label as any} fill={`hsl(${210 + (index * 35)}, 75%, 55%)`} radius={[4, 4, 0, 0]} isAnimationActive={false} />
           ))}
+          <Brush 
+            dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric)} 
+            height={30} 
+            stroke={activeTierVisual ? "#3b82f6" : "#cbd5e1"}
+            fill={activeTierVisual ? "rgba(0,0,0,0.4)" : "#f8fafc"}
+            padding={{ top: 20, bottom: 0, left: 0, right: 0 }}
+          />
         </BarChart>
       );
     }
@@ -1176,6 +1228,13 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
           {activeYLabels.map((label, index) => (
             <Line key={label} type="monotone" dataKey={label as any} stroke={`hsl(${210 + (index * 35)}, 75%, 55%)`} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} isAnimationActive={false} />
           ))}
+          <Brush 
+            dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric)} 
+            height={30} 
+            stroke={activeTierVisual ? "#3b82f6" : "#cbd5e1"}
+            fill={activeTierVisual ? "rgba(0,0,0,0.4)" : "#f8fafc"}
+            padding={{ top: 20, bottom: 0, left: 0, right: 0 }}
+          />
         </LineChart>
       );
     }
@@ -1190,6 +1249,13 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         {activeYLabels.map((label, index) => (
           <Area key={label} type="monotone" dataKey={label as any} stackId="1" stroke={`hsl(${210 + (index * 35)}, 75%, 55%)`} fill={`hsl(${210 + (index * 35)}, 75%, 55%)`} fillOpacity={0.6} isAnimationActive={false} />
         ))}
+        <Brush 
+          dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric)} 
+          height={30} 
+          stroke={activeTierVisual ? "#3b82f6" : "#cbd5e1"}
+          fill={activeTierVisual ? "rgba(0,0,0,0.4)" : "#f8fafc"}
+          padding={{ top: 20, bottom: 0, left: 0, right: 0 }}
+        />
       </AreaChart>
     );
   };
@@ -1797,6 +1863,65 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                       {isNormalized ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
                       {isNormalized ? t.fixed : t.normalized}
                     </button>
+                    <div className="w-[1px] h-4 bg-slate-200 mx-1 opacity-20" />
+                    
+                    {/* Zoom X Controls */}
+                    <div className="flex items-center gap-1">
+                      <span className={`text-[10px] font-bold mr-1 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>X:</span>
+                      <button
+                        onClick={() => setChartZoomX(prev => Math.max(1, prev - 1))}
+                        disabled={chartZoomX <= 1}
+                        className={`p-1 rounded-lg transition-all ${chartZoomX > 1 ? (activeTierVisual ? 'text-white hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100') : 'opacity-20 cursor-not-allowed'}`}
+                        title="Zoom Out X"
+                      >
+                        <ZoomOut className="w-3 h-3" />
+                      </button>
+                      <span className={`text-[10px] font-black w-10 text-center ${activeTierVisual ? 'text-white/60' : 'text-slate-500'}`}>
+                        {Math.round(chartZoomX * 100)}%
+                      </span>
+                      <button
+                        onClick={() => setChartZoomX(prev => Math.min(100, prev + 1))}
+                        disabled={chartZoomX >= 100}
+                        className={`p-1 rounded-lg transition-all ${chartZoomX < 100 ? (activeTierVisual ? 'text-white hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100') : 'opacity-20 cursor-not-allowed'}`}
+                        title="Zoom In X"
+                      >
+                        <ZoomIn className="w-3 h-3" />
+                      </button>
+                    </div>
+
+                    <div className="w-[1px] h-3 bg-slate-200 mx-1 opacity-10" />
+
+                    {/* Zoom Y Controls */}
+                    <div className="flex items-center gap-1">
+                      <span className={`text-[10px] font-bold mr-1 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>Y:</span>
+                      <button
+                        onClick={() => setChartZoomY(prev => Math.max(1, prev - 1))}
+                        disabled={chartZoomY <= 1}
+                        className={`p-1 rounded-lg transition-all ${chartZoomY > 1 ? (activeTierVisual ? 'text-white hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100') : 'opacity-20 cursor-not-allowed'}`}
+                        title="Zoom Out Y"
+                      >
+                        <ZoomOut className="w-3 h-3" />
+                      </button>
+                      <span className={`text-[10px] font-black w-10 text-center ${activeTierVisual ? 'text-white/60' : 'text-slate-500'}`}>
+                        {Math.round(chartZoomY * 100)}%
+                      </span>
+                      <button
+                        onClick={() => setChartZoomY(prev => Math.min(100, prev + 1))}
+                        disabled={chartZoomY >= 100}
+                        className={`p-1 rounded-lg transition-all ${chartZoomY < 100 ? (activeTierVisual ? 'text-white hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100') : 'opacity-20 cursor-not-allowed'}`}
+                        title="Zoom In Y"
+                      >
+                        <ZoomIn className="w-3 h-3" />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => { setChartZoomX(1); setChartZoomY(1); }}
+                      className={`p-1 rounded-lg transition-all ${chartZoomX !== 1 || chartZoomY !== 1 ? (activeTierVisual ? 'text-blue-400 hover:bg-white/10' : 'text-blue-600 hover:bg-blue-50') : 'opacity-20 cursor-not-allowed'}`}
+                      title="Reset Zoom"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                    </button>
                   </div>
 
                   {/* RESTORED: Axis Selectors for Chart View (X and Y Axis) */}
@@ -2048,8 +2173,16 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             animate={{ opacity: 1 }} 
             className={`rounded-3xl shadow-2xl border p-6 md:p-8 min-h-[600px] flex flex-col transition-all duration-500 ${activeTierVisual ? 'bg-black/60 border-white/10' : 'bg-white border-slate-100'}`}
           >
-            <div className="w-full h-[500px] relative">
-              <div className="absolute inset-0">
+            <div className={`w-full h-[550px] relative overflow-auto custom-scrollbar ${activeTierVisual ? 'scrollbar-white' : ''}`}>
+              <div 
+                className="absolute inset-0" 
+                style={{ 
+                  width: `${chartZoomX * 100}%`, 
+                  height: `${chartZoomY * 100}%`,
+                  minWidth: '100%',
+                  minHeight: '100%'
+                }}
+              >
                 <ResponsiveContainer width="100%" height="100%" debounce={100}>
                   {renderChart()}
                 </ResponsiveContainer>
@@ -2383,9 +2516,27 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: activeTierVisual.ui.hexCode }} />
                              <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/40">COORD_{activeTierVisual.tierId.replace(/[^0-9]/g, '')}</p>
                           </div>
-                          <h3 className="text-5xl font-black italic tracking-tighter uppercase text-white leading-none">
-                            {t.tierNames[activeTierVisual.tierId] || activeTierVisual.name}
-                          </h3>
+                          <div className="flex items-center gap-4">
+                            <h3 className="text-5xl font-black italic tracking-tighter uppercase text-white leading-none">
+                              {t.tierNames[activeTierVisual.tierId] || activeTierVisual.name}
+                            </h3>
+                            <div className="flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/10 ml-2">
+                              <button 
+                                onClick={() => setCalcLayoutMode('grid')}
+                                className={`p-1.5 rounded-lg transition-all ${calcLayoutMode === 'grid' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+                                title="Grid View"
+                              >
+                                <LayoutGrid className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={() => setCalcLayoutMode('single')}
+                                className={`p-1.5 rounded-lg transition-all ${calcLayoutMode === 'single' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+                                title="Single Focus View"
+                              >
+                                <Square className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
@@ -2450,7 +2601,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                     {/* INTERPOLATED METRICS HUD */}
                     <div className="pt-8 border-t border-white/10 space-y-8">
                       {(() => {
-                        const renderMetricCard = (metric: { key: string; labelKey: string }) => {
+                        const renderMetricCard = (metric: { key: string; labelKey: string; group: string }, isLarge: boolean = false) => {
                           const val = interpolationResult[metric.key];
                           if (val === undefined) return null;
 
@@ -2474,7 +2625,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                               whileHover={isAltSupported ? { y: -3, scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' } : {}}
                               whileTap={isAltSupported ? { scale: 0.96 } : {}}
                               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                              className={`group p-4 rounded-2xl transition-all duration-300 ${isAltSupported ? 'cursor-pointer hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 bg-white/5 border border-white/10 ring-1 ring-white/5' : 'bg-white/5 border border-white/5'}`}
+                              className={`group transition-all duration-300 ${isLarge ? 'p-10 rounded-[32px] bg-white/5 border border-white/20 shadow-[0_0_50px_rgba(255,255,255,0.05)]' : (isAltSupported ? 'p-4 rounded-2xl cursor-pointer hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 bg-white/5 border border-white/10 ring-1 ring-white/5' : 'p-4 rounded-2xl bg-white/5 border border-white/5')}`}
                               onClick={(e) => {
                                 if (isCurrency) {
                                   e.stopPropagation();
@@ -2488,11 +2639,11 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                                 }
                               }}
                             >
-                              <div className="flex items-center gap-2 mb-1">
-                                <div className="w-1 h-3 rounded-full opacity-40 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: activeTierVisual.ui.hexCode }} />
-                                <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-white/60 transition-colors flex items-center gap-1">
+                              <div className={`flex items-center gap-2 ${isLarge ? 'mb-4' : 'mb-1'}`}>
+                                <div className={`${isLarge ? 'w-1.5 h-6' : 'w-1 h-3'} rounded-full opacity-40 group-hover:opacity-100 transition-opacity`} style={{ backgroundColor: activeTierVisual.ui.hexCode }} />
+                                <p className={`${isLarge ? 'text-[12px]' : 'text-[9px]'} font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-white/60 transition-colors flex items-center gap-1`}>
                                   {label}
-                                  {isAltSupported && <Zap className="w-2 h-2 animate-pulse text-yellow-400 fill-yellow-400" />}
+                                  {isAltSupported && <Zap className={`${isLarge ? 'w-3 h-3' : 'w-2 h-2'} animate-pulse text-yellow-400 fill-yellow-400`} />}
                                 </p>
                               </div>
                               <AnimatePresence mode="popLayout">
@@ -2502,14 +2653,14 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: 5 }}
                                   transition={{ duration: 0.2 }}
-                                  className={`text-lg sm:text-xl font-black text-white leading-tight break-words group-hover:scale-[1.02] origin-left transition-transform ${metric.key !== 'iq' ? 'italic' : ''}`} 
-                                  style={{ textShadow: metric.key !== 'iq' ? `0 0 10px ${activeTierVisual.ui.hexCode}33` : 'none' }}
+                                  className={`${isLarge ? 'text-4xl sm:text-5xl mb-6' : 'text-lg sm:text-xl'} font-black text-white leading-tight break-words group-hover:scale-[1.02] origin-left transition-transform ${metric.key !== 'iq' ? 'italic' : ''}`} 
+                                  style={{ textShadow: metric.key !== 'iq' ? `0 0 ${isLarge ? '30px' : '10px'} ${activeTierVisual.ui.hexCode}33` : 'none' }}
                                 >
                                   {formatValue(currentVal, metric.key === 'sel' ? 'sel' : metric.key)}
                                 </motion.p>
                               </AnimatePresence>
                               {isAltSupported && (
-                                <p className="text-[8px] font-bold text-white/40 uppercase mt-2 group-hover:text-white/80 transition-colors">
+                                <p className={`${isLarge ? 'text-[10px] mt-4' : 'text-[8px] mt-2'} font-bold text-white/40 uppercase group-hover:text-white/80 transition-colors`}>
                                   {isCurrency 
                                     ? `TAP TO SWITCH TO ${currencyMode === 'USD' ? 'IDR' : 'USD'}` 
                                     : (isHeight 
@@ -2517,9 +2668,83 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                                       : `TAP FOR ALT (${((altIndices[metric.key] || 0) % options.length) + 1}/${options.length})`)}
                                 </p>
                               )}
+                              
+                              {isLarge && (
+                                <div className="mt-8 pt-8 border-t border-white/10 flex items-center justify-between">
+                                   <div className="flex flex-col gap-1">
+                                      <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Environmental Sector</span>
+                                      <span className="text-xs font-bold text-white/60 capitalize">{metric.group} Benchmarking</span>
+                                   </div>
+                                   <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                      <Brain className="w-6 h-6 opacity-40" style={{ color: activeTierVisual.ui.hexCode }} />
+                                   </div>
+                                </div>
+                              )}
                             </motion.div>
                           );
                         };
+
+                        if (calcLayoutMode === 'single') {
+                          const currentMetric = calculatorMetrics[calcActiveIndex];
+                          return (
+                            <div className="relative pt-8">
+                               <div className="flex items-center justify-between mb-12 max-w-xl mx-auto px-6">
+                                  <motion.button 
+                                    whileHover={{ scale: 1.1, x: -5 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={handlePrevCalc}
+                                    className="p-4 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all shadow-xl"
+                                  >
+                                    <ChevronLeft className="w-6 h-6" />
+                                  </motion.button>
+
+                                  <div className="text-center">
+                                     <motion.p 
+                                       key={calcActiveIndex}
+                                       initial={{ opacity: 0, y: 5 }}
+                                       animate={{ opacity: 1, y: 0 }}
+                                       className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 mb-2"
+                                     >
+                                        HUD MODULE {String(calcActiveIndex + 1).padStart(2, '0')} / {calculatorMetrics.length}
+                                     </motion.p>
+                                     <div className="flex items-center justify-center gap-2">
+                                        <div className="flex gap-1">
+                                           {calculatorMetrics.map((_, idx) => (
+                                              <div 
+                                                key={idx} 
+                                                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === calcActiveIndex ? 'w-4 bg-white' : 'bg-white/10'}`} 
+                                              />
+                                           ))}
+                                        </div>
+                                     </div>
+                                  </div>
+
+                                  <motion.button 
+                                    whileHover={{ scale: 1.1, x: 5 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={handleNextCalc}
+                                    className="p-4 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all shadow-xl"
+                                  >
+                                    <ChevronRight className="w-6 h-6" />
+                                  </motion.button>
+                               </div>
+
+                               <div className="max-w-xl mx-auto">
+                                  <AnimatePresence mode="wait">
+                                     <motion.div
+                                       key={calcActiveIndex}
+                                       initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                                       animate={{ opacity: 1, x: 0, scale: 1 }}
+                                       exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                                       transition={{ duration: 0.3, ease: "easeOut" }}
+                                     >
+                                        {renderMetricCard(currentMetric, true)}
+                                     </motion.div>
+                                  </AnimatePresence>
+                               </div>
+                            </div>
+                          );
+                        }
 
                         return (
                           <div className="space-y-8">
@@ -2533,22 +2758,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                                 <div className="flex-1 h-px bg-white/10" />
                               </div>
                               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-6">
-                                {[
-                                  { key: 'mlbb', labelKey: 'rankSNBT' },
-                                  { key: 'gd', labelKey: 'gdDifficulty' },
-                                  { key: 'map', labelKey: 'gdMap' },
-                                  { key: 'pp', labelKey: 'osuPP' },
-                                  { key: 'star', labelKey: 'osuStar' },
-                                  { key: 'jam', labelKey: 'playHour' },
-                                  { key: 'elo', labelKey: 'chessElo' },
-                                  { key: 'psl', labelKey: 'psl' },
-                                  { key: 'iq', labelKey: 'iq' },
-                                  { key: 'asetBersih', labelKey: 'asetBersih' },
-                                  { key: 'gaji', labelKey: 'gajiBulanan' },
-                                  { key: 'tinggi', labelKey: 'tinggiBadan' },
-                                  { key: 'sat', labelKey: 'sat' },
-                                  { key: 'comp', labelKey: 'compoundDifficulty' },
-                                ].map((metric) => renderMetricCard(metric))}
+                                {calculatorMetrics.filter(m => m.group === 'global').map((metric) => renderMetricCard(metric))}
                               </div>
                             </div>
 
@@ -2562,13 +2772,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                                 <div className="flex-1 h-px bg-white/10" />
                               </div>
                               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-6">
-                                {[
-                                  { key: 'benar', labelKey: 'jumlahBenar' },
-                                  { key: 'irt', labelKey: 'skorIRT' },
-                                  { key: 'rank', labelKey: 'posisiNasional' },
-                                  { key: 'sel', labelKey: 'keketatan' },
-                                  { key: 'univ', labelKey: 'statusPenerimaan' }
-                                ].map((metric) => renderMetricCard(metric))}
+                                {calculatorMetrics.filter(m => m.group === 'indonesian').map((metric) => renderMetricCard(metric))}
                               </div>
                             </div>
                           </div>

@@ -4,6 +4,7 @@ import { Surah, Ayah } from '../types';
 import { useLocalization } from '../hooks/useLocalization';
 import { useTheme } from '../hooks/useTheme';
 import { motion } from 'motion/react';
+import { AyahEndSymbol } from './AyahEndSymbol';
 
 interface ReadingViewProps {
   surah: Surah;
@@ -82,6 +83,7 @@ export const ReadingView: React.FC<ReadingViewProps> = ({ surah, ayahs, onBack, 
                 style={{ fontSize: `${settings.fontSize}px`, direction: 'rtl' }}
               >
                 {ayah.text}
+                <AyahEndSymbol number={ayah.numberInSurah} />
               </p>
             </div>
 

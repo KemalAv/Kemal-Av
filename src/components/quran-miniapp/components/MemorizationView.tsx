@@ -4,6 +4,7 @@ import { Surah, Ayah, Mistake, MemorizationStats } from '../types';
 import { useLocalization } from '../hooks/useLocalization';
 import { useTheme } from '../hooks/useTheme';
 import { motion } from 'motion/react';
+import { AyahEndSymbol } from './AyahEndSymbol';
 
 interface MemorizationViewProps {
   surah: Surah;
@@ -128,6 +129,10 @@ export const MemorizationView: React.FC<MemorizationViewProps> = ({
                 {word}
               </motion.span>
             ))}
+            <AyahEndSymbol 
+              number={currentAyah.numberInSurah} 
+              className={`transition-all duration-300 ${visibleWordsCount === words.length ? 'opacity-100 scale-100' : 'opacity-5 scale-90 blur-[4px]'}`}
+            />
           </div>
         </div>
 

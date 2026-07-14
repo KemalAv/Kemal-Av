@@ -4,6 +4,7 @@ import { Surah, Ayah, MemorizationStats } from '../types';
 import { useLocalization } from '../hooks/useLocalization';
 import { useTheme } from '../hooks/useTheme';
 import { motion } from 'motion/react';
+import { AyahEndSymbol } from './AyahEndSymbol';
 
 interface AnalysisViewProps {
   surah: Surah;
@@ -82,6 +83,7 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({ surah, ayahs, stats,
                         </span>
                       );
                     })}
+                    <AyahEndSymbol number={ayah.numberInSurah} />
                   </p>
                 </div>
               );
