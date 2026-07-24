@@ -41,8 +41,8 @@ function SubdomainManager() {
 
     if (subdomain === 'articles' && !currentPath.startsWith('/articles')) {
       navigate('/articles', { replace: true });
-    } else if (subdomain === 'quran' && !currentPath.startsWith('/app/belajar-al-quran')) {
-      navigate('/app/belajar-al-quran', { replace: true });
+    } else if (subdomain === 'quran' && !currentPath.startsWith('/app/hafalan-al-quran')) {
+      navigate('/app/hafalan-al-quran', { replace: true });
     } else if (subdomain === 'practice' && !currentPath.startsWith('/app/bikin-kuis-materi')) {
       navigate('/app/bikin-kuis-materi', { replace: true });
     } else if (subdomain === 'exam' && !currentPath.startsWith('/app/perbandingan-pencapaian')) {
@@ -319,7 +319,7 @@ export default function App() {
     switch (title) {
       case 'bikin-kuis-materi':
         return <PracticeAppView />;
-      case 'belajar-al-quran':
+      case 'hafalan-al-quran':
         return (
           <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300">
             <QuranMiniApp onClose={() => navigate('/')} />

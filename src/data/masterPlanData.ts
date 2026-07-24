@@ -18,33 +18,39 @@ export const masterPlanData: MasterPlanData = {
   interests: [
     "Teknologi: Koding (dengan bantuan AI), Machine Learning, AI.",
     "Fisik & Mekanikal: Robotika (Arduino) dan servis barang (maintenance).",
-    "Gaya Hidup: Konsep hidup mandiri secara energi dan pangan (off-grid)."
+    "Bisnis: Mengelola dan mengoptimalkan aset keluarga, melanjutkan ekspansi bisnis pribadi, serta tetap aktif bekerja di dunia profesional."
   ],
   education: {
     s1: [
       {
-        title: "Plan A (Insinyur Serba Bisa)",
-        campus: "S1 Teknik Elektro Telkom University (Tel-U)",
-        strategy: "Lulus dalam 3.5 tahun (7 semester) dengan memaksimalkan Transfer SKS dari kuliah lama dan menjaga IPK >3.25.",
-        perks: "Memilih kos bagus akses dekat ke gedung FTE, fasilitas Wi-Fi untuk koding/game ritme."
+        title: "Plan A (Jalur Makro Global)",
+        campus: "Daftar IUP UGM (Pilihan 1) / UNDIP (Pilihan 2)",
+        strategy: "Pilihan 1: S1 Teknik Industri – Fokus pada efisiensi sistem dan manajemen operasional untuk otomatisasi alur barang serta stok di 3 franchise Bapak. Pilihan 2: S1 Manajemen – Berfokus pada strategi ekspansi makro, pemasaran waralaba, pengelolaan SDM, dan pengambilan keputusan bisnis.",
+        perks: "Prestise UGM/UNDIP, paparan global, kurikulum teknik + manajemen operasional (persiapan CEO)."
       },
       {
-        title: "Plan B (Jalur Makro Global)",
-        campus: "S1 Teknik Industri IUP UGM",
-        strategy: "Memanfaatkan persiapan IELTS/TOEFL dan tes skolastik (SAT/TPA) untuk menembus seleksi kelas internasional UGM.",
-        perks: "Prestise UGM, paparan global, kurikulum teknik + manajemen operasional (persiapan CEO)."
+        title: "Plan B (Jalur Teknis PTN)",
+        campus: "Daftar Jalur Mandiri S1 UNDIP (Pilihan 1) / ITS (Pilihan 2) / UB (Pilihan 3) / UNNES (Pilihan 4)",
+        strategy: "Pilihan 1: S1 Teknik Elektro – Fokus pada implementasi teknologi Smart Home di aset Airbnb dan Apartemen keluarga untuk menaikkan nilai sewa. Pilihan 2: S1 Teknik Komputer – Berfokus pada integrasi sistem digital sebagai opsi pengaman terbaik jika Teknik Elektro tidak tembus.",
+        perks: "Kurikulum teknik kuat, prospek kerja otomatisasi industri."
       },
       {
-        title: "Plan C (Praktik Lapangan Terfokus)",
-        campus: "D4 Teknologi Rekayasa Otomasi (TRO) SV UNDIP",
-        strategy: "Pindah internal kampus melalui jalur seleksi resmi ke program Sarjana Terapan.",
-        perks: "Kurikulum berbasis 70% praktik lapangan, sertifikasi IABEE, fokus robotika/IoT (100% Semarang)."
+        title: "Plan C (Jalur Praktik Lapangan)",
+        campus: "Daftar Jalur Mandiri D4 UNDIP (Pilihan 1) / ITS (Pilihan 2)",
+        strategy: "Pilihan 1: D4 Teknologi Rekayasa Otomasi (TRO) – Titik temu untuk mengasah koding AI, Machine Learning, dan robotika (Arduino) guna mengincar posisi Divisi IT & Inovasi di Kantor Pusat Indomaret. Pilihan 2: D4 Manajemen Logistik (MAL) – Berfokus pada tata kelola rantai pasok dan distribusi barang skala besar.",
+        perks: "Kurikulum berbasis 70% praktik lapangan, sertifikasi IABEE, fokus robotika/IoT."
       },
       {
-        title: "Plan D (Jalur Bertahan & Otodidak)",
-        campus: "S1 Fisika FSM UNDIP",
-        strategy: "Lanjutkan studi yang sudah berjalan, masuk KBK Elektronika dan Instrumentasi (Elins).",
-        perks: "Hemat energi birokrasi, belajar koding IoT & mekanikal agresif secara otodidak."
+        title: "Plan D (Jalur Swasta Premium)",
+        campus: "Daftar Telkom University / UDINUS",
+        strategy: "Pilihan 1: S1 Teknik Elektro (Tel-U), Pilihan 2: S1 Teknik Industri (Tel-U), Pilihan 3: S1 Sistem Informasi (Tel-U & UDINUS), Pilihan 4: S1 Manajemen Rekayasa Industri (Tel-U), Pilihan 5: S1 Teknik Logistik (Tel-U)",
+        perks: "Fasilitas kampus lengkap, kurikulum industri, akses koding/IT kuat."
+      },
+      {
+        title: "Plan E (Jalur Bertahan & Otodidak)",
+        campus: "Bertahan di S1 Fisika UNDIP",
+        strategy: "Melanjutkan studi yang sedang berjalan dan mengambil Kelompok Bidang Keahlian (KBK) Elektronika dan Instrumentasi (Elins).",
+        perks: "Menghemat energi birokrasi kampus sambil tetap memperdalam ilmu koding IoT dan mekanikal secara agresif lewat jalur otodidak."
       }
     ],
     s2: [
@@ -141,7 +147,7 @@ export const masterPlanData: MasterPlanData = {
   lifePhases: [
     {
       age: "19-21 Tahun",
-      title: "Transisi & S1 Elektro Tel-U",
+      title: "Transisi & S1 Teknik Elektro Undip",
       description: "Fokus akademik S1 serta sinkronisasi bisnis keluarga setiap jeda semester.",
       items: [
         "Jeda Semester: Belajar Cash Flow retail & Properti di bawah bimbingan Ayah.",
@@ -169,7 +175,7 @@ export const masterPlanData: MasterPlanData = {
       items: [
         "S2: MBA UGM Yogyakarta (AACSB Accredited).",
         "Aset: Pasang Smart Lock IoT di Airbnb keluarga untuk pangkas OPEX listrik.",
-        "Fisik: Gym Bulk Kevin Hart type (165cm/60kg), Lasik 20/20, Behel gigi."
+        "Fisik: Gym Bulk Kevin Hart type (165cm/60kg), Lasik 20/20."
       ],
       status: "planned"
     },

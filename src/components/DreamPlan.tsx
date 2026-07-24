@@ -218,7 +218,7 @@ export default function DreamPlan() {
                     <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
                       <div className="flex items-center gap-3 mb-6">
                         <Zap className="text-indigo-600" />
-                        <h3 className="text-xl font-bold text-slate-900">Minat & Gaya Hidup</h3>
+                        <h3 className="text-xl font-bold text-slate-900">Minat & Impian</h3>
                       </div>
                       <ul className="space-y-4">
                         {interests.map((interest, i) => (
@@ -369,7 +369,7 @@ export default function DreamPlan() {
                       <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl mb-4">
                         <Calendar size={20} />
                       </div>
-                      <h3 className="text-2xl font-bold text-slate-900">Timeline Alur Kehidupan (Plan A)</h3>
+                      <h3 className="text-2xl font-bold text-slate-900">Timeline Alur Kehidupan (Plan B)</h3>
                     </div>
                     
                     <div className="absolute left-1/2 -translate-x-1/2 top-32 bottom-0 w-0.5 bg-indigo-100 hidden lg:block" />
@@ -418,6 +418,24 @@ export default function DreamPlan() {
                     </div>
                   </div>
 
+                  {/* Device Specifications */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    {deviceSpecs.map((v, i) => (
+                      <div key={i} className="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                          {v.name === 'Ponsel' && <Smartphone size={24} />}
+                          {v.name === 'Motor' && <Bike size={24} />}
+                          {v.name === 'Laptop' && <Laptop size={24} />}
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{v.name}</h4>
+                          <p className="text-sm font-bold text-slate-900">{v.model}</p>
+                        </div>
+                        {v.status === 'completed' && <CheckCircle2 size={16} className="text-emerald-500 ml-auto" />}
+                      </div>
+                    ))}
+                  </div>
+
                   {/* Misi Akhir: Off-Grid Projects */}
                   <div className="p-8 md:p-12 bg-slate-900 rounded-[3rem] text-white relative overflow-hidden">
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -438,23 +456,6 @@ export default function DreamPlan() {
                               Status: {offGrid.timeline}
                             </div>
                           </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                          {deviceSpecs.map((v, i) => (
-                            <div key={i} className="p-4 bg-slate-800/50 rounded-2xl border border-slate-700 flex items-center gap-4">
-                              <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl">
-                                {v.name === 'Ponsel' && <Smartphone size={18} />}
-                                {v.name === 'Motor' && <Bike size={18} />}
-                                {v.name === 'Laptop' && <Laptop size={18} />}
-                              </div>
-                              <div>
-                                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{v.name}</h4>
-                                <p className="text-sm font-bold text-slate-200">{v.model}</p>
-                              </div>
-                              {v.status === 'completed' && <CheckCircle2 size={16} className="text-emerald-400 ml-auto" />}
-                            </div>
-                          ))}
                         </div>
                       </div>
 

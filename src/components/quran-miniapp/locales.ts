@@ -28,7 +28,7 @@ export const locales = {
     resetToStart: "Reset to Start"
   },
   id: {
-    title: "Belajar Al-Qur'an",
+    title: "Hafalan Al-Qur'an",
     searchSurah: "Cari Surah...",
     juz: "Juz",
     startAyah: "Mulai Ayat",

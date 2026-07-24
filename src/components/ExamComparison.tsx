@@ -560,6 +560,9 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       }
     } else {
       inputNum = cleanNumLocal(calcInput);
+      if (calcSubject === 'sat' && !isNaN(inputNum)) {
+        inputNum = Math.round(inputNum / 10) * 10;
+      }
     }
 
     if (isNaN(inputNum)) return null;
@@ -628,21 +631,14 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       const u = upper[key];
       
       if (key === 'gd') {
-        const currentPct = lower.pct + t_factor * (upper.pct - lower.pct);
-        if (currentPct >= 99.94 && currentPct <= 99.98) {
-          const t = (currentPct - 99.94) / (99.98 - 99.94 || 1);
-          const gdRank = Math.round(250 - t * (250 - 50));
-          result[key] = `Top ${gdRank} Extreme (10★)`;
-          return;
-        } else if (currentPct >= 99.99 && currentPct <= 100.00) {
-          const t = (currentPct - 99.99) / (100.00 - 99.99 || 1);
-          const gdRank = Math.round(50 - t * (50 - 1));
-          result[key] = `Top ${gdRank} Extreme (10★)`;
-          return;
-        } else if (currentPct > 99.98 && currentPct < 99.99) {
-          const t = (currentPct - 99.98) / (99.99 - 99.98 || 1);
-          const gdRank = Math.round(50 - t * 0);
-          result[key] = `Top ${gdRank} Extreme (10★)`;
+        const gdPattern = /^Top\s+(\d+)\s+Extreme(?:\s+Demon)?\s*\(10★\)$/i;
+        const matchL = String(l).match(gdPattern);
+        const matchU = String(u).match(gdPattern);
+        if (matchL && matchU) {
+          const rankL = parseInt(matchL[1], 10);
+          const rankU = parseInt(matchU[1], 10);
+          const interpolatedRank = Math.round(rankL + t_factor * (rankU - rankL));
+          result[key] = `Top ${interpolatedRank} Extreme Demon (10★)`;
           return;
         }
       }
@@ -650,8 +646,10 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
       if (typeof l === 'number' && typeof u === 'number') {
         const interpolated = l + t_factor * (u - l);
         // Round to nearest integer for these specific keys
-        if (['rank', 'comp', 'jam', 'benar', 'iq', 'pp', 'elo', 'sat', 'irt', 'sel', 'asetBersih', 'gaji'].includes(key)) {
+        if (['rank', 'comp', 'jam', 'benar', 'iq', 'pp', 'elo', 'irt', 'sel', 'asetBersih', 'gaji'].includes(key)) {
           result[key] = Math.round(interpolated);
+        } else if (key === 'sat') {
+          result[key] = Math.round(interpolated / 10) * 10;
         } else {
           result[key] = Number(interpolated.toFixed(2));
         }
@@ -2097,7 +2095,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                         {activeColumns.map((col) => {
                           let val = row[col.key];
                           const isCurrency = col.key === 'asetBersih' || col.key === 'gajiBulanan';
-                          const isAltSupported = col.key === 'tinggiBadan' || (typeof val === 'string' && val.includes('/') && !val.includes('(')) || isCurrency;
+                          const isAltSupported = col.key === 'tinggiBadan' || (typeof val === 'string' && val.includes('/')) || isCurrency;
                           const options = isAltSupported ? (isCurrency ? [val] : (col.key === 'tinggiBadan' ? [val] : (val as string).split('/').map(s => s.trim()))) : [val];
                           // Use a more stable key for table cell alternatives
                           const rowId = row.jumlahBenar; // jumlahBenar is unique per row
@@ -2269,7 +2267,10 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                     <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>{t.inputScore}</label>
                     <div className="relative group/input">
                       <input 
-                        type="text"
+                        type="number"
+                        step="1"
+                        min="400"
+                        max="1600"
                         placeholder={t.scorePlaceholder}
                         value={calcInput}
                         onChange={(e) => setCalcInput(e.target.value)}
@@ -2613,7 +2614,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                           }
                           const isCurrency = metric.key === 'asetBersih' || metric.key === 'gaji';
                           const isHeight = metric.key === 'tinggi';
-                          const isAltSupported = (typeof val === 'string' && val.includes('/') && !val.includes('(')) || isCurrency || isHeight;
+                          const isAltSupported = (typeof val === 'string' && val.includes('/')) || isCurrency || isHeight;
                           const options = isAltSupported ? (isCurrency ? [val] : (isHeight ? [val] : (val as string).split('/').map(s => s.trim()))) : [val];
                           const currentVal = (isCurrency || isHeight) ? val : options[(altIndices[metric.key] || 0) % options.length];
 

@@ -13,9 +13,9 @@ import kretekImg from './assets/kretek.png';
 export const profile: Profile = {
   name: "Kemal Avicenna Faza",
   birthDate: "17 Mei 2008",
-  description: "Halo, nama saya Kemal Avicenna Faza. Saya adalah seorang Mahasiswa yang suka berkreasi di dunia digital!",
+  description: "Halo, nama saya Kemal Avicenna Faza. Saya suka berkreasi di dunia digital!",
   currentFocus: "Meningkatkan keahlian",
-  roles: ["Automation Enthusiast", "Web Developer", "Future Tech CEO"]
+  roles: []
 };
 
 export const works: Project[] = [
@@ -47,7 +47,7 @@ export const apps: Project[] = [
     type: "app"
   },
   {
-    title: "Belajar Al-Qur'an",
+    title: "Hafalan Al-Qur'an",
     description: "Mini app pendukung hafalan Al-Qur'an dengan fitur per surat dan ayat.",
     link: "#",
     type: "app"
