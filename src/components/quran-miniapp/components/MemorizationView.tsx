@@ -112,24 +112,25 @@ export const MemorizationView: React.FC<MemorizationViewProps> = ({
           >
             {words.map((word, i) => (
               <motion.span 
-                key={i}
+                key={`${currentAyahIdx}-${i}`}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ 
                   opacity: i < visibleWordsCount ? 1 : 0.05,
                   scale: i < visibleWordsCount ? 1 : 0.9,
                   filter: i < visibleWordsCount ? 'blur(0px)' : 'blur(4px)'
                 }}
-                className={`transition-all duration-300 ${(() => {
+                className={(() => {
                   const m = mistakes.find(m => m.ayahIndex === currentAyahIdx && m.wordIndex === i);
                   if (m?.type === 'forgot') return 'text-rose-500';
                   if (m?.type === 'tajwid') return 'text-amber-500';
                   return 'text-slate-900 dark:text-slate-100';
-                })()}`}
+                })()}
               >
                 {word}
               </motion.span>
             ))}
             <AyahEndSymbol 
+              key={`end-${currentAyahIdx}`}
               number={currentAyah.numberInSurah} 
               className={`transition-all duration-300 ${visibleWordsCount === words.length ? 'opacity-100 scale-100' : 'opacity-5 scale-90 blur-[4px]'}`}
             />
