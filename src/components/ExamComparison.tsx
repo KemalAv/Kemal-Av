@@ -63,7 +63,7 @@ import {
   Brush,
 } from 'recharts';
 
-type ViewMode = 'table' | 'chart' | 'calculator';
+type ViewMode = 'table' | 'chart' | 'calculator' | 'osu-pp-simulator';
 type ChartType = 'bar' | 'line' | 'area' | 'scatter';
 type CalcLayoutMode = 'grid' | 'single';
 
@@ -203,6 +203,16 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   // Alternative value tracking for multi-value results (calculator and table)
   const [altIndices, setAltIndices] = useState<Record<string, number>>({});
   const [currencyMode, setCurrencyMode] = useState<'USD' | 'IDR'>(language === 'id' ? 'IDR' : 'USD');
+
+  // UTBK-SNBT to osu! PP simulator state variables
+  const [utbkPU, setUtbkPU] = useState<number>(600);
+  const [utbkPBM, setUtbkPBM] = useState<number>(600);
+  const [utbkPPU, setUtbkPPU] = useState<number>(600);
+  const [utbkPK, setUtbkPK] = useState<number>(600);
+  const [utbkLitIndo, setUtbkLitIndo] = useState<number>(600);
+  const [utbkLitIng, setUtbkLitIng] = useState<number>(600);
+  const [utbkPM, setUtbkPM] = useState<number>(600);
+  const [expandedWeights, setExpandedWeights] = useState<Record<string, boolean>>({});
 
   // Sync Currency with Language changes
   React.useEffect(() => {
@@ -726,9 +736,41 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     return result;
   }, [calcInput, calcSubject, colToInterpKey]);
 
+  const osuInterpolationResult = useMemo(() => {
+    if (viewMode !== 'osu-pp-simulator') return null;
+    
+    const avgScore = (utbkPU + utbkPBM + utbkPPU + utbkPK + utbkLitIndo + utbkLitIng + utbkPM) / 7;
+    
+    const sorted = [...INTERPOLATION_DATA].sort((a, b) => a.irt - b.irt);
+    let lower = sorted[0];
+    let upper = sorted[sorted.length - 1];
+    
+    if (avgScore <= lower.irt) {
+      upper = sorted[1];
+    } else if (avgScore >= upper.irt) {
+      lower = sorted[sorted.length - 2];
+    } else {
+      for (let i = 0; i < sorted.length - 1; i++) {
+        if (avgScore >= sorted[i].irt && avgScore <= sorted[i+1].irt) {
+          lower = sorted[i];
+          upper = sorted[i+1];
+          break;
+        }
+      }
+    }
+    
+    const t_factor = (avgScore - lower.irt) / (upper.irt - lower.irt || 1);
+    
+    return {
+      benar: Math.round(lower.benar + t_factor * (upper.benar - lower.benar)),
+      iq: Math.round(lower.iq + t_factor * (upper.iq - lower.iq)),
+    };
+  }, [viewMode, utbkPU, utbkPBM, utbkPPU, utbkPK, utbkLitIndo, utbkLitIng, utbkPM]);
+
   const activeTierVisual = useMemo(() => {
-    if (!interpolationResult) return null;
-    const iqValue = interpolationResult.iq;
+    const source = viewMode === 'osu-pp-simulator' ? osuInterpolationResult : interpolationResult;
+    if (!source) return null;
+    const iqValue = source.iq;
     
     let tierId = "40-74";
     if (iqValue >= 145) tierId = "145-160";
@@ -747,7 +789,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     else if (iqValue >= 75) tierId = "75-84";
     
     return TIER_VISUAL_DATA[tierId] || TIER_VISUAL_DATA["40-74"] || null;
-  }, [interpolationResult]);
+  }, [interpolationResult, osuInterpolationResult, viewMode]);
 
   const activeColumns = columns.filter(col => visibleColumns.has(col.key));
 
@@ -1704,6 +1746,522 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
     );
   };
 
+  const renderOsuSimulator = () => {
+    const localNormalCDF = (z: number): number => {
+      const a1 =  0.254829592;
+      const a2 = -0.284496736;
+      const a3 =  1.421413741;
+      const a4 = -1.453152027;
+      const a5 =  1.061405429;
+      const p  =  0.3275911;
+
+      const sign = (z >= 0) ? 1 : -1;
+      const absX = Math.abs(z) / Math.sqrt(2);
+
+      const t = 1.0 / (1.0 + p * absX);
+      const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+
+      return 0.5 * (1 + sign * y);
+    };
+
+    const getSubtestRank = (score: number) => {
+      const Z = (score - 500) / 105;
+      const cdfVal = localNormalCDF(Z);
+      return Math.max(1, Math.min(850000, Math.round((1 - cdfVal) * 850000)));
+    };
+
+    const getGlobalRank = (score: number) => {
+      const CDF_User = localNormalCDF((score - 525) / 80);
+      const CDF_Max = localNormalCDF((825 - 525) / 80);
+      const CDF_Min = localNormalCDF((275 - 525) / 80);
+      const Persentil_Scaled = (CDF_User - CDF_Min) / (CDF_Max - CDF_Min || 1);
+      return Math.max(1, Math.min(850000, Math.round((1 - Persentil_Scaled) * 850000)));
+    };
+
+    const getOsuPP = (score: number) => {
+      if (score >= 700) {
+        return 500 + ((score - 700) / (1000 - 700)) * (2000 - 500);
+      } else if (score >= 500) {
+        return 100 + ((score - 500) / (700 - 500)) * (500 - 100);
+      } else if (score >= 232) {
+        return 1 + ((score - 232) / (500 - 232)) * (100 - 1);
+      } else {
+        return 1;
+      }
+    };
+
+    const rawTeknik = (0.25 * utbkPM) + (0.20 * utbkPK) + (0.20 * utbkPU) + (0.15 * utbkLitIng) + (0.10 * utbkLitIndo) + (0.05 * utbkPBM) + (0.05 * utbkPPU);
+    const rawSosial = (0.25 * utbkPBM) + (0.25 * utbkLitIndo) + (0.15 * utbkPPU) + (0.15 * utbkPU) + (0.10 * utbkLitIng) + (0.05 * utbkPM) + (0.05 * utbkPK);
+    const rawKesehatan = (0.25 * utbkPU) + (0.25 * utbkLitIng) + (0.15 * utbkPK) + (0.15 * utbkPM) + (0.10 * utbkLitIndo) + (0.05 * utbkPBM) + (0.05 * utbkPPU);
+    const rawBisnis = (0.25 * utbkPK) + (0.25 * utbkPM) + (0.15 * utbkLitIng) + (0.15 * utbkPU) + (0.10 * utbkPBM) + (0.05 * utbkLitIndo) + (0.05 * utbkPPU);
+    const rawSastra = (0.30 * utbkLitIng) + (0.25 * utbkPPU) + (0.15 * utbkLitIndo) + (0.10 * utbkPBM) + (0.10 * utbkPU) + (0.05 * utbkPM) + (0.05 * utbkPK);
+
+    const scores = [utbkPU, utbkPBM, utbkPPU, utbkPK, utbkLitIndo, utbkLitIng, utbkPM];
+    const Rata_Rata_Murni = scores.reduce((a, b) => a + b, 0) / 7;
+
+    const mean = Rata_Rata_Murni;
+    const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / 7;
+    const SD_Internal = Math.sqrt(variance);
+    const Min_Subtest = Math.min(...scores);
+    const Z_Internal = (mean - Min_Subtest) / Math.max(1, SD_Internal);
+
+    const subtestsInfo = [
+      { key: "pu", label: "PU", val: utbkPU, wTeknik: 0.20, wSosial: 0.15, wKesehatan: 0.25, wBisnis: 0.15, wSastra: 0.10 },
+      { key: "pbm", label: "PBM", val: utbkPBM, wTeknik: 0.05, wSosial: 0.25, wKesehatan: 0.05, wBisnis: 0.10, wSastra: 0.10 },
+      { key: "ppu", label: "PPU", val: utbkPPU, wTeknik: 0.05, wSosial: 0.15, wKesehatan: 0.05, wBisnis: 0.05, wSastra: 0.25 },
+      { key: "pk", label: "PK", val: utbkPK, wTeknik: 0.20, wSosial: 0.05, wKesehatan: 0.15, wBisnis: 0.25, wSastra: 0.05 },
+      { key: "litIndo", label: "Literasi Indonesia", val: utbkLitIndo, wTeknik: 0.10, wSosial: 0.25, wKesehatan: 0.10, wBisnis: 0.05, wSastra: 0.15 },
+      { key: "litIng", label: "Literasi Inggris", val: utbkLitIng, wTeknik: 0.15, wSosial: 0.10, wKesehatan: 0.25, wBisnis: 0.15, wSastra: 0.30 },
+      { key: "pm", label: "PM", val: utbkPM, wTeknik: 0.25, wSosial: 0.05, wKesehatan: 0.15, wBisnis: 0.25, wSastra: 0.05 },
+    ];
+
+    let minSubInfo = subtestsInfo[0];
+    for (const info of subtestsInfo) {
+      if (info.val < minSubInfo.val) {
+        minSubInfo = info;
+      }
+    }
+
+    // Dynamic weighted Z-score penalty (prioritises subtests with higher weights when Z_nat < 1.0, with heavier nerf if below 0)
+    let sumTeknikSeverity = 0;
+    let sumSosialSeverity = 0;
+    let sumKesehatanSeverity = 0;
+    let sumBisnisSeverity = 0;
+    let sumSastraSeverity = 0;
+
+    subtestsInfo.forEach(sub => {
+      const zNat = (sub.val - 500) / 105;
+      if (zNat < 1.0) {
+        let severity = 0;
+        if (zNat >= 0.0) {
+          // Z is between 0 and 1 (Score between 500 and 600)
+          severity = (1.0 - zNat) * 1.5;
+        } else {
+          // Z is below 0 (Score below 500) - much heavier nerf
+          severity = 1.5 + Math.abs(zNat) * 4.0;
+        }
+        sumTeknikSeverity += sub.wTeknik * severity;
+        sumSosialSeverity += sub.wSosial * severity;
+        sumKesehatanSeverity += sub.wKesehatan * severity;
+        sumBisnisSeverity += sub.wBisnis * severity;
+        sumSastraSeverity += sub.wSastra * severity;
+      }
+    });
+
+    const penaltyTeknik = 1.0 - Math.min(0.10, sumTeknikSeverity * 0.10);
+    const penaltySosial = 1.0 - Math.min(0.10, sumSosialSeverity * 0.10);
+    const penaltyKesehatan = 1.0 - Math.min(0.10, sumKesehatanSeverity * 0.10);
+    const penaltyBisnis = 1.0 - Math.min(0.10, sumBisnisSeverity * 0.10);
+    const penaltySastra = 1.0 - Math.min(0.10, sumSastraSeverity * 0.10);
+
+    const hasPenalty = (1.0 - penaltyTeknik) > 0.001 || 
+                       (1.0 - penaltySosial) > 0.001 || 
+                       (1.0 - penaltyKesehatan) > 0.001 || 
+                       (1.0 - penaltyBisnis) > 0.001 || 
+                       (1.0 - penaltySastra) > 0.001;
+
+    const scoreTeknik = rawTeknik * penaltyTeknik;
+    const scoreSosial = rawSosial * penaltySosial;
+    const scoreKesehatan = rawKesehatan * penaltyKesehatan;
+    const scoreBisnis = rawBisnis * penaltyBisnis;
+    const scoreSastra = rawSastra * penaltySastra;
+
+    const ppTeknik = getOsuPP(scoreTeknik);
+    const ppSosial = getOsuPP(scoreSosial);
+    const ppKesehatan = getOsuPP(scoreKesehatan);
+    const ppBisnis = getOsuPP(scoreBisnis);
+    const ppSastra = getOsuPP(scoreSastra);
+
+    const Rata_Rata_Berbobot = (scoreTeknik + scoreSosial + scoreKesehatan + scoreBisnis + scoreSastra) / 5;
+
+    const rawTopPlays = [
+      { id: "teknik", name: "Teknik", raw: rawTeknik, final: scoreTeknik, pp: ppTeknik, icon: "🛠️", color: "from-blue-500 to-cyan-400", desc: "Penalaran Matematika & Pengetahuan Kuantitatif" },
+      { id: "sosial", name: "Sosial", raw: rawSosial, final: scoreSosial, pp: ppSosial, icon: "📚", color: "from-amber-500 to-orange-400", desc: "Pemahaman Bacaan, Menulis & Literasi Indonesia" },
+      { id: "kesehatan", name: "Kesehatan", raw: rawKesehatan, final: scoreKesehatan, pp: ppKesehatan, icon: "🏥", color: "from-emerald-500 to-teal-400", desc: "Penalaran Umum & Literasi Bahasa Inggris" },
+      { id: "bisnis", name: "Bisnis", raw: rawBisnis, final: scoreBisnis, pp: ppBisnis, icon: "💼", color: "from-purple-500 to-indigo-400", desc: "Pengetahuan Kuantitatif & Penalaran Matematika" },
+      { id: "sastra", name: "Sastra", raw: rawSastra, final: scoreSastra, pp: ppSastra, icon: "🎭", color: "from-pink-500 to-rose-400", desc: "Literasi Bahasa Inggris & Pengetahuan Umum" },
+    ];
+
+    const topPlays = [...rawTopPlays].sort((a, b) => b.pp - a.pp);
+    const maxPP = Math.max(ppTeknik, ppSosial, ppKesehatan, ppBisnis, ppSastra);
+
+    let playerStatus = "6-Digit Hardstuck";
+    let statusColor = "text-slate-400 border-slate-500 bg-slate-500/10";
+    if (maxPP >= 1000) {
+      playerStatus = "God Play";
+      statusColor = "text-amber-400 border-amber-400/50 bg-amber-400/10 shadow-[0_0_15px_rgba(245,158,11,0.2)]";
+    } else if (maxPP >= 500) {
+      playerStatus = "Pro Play";
+      statusColor = "text-purple-400 border-purple-400/50 bg-purple-400/10 shadow-[0_0_12px_rgba(168,85,247,0.2)]";
+    } else if (maxPP >= 150) {
+      playerStatus = "Median Play";
+      statusColor = "text-blue-400 border-blue-400/50 bg-blue-400/10 shadow-[0_0_10px_rgba(59,130,246,0.2)]";
+    }
+
+    return (
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-6xl mx-auto space-y-8"
+      >
+        <div className="relative p-6 sm:p-8 rounded-3xl border border-white/10 bg-black/50 backdrop-blur-xl overflow-hidden shadow-2xl">
+          <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-pink-500/20 blur-3xl" />
+          <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-purple-500/20 blur-3xl" />
+          
+          <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 p-1 shadow-lg shadow-pink-500/20 active:scale-95 transition-transform">
+                <div className="w-full h-full rounded-xl bg-slate-950 flex flex-col items-center justify-center overflow-hidden relative">
+                  <Gamepad2 className="w-12 h-12 text-pink-400 animate-pulse" />
+                  <div className="absolute bottom-1 bg-black/60 text-[8px] font-black tracking-widest text-pink-300 px-1.5 py-0.5 rounded uppercase">
+                    LV.99
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center sm:text-left space-y-2">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                  <h2 className="text-3xl font-black tracking-tight text-white uppercase italic">
+                    osu! UTBK Profile Dashboard
+                  </h2>
+                  <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${statusColor}`}>
+                    {playerStatus}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-slate-400 leading-relaxed max-w-xl">
+                  Selamat datang di simulator integrasi performa akademik UTBK-SNBT terhadap sistem ranking lagu osu! PP. Geser nilai subtes di bawah dan pantau skor Top Plays kamu secara real-time!
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center md:items-end text-center md:text-right p-4 rounded-2xl bg-white/5 border border-white/5 min-w-[200px]">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-pink-400">Total Active Play PP</span>
+              <span className="text-5xl font-black text-white italic tracking-tighter drop-shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+                {Math.round(maxPP).toLocaleString('en-US')}
+                <span className="text-xl ml-1 text-pink-400 font-bold">pp</span>
+              </span>
+              <span className="text-[9px] font-bold text-slate-400 mt-1">
+                Berdasarkan Rumpun Jurusan Tertinggi
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md flex items-center justify-between shadow-lg relative group overflow-hidden">
+            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-all duration-500" />
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Rata-Rata Murni</span>
+              <h3 className="text-3xl font-black text-white font-mono">{Rata_Rata_Murni.toFixed(1)}</h3>
+              <p className="text-[10px] font-semibold text-slate-400">Arithmetic Mean 7 Subtes</p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+              <Activity className="w-6 h-6 animate-pulse" />
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md flex items-center justify-between shadow-lg relative group overflow-hidden">
+            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-all duration-500" />
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Peringkat Rata-Rata Asli</span>
+              <h3 className="text-3xl font-black text-white font-mono">
+                #{getGlobalRank(Rata_Rata_Murni).toLocaleString('en-US')}
+              </h3>
+              <p className="text-[10px] font-semibold text-slate-400">Peringkat Nasional (Jalur 2B μ=525, σ=80)</p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+              <Trophy className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md flex items-center justify-between shadow-lg relative group overflow-hidden">
+            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-pink-500/5 rounded-full blur-2xl group-hover:bg-pink-500/10 transition-all duration-500" />
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-pink-400">Rata-Rata Skor Berbobot</span>
+              <h3 className="text-3xl font-black text-white font-mono">{Rata_Rata_Berbobot.toFixed(1)}</h3>
+              <p className="text-[10px] font-semibold text-slate-400">Skor Jurusan Pasca-Penalti</p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400">
+              <Target className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
+        {hasPenalty && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-2xl border border-rose-500/30 bg-rose-950/20 backdrop-blur-md flex items-start gap-4 shadow-xl shadow-rose-950/10"
+          >
+            <div className="p-2 rounded-xl bg-rose-500/25 border border-rose-500/40 text-rose-400">
+              <ShieldAlert className="w-5 h-5 animate-bounce" />
+            </div>
+            <div className="space-y-1 flex-1">
+              <h4 className="text-sm font-black uppercase text-rose-400 tracking-wide">
+                TERDETEKSI PENALTI SUBTES DI BAWAH RERATA NASIONAL (Z-Score &lt; 1.0)
+              </h4>
+              <p className="text-xs font-bold text-slate-300 leading-relaxed">
+                Beberapa nilai subtes Anda memiliki nilai Z-Score nasional di bawah 1.0 (Skor &lt; 600) dengan dampak penalti jauh lebih berat untuk subtes di bawah 500 (Z-Score &lt; 0.0). Sistem secara dinamis memberikan penalti proporsional yang **mengutamakan subtes dengan bobot tinggi** pada tiap rumpun jurusan secara independen (maksimal potongan dibatasi aman hingga 10% agar tidak terlalu brutal).
+              </p>
+              <div className="text-[10px] font-mono text-rose-300/60 pt-1 flex flex-wrap gap-x-4">
+                <span>Rata murni: {Rata_Rata_Murni.toFixed(1)}</span>
+                <span>Terendah: {minSubInfo.label} ({minSubInfo.val})</span>
+                <span>Internal SD: {SD_Internal.toFixed(1)}</span>
+                <span>SD-Kriteria: Nasional (μ=500, σ=105)</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-6 p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-6">
+            <div className="border-b border-white/5 pb-4">
+              <h3 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <Target className="w-5 h-5 text-pink-500" />
+                7 SUBTES UTBK-SNBT SLIDERS
+              </h3>
+              <p className="text-[10px] font-bold text-slate-400 mt-1">
+                Tarik slider untuk mengubah skor subtes mandiri (275 - 1000)
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              {[
+                { label: "PU (Penalaran Umum)", val: utbkPU, setter: setUtbkPU, color: "accent-blue-500" },
+                { label: "PBM (Pemahaman Bacaan & Menulis)", val: utbkPBM, setter: setUtbkPBM, color: "accent-indigo-500" },
+                { label: "PPU (Pengetahuan & Pemahaman Umum)", val: utbkPPU, setter: setUtbkPPU, color: "accent-purple-500" },
+                { label: "PK (Pengetahuan Kuantitatif)", val: utbkPK, setter: setUtbkPK, color: "accent-emerald-500" },
+                { label: "Literasi Bahasa Indonesia", val: utbkLitIndo, setter: setUtbkLitIndo, color: "accent-amber-500" },
+                { label: "Literasi Bahasa Inggris", val: utbkLitIng, setter: setUtbkLitIng, color: "accent-rose-500" },
+                { label: "PM (Penalaran Matematika)", val: utbkPM, setter: setUtbkPM, color: "accent-teal-500" },
+              ].map((sub, index) => {
+                const subRank = getSubtestRank(sub.val);
+                return (
+                  <div key={index} className="space-y-1.5 p-3 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/5 transition-all">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-black text-slate-200 tracking-wide">{sub.label}</span>
+                      <span className="text-sm font-black text-white font-mono bg-white/10 px-2 py-0.5 rounded">
+                        {sub.val}
+                      </span>
+                    </div>
+                    <input 
+                      type="range"
+                      min={275}
+                      max={1000}
+                      value={sub.val}
+                      onChange={(e) => sub.setter(parseInt(e.target.value))}
+                      className="w-full cursor-pointer h-2 bg-slate-900 rounded-lg outline-none transition-all accent-pink-500"
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-[10px] font-medium text-slate-400/80">
+                        Peringkat Nasional: <span className="text-slate-300 font-bold">Peringkat #{subRank.toLocaleString('en-US')}</span>
+                      </p>
+                      <p className="text-[9px] font-mono text-slate-500">
+                        Z: {((sub.val - 500) / 105).toFixed(2)} (μ=500, σ=105)
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="lg:col-span-6 p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-6">
+            <div className="border-b border-white/5 pb-4">
+              <h3 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-pink-500 animate-pulse" />
+                TOP PP PLAYS LEADERBOARD
+              </h3>
+              <p className="text-[10px] font-bold text-slate-400 mt-1">
+                Daftar top play individu terurut murni berdasarkan pp tertinggi layaknya profil osu!
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {(() => {
+                const jurusansWeights: Record<string, { key: string; label: string; weight: number; score: number }[]> = {
+                  teknik: [
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.25, score: utbkPM },
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.20, score: utbkPK },
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.20, score: utbkPU },
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.15, score: utbkLitIng },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.10, score: utbkLitIndo },
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.05, score: utbkPBM },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.05, score: utbkPPU },
+                  ],
+                  sosial: [
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.25, score: utbkPBM },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.25, score: utbkLitIndo },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.15, score: utbkPPU },
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.15, score: utbkPU },
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.10, score: utbkLitIng },
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.05, score: utbkPM },
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.05, score: utbkPK },
+                  ],
+                  kesehatan: [
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.25, score: utbkPU },
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.25, score: utbkLitIng },
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.15, score: utbkPK },
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.15, score: utbkPM },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.10, score: utbkLitIndo },
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.05, score: utbkPBM },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.05, score: utbkPPU },
+                  ],
+                  bisnis: [
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.25, score: utbkPK },
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.25, score: utbkPM },
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.15, score: utbkLitIng },
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.15, score: utbkPU },
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.10, score: utbkPBM },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.05, score: utbkLitIndo },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.05, score: utbkPPU },
+                  ],
+                  sastra: [
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.30, score: utbkLitIng },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.25, score: utbkPPU },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.15, score: utbkLitIndo },
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.10, score: utbkPBM },
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.10, score: utbkPU },
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.05, score: utbkPM },
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.05, score: utbkPK },
+                  ],
+                };
+
+                const jurusansPenalties: Record<string, number> = {
+                  teknik: penaltyTeknik,
+                  sosial: penaltySosial,
+                  kesehatan: penaltyKesehatan,
+                  bisnis: penaltyBisnis,
+                  sastra: penaltySastra,
+                };
+
+                return topPlays.map((item, index) => {
+                  const globalRank = getGlobalRank(item.final);
+                  const weights = jurusansWeights[item.id] || [];
+                  const penaltyVal = jurusansPenalties[item.id] ?? 1.0;
+                  const isExpanded = !!expandedWeights[item.id];
+
+                  return (
+                    <motion.div 
+                      key={item.id}
+                      layoutId={`play-row-${item.id}`}
+                      onClick={() => setExpandedWeights(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
+                      className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all flex flex-col gap-3 relative overflow-hidden group shadow-md cursor-pointer select-none"
+                    >
+                      <div className="absolute inset-y-0 left-0 bg-white/[0.02] transition-all group-hover:bg-white/[0.04] pointer-events-none" style={{ width: `${(item.final / 1000) * 100}%` }} />
+                      
+                      <div className="flex items-center justify-between w-full relative z-10">
+                        <div className="flex items-center gap-4">
+                          <span className="text-lg font-black italic text-pink-400 font-mono w-6 text-center">
+                            #{index + 1}
+                          </span>
+                          
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-black text-white tracking-wide flex items-center gap-1.5">
+                                {item.icon} {item.name}
+                              </span>
+                              {hasPenalty && (
+                                <span className="text-[8px] font-black uppercase text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
+                                  -{Math.round((1 - (item.final / (item.raw || 1))) * 100)}% Penalti
+                                </span>
+                              )}
+                              <span className="text-[8px] font-black uppercase text-pink-300 bg-pink-500/10 px-1.5 py-0.5 rounded border border-pink-500/20 flex items-center gap-1">
+                                {isExpanded ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
+                                {isExpanded ? "Sembunyikan" : "Detail Bobot"}
+                              </span>
+                            </div>
+                            <p className="text-[10px] font-medium text-slate-400/90 leading-tight">
+                              {item.desc}
+                            </p>
+                            <div className="flex items-center gap-3 text-[10px] font-semibold text-slate-400 pt-0.5">
+                              <span>Raw: <strong className="text-slate-300 font-mono">{Math.round(item.raw)}</strong></span>
+                              <span>Akhir: <strong className="text-slate-300 font-mono">{Math.round(item.final)}</strong></span>
+                              <span>Rank: <strong className="text-indigo-400 font-mono">#{globalRank.toLocaleString('en-US')}</strong></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-3xl font-black text-pink-400 font-mono tracking-tight group-hover:scale-105 origin-right transition-transform block">
+                            {Math.round(item.pp)}
+                            <span className="text-xs ml-0.5 font-bold uppercase tracking-widest">pp</span>
+                          </span>
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block pt-0.5">
+                            {item.pp >= 1000 ? "ACC: 100%" : item.pp >= 500 ? "ACC: 99.5%" : item.pp >= 150 ? "ACC: 98.0%" : "ACC: 95.0%"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="relative z-10 border-t border-white/5 pt-3 mt-1 space-y-2 overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="text-[10px] font-black tracking-widest text-pink-400 uppercase mb-2">
+                              Breakdown Pembobotan Subtes ({item.name}):
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {weights.map((w, wIdx) => {
+                                const contribution = w.score * w.weight;
+                                const pct = Math.round(w.weight * 100);
+                                return (
+                                  <div key={wIdx} className="p-2 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between text-xs font-semibold">
+                                    <div className="space-y-0.5">
+                                      <div className="text-slate-200 text-[11px] font-bold">{w.label}</div>
+                                      <div className="text-slate-400 text-[9px] font-medium font-mono">
+                                        Skor: {w.score} × Bobot: {pct}%
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <span className="text-white font-mono font-bold">+{contribution.toFixed(1)}</span>
+                                      <span className="text-[9px] text-slate-400 block font-normal">Kontribusi</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            <div className="p-2.5 rounded-lg bg-pink-500/5 border border-pink-500/15 text-[10px] text-slate-300 leading-relaxed font-semibold">
+                              <span className="text-pink-400 font-bold uppercase mr-1">Formula Matematika:</span>
+                              <span>
+                                Skor Raw = Σ(Skor Subtes × Bobot) = <strong>{Math.round(item.raw)}</strong>
+                              </span>
+                              {penaltyVal < 0.999 && (
+                                <span className="block mt-0.5">
+                                  Terkena Penalti Jurusan: <strong className="text-rose-400 font-mono">-{Math.round((1 - penaltyVal) * 100)}%</strong> (Pengali: {penaltyVal.toFixed(3)}) → Skor Akhir = <strong>{Math.round(item.final)}</strong>
+                                </span>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                });
+              })()}
+            </div>
+
+            <div className="p-4 rounded-xl border border-white/5 bg-white/5 text-[10px] font-bold text-slate-400 leading-relaxed space-y-1">
+              <p className="text-white uppercase tracking-wider mb-1 text-xs">PIECEWISE PP METRIC FORMULA</p>
+              <p>• Skor &gt;= 700: <span className="text-pink-400 font-mono font-bold">500 + ((Skor - 700)/300) * 1500 pp</span> (max 2000 pp)</p>
+              <p>• Skor 500 - 699: <span className="text-pink-400 font-mono font-bold">100 + ((Skor - 500)/200) * 400 pp</span></p>
+              <p>• Skor 232 - 499: <span className="text-pink-400 font-mono font-bold">1 + ((Skor - 232)/268) * 99 pp</span></p>
+              <p>• Skor &lt; 232: <span className="text-pink-400 font-mono font-bold">1 pp</span></p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <div className="min-h-screen relative font-sans overflow-x-hidden transition-colors duration-1000" style={{ backgroundColor: activeTierVisual?.ui.dominantColor || '#f8fafc' }}>
       
@@ -1726,7 +2284,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             />
             
             {/* SVG Illustration Background */}
-            <DecorativeSVGBackground b={interpolationResult.benar} hex={activeTierVisual.ui.hexCode} />
+            <DecorativeSVGBackground b={viewMode === 'osu-pp-simulator' ? (osuInterpolationResult?.benar || 60) : (interpolationResult?.benar || 60)} hex={activeTierVisual.ui.hexCode} />
             
             {/* Integrated Astronaut Character Visual */}
             <AstronautVisual tierId={activeTierVisual.tierId} hex={activeTierVisual.ui.hexCode} />
@@ -1830,6 +2388,13 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
                 >
                   <Target className="w-4 h-4" />
                   {t.calculator}
+                </button>
+                <button
+                  onClick={() => setViewMode('osu-pp-simulator')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${viewMode === 'osu-pp-simulator' ? 'bg-pink-600 text-white shadow-lg shadow-pink-500/30' : (activeTierVisual ? 'text-pink-400 hover:text-pink-200' : 'text-pink-600 hover:bg-pink-50')}`}
+                >
+                  <Gamepad2 className="w-4 h-4 animate-bounce" />
+                  osu! PP Simulator
                 </button>
               </div>
 
@@ -2209,6 +2774,8 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
               </div>
             </div>
           </motion.div>
+        ) : viewMode === 'osu-pp-simulator' ? (
+          renderOsuSimulator()
         ) : (
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}

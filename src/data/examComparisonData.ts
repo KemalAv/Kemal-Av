@@ -49,8 +49,8 @@ export const INTERPOLATION_DATA: InterpolationPoint[] = [
   { benar: 130, mlbb: "Mythic Immortal (250-399★)", gd: "Top 699 Extreme Demon (10★)", irt: 750, rank: 1999, pp: 650, star: 8.5, elo: 2000, sat: 1550, jam: 1750, pct: 99.75, comp: 32768.0, sel: 30, iq: 130, univ: "FTTM - ITB / Kedokteran - UI", map: "Astral Divinity / Black Blizzard", psl: 6.5, asetBersih: 5000000, gaji: 35000, tinggi: 194.0 },
   { benar: 139, mlbb: "Mythic Immortal (250-399★)", gd: "Top 400 Extreme Demon (10★)", irt: 769, rank: 500, pp: 849, star: 8.9, elo: 2299, sat: 1589, jam: 2499, pct: 99.93, comp: 131071.0, sel: 49, iq: 134, univ: "FTTM - ITB / Kedokteran - UI", map: "Astral Divinity / Black Blizzard", psl: 6.99, asetBersih: 9999999, gaji: 74999, tinggi: 197.9 },
   { benar: 140, mlbb: "Mythic Immortal (400-799★)", gd: "Top 399 Extreme Demon (10★)", irt: 770, rank: 499, pp: 850, star: 9.0, elo: 2300, sat: 1590, jam: 2500, pct: 99.94, comp: 131072.0, sel: 50, iq: 135, univ: "ACCEPTED ALL", map: "Sonic Wave / Bloodlust", psl: 7.0, asetBersih: 10000000, gaji: 75000, tinggi: 198.0 },
-  { benar: 149, mlbb: "Mythic Immortal (400-799★)", gd: "Top 100 Extreme Demon (10★)", irt: 794, rank: 50, pp: 1099, star: 10.0, elo: 2500, sat: 1599, jam: 3000, pct: 99.98, comp: 4194303.0, sel: 100, iq: 145, univ: "ACCEPTED ALL", map: "Sonic Wave / Bloodlust", psl: 7.24, asetBersih: 49999999, gaji: 299999, tinggi: 202.9 },
-  { benar: 150, mlbb: "Mythic Immortal (800-1500★)", gd: "Top 99 Extreme Demon (10★)", irt: 795, rank: 49, pp: 1100, star: 10.0, elo: 2500, sat: 1600, jam: 3000, pct: 99.99, comp: 4194304.0, sel: 100, iq: 145, univ: "ACCEPTED ALL", map: "The Yangire / Slaughterhouse", psl: 7.25, asetBersih: 50000000, gaji: 300000, tinggi: 203.0 },
+  { benar: 149, mlbb: "Mythic Immortal (400-799★)", gd: "Top 100 Extreme Demon (10★)", irt: 794, rank: 50, pp: 1099, star: 10.0, elo: 2500, sat: 1599, jam: 3000, pct: 99.98, comp: 1048575.0, sel: 100, iq: 145, univ: "ACCEPTED ALL", map: "Sonic Wave / Bloodlust", psl: 7.24, asetBersih: 49999999, gaji: 299999, tinggi: 202.9 },
+  { benar: 150, mlbb: "Mythic Immortal (800-1500★)", gd: "Top 99 Extreme Demon (10★)", irt: 795, rank: 49, pp: 1100, star: 10.0, elo: 2500, sat: 1600, jam: 3000, pct: 99.99, comp: 1048576.0, sel: 100, iq: 145, univ: "ACCEPTED ALL", map: "The Yangire / Slaughterhouse", psl: 7.25, asetBersih: 50000000, gaji: 300000, tinggi: 203.0 },
   { benar: 160, mlbb: "Mythic Immortal (800-1500★)", gd: "Top 1 Extreme Demon (10★)", irt: 825, rank: 1, pp: 2000, star: 12.0, elo: 3000, sat: 1600, jam: 6000, pct: 100.00, comp: 33554432.0, sel: 500, iq: 160, univ: "ACCEPTED ALL", map: "The Yangire / Slaughterhouse", psl: 8.0, asetBersih: 2000000000, gaji: 15000000, tinggi: 218.5 }
 ];
 
@@ -93,7 +93,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
     sat: "1.600",
     playHour: "3.000-6.000",
     percentile: "99,99% - 100,00%",
-    compoundDifficulty: "4.194.304-33.554.432",
+    compoundDifficulty: "1.048.576-33.554.432",
     iq: "145-160",
     psl: "7.25-8 (Gigachad)",
     asetBersih: "$50.000.000 - $2.000.000.000",
@@ -115,7 +115,7 @@ export const EXAM_COMPARISON_DATA: ComparisonRow[] = [
     sat: "1.590-1.600",
     playHour: "2.500-3.000",
     percentile: "99,94% - 99,98%",
-    compoundDifficulty: "131.072-4.194.303",
+    compoundDifficulty: "131.072-1.048.575",
     iq: "135-145",
     psl: "7-7.24 (Gigachad)",
     asetBersih: "$10.000.000 - $49.999.999",

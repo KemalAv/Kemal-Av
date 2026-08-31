@@ -43,7 +43,7 @@ export const masterPlanData: MasterPlanData = {
       {
         title: "Plan D (Jalur Swasta Premium)",
         campus: "Daftar Telkom University / UDINUS",
-        strategy: "Pilihan 1: S1 Teknik Elektro (Tel-U), Pilihan 2: S1 Teknik Industri (Tel-U), Pilihan 3: S1 Sistem Informasi (Tel-U & UDINUS), Pilihan 4: S1 Manajemen Rekayasa Industri (Tel-U), Pilihan 5: S1 Teknik Logistik (Tel-U)",
+        strategy: "Pilihan 1: S1 Teknik Industri – Fokus pada efisiensi sistem dan manajemen operasional untuk otomatisasi alur barang serta stok di 3 franchise Bapak. Pilihan 2: S1 Sistem Informasi – Fokus pada digitalisasi data dan integrasi dasbor real-time untuk otomatisasi pemantauan penjualan di franchise Bapak.",
         perks: "Fasilitas kampus lengkap, kurikulum industri, akses koding/IT kuat."
       },
       {
