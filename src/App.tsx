@@ -23,6 +23,7 @@ import { MultipleChoiceInputArea } from './components/MultipleChoiceInputArea';
 import { MultipleChoiceArea } from './components/MultipleChoiceArea';
 import { QuranMiniApp } from './components/quran-miniapp/App';
 import { ExamComparison } from './components/ExamComparison';
+import { Snbt2030Simulator } from './components/Snbt2030Simulator';
 import { useLocalization } from './hooks/useLocalization';
 import { PracticeMode, PracticeView, Flashcard, MultipleChoiceQuestion, BlogPost } from './types';
 import { Icons } from './constants';

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { EXAM_COMPARISON_DATA, ComparisonRow, INTERPOLATION_DATA, InterpolationPoint } from '../data/examComparisonData';
 import { TIER_VISUAL_DATA, TierVisualInfo } from '../data/tierVisualData';
 import { PercentileBellCurve } from './PercentileBellCurve';
+import { Snbt2030Simulator } from './Snbt2030Simulator';
 import { 
   Trophy, 
   Search, 
@@ -159,6 +160,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   const [sortField, setSortField] = useState<keyof ComparisonRow>('percentile');
   const [isSortedAsc, setIsSortedAsc] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [osuSubTab, setOsuSubTab] = useState<'profile' | 'snbt2030'>('profile');
   const [chartType, setChartType] = useState<ChartType>('bar');
   const [calcLayoutMode, setCalcLayoutMode] = useState<CalcLayoutMode>('grid');
   const [calcActiveIndex, setCalcActiveIndex] = useState(0);
@@ -768,7 +770,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
   }, [viewMode, utbkPU, utbkPBM, utbkPPU, utbkPK, utbkLitIndo, utbkLitIng, utbkPM]);
 
   const activeTierVisual = useMemo(() => {
-    const source = viewMode === 'osu-pp-simulator' ? osuInterpolationResult : interpolationResult;
+    const source = (viewMode === 'osu-pp-simulator') ? osuInterpolationResult : interpolationResult;
     if (!source) return null;
     const iqValue = source.iq;
     
@@ -1905,9 +1907,37 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
         transition={{ duration: 0.5 }}
         className="max-w-6xl mx-auto space-y-8"
       >
-        <div className="relative p-6 sm:p-8 rounded-3xl border border-white/10 bg-black/50 backdrop-blur-xl overflow-hidden shadow-2xl">
-          <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-pink-500/20 blur-3xl" />
-          <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-purple-500/20 blur-3xl" />
+        {/* Sleek Sub-Tab Switcher inside osu! PP Simulator */}
+        <div className="flex items-center justify-center p-1.5 rounded-2xl bg-white/5 border border-white/10 max-w-md mx-auto">
+          <button
+            onClick={() => setOsuSubTab('profile')}
+            className={`flex-1 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+              osuSubTab === 'profile'
+                ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg shadow-pink-600/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Gamepad2 className="w-4 h-4" />
+            osu! PP Profile
+          </button>
+          <button
+            onClick={() => setOsuSubTab('snbt2030')}
+            className={`flex-1 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+              osuSubTab === 'snbt2030'
+                ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg shadow-pink-600/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <GraduationCap className="w-4 h-4" />
+            SNBT 2030 Simulator
+          </button>
+        </div>
+
+        {osuSubTab === 'profile' ? (
+          <>
+            <div className="relative p-6 sm:p-8 rounded-3xl border border-white/10 bg-black/50 backdrop-blur-xl overflow-hidden shadow-2xl">
+              <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-pink-500/20 blur-3xl" />
+              <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-purple-500/20 blur-3xl" />
           
           <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -2258,6 +2288,30 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             </div>
           </div>
         </div>
+          </>
+        ) : (
+          <Snbt2030Simulator 
+            initialScores={{
+              pu: utbkPU,
+              pbm: utbkPBM,
+              ppu: utbkPPU,
+              pk: utbkPK,
+              litIndo: utbkLitIndo,
+              litIng: utbkLitIng,
+              pm: utbkPM,
+            }}
+            onScoresChange={(scores) => {
+              setUtbkPU(scores.pu);
+              setUtbkPBM(scores.pbm);
+              setUtbkPPU(scores.ppu);
+              setUtbkPK(scores.pk);
+              setUtbkLitIndo(scores.litIndo);
+              setUtbkLitIng(scores.litIng);
+              setUtbkPM(scores.pm);
+            }}
+            activeTierHex={activeTierVisual?.ui.hexCode}
+          />
+        )}
       </motion.div>
     );
   };
@@ -2284,7 +2338,7 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             />
             
             {/* SVG Illustration Background */}
-            <DecorativeSVGBackground b={viewMode === 'osu-pp-simulator' ? (osuInterpolationResult?.benar || 60) : (interpolationResult?.benar || 60)} hex={activeTierVisual.ui.hexCode} />
+            <DecorativeSVGBackground b={(viewMode === 'osu-pp-simulator') ? (osuInterpolationResult?.benar || 60) : (interpolationResult?.benar || 60)} hex={activeTierVisual.ui.hexCode} />
             
             {/* Integrated Astronaut Character Visual */}
             <AstronautVisual tierId={activeTierVisual.tierId} hex={activeTierVisual.ui.hexCode} />
