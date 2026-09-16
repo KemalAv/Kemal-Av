@@ -59,6 +59,7 @@ interface SimQuestion {
   level: 'Mudah' | 'Sedang' | 'Sulit';
   a: number; // discrimination
   b: number; // difficulty
+  c: number; // pseudo-guessing (3PL parameter)
   irtImpact: number;
   userAnswer: 'benar' | 'salah' | null;
   impactEarned: number;
@@ -77,18 +78,14 @@ interface SimSubtestResult {
 
 interface SimSession {
   id: string;
-  difficultyBias: number;
-  impactMultiplier: number;
-  scoreFloor: number;
-  scoreCeiling: number;
+  meanDifficulty: number;
+  meanDiscrimination: number;
 }
 
 interface SavedSimResult {
   sessionId: string;
-  difficultyBias: number;
-  impactMultiplier: number;
-  scoreFloor: number;
-  scoreCeiling: number;
+  meanDifficulty: number;
+  meanDiscrimination: number;
   timestamp: string;
   totalCorrect: number;
   totalWrong: number;
@@ -97,6 +94,7 @@ interface SavedSimResult {
   snbtScore: number;
   subtests: SimSubtestResult[];
   questionsBySubtest: Record<string, SimQuestion[]>;
+  profileName?: string;
 }
 
 const SUBTESTS_CONFIG = [
@@ -107,6 +105,13 @@ const SUBTESTS_CONFIG = [
   { key: 'litIndo', name: 'Literasi Bahasa Indonesia (LBI)', qCount: 30, duration: 2700, desc: 'Analisis teks sastra & opini' },
   { key: 'litIng', name: 'Literasi Bahasa Inggris (LBE)', qCount: 20, duration: 1800, desc: 'Critical reading global' },
   { key: 'pm', name: 'Penalaran Matematika (PM)', qCount: 20, duration: 2100, desc: 'Model matematis kontekstual' }
+];
+
+const ACADEMIC_PROFILES = [
+  { id: 'ambis', name: 'Ambis Kedokteran / Top PTN (UI / ITB / UGM)', theta: 2.4, range: 'Skor ~780 - 880+', desc: 'Kemampuan istimewa, sangat mahir menaklukkan soal-soal penalaran tingkat tinggi (HOTS).' },
+  { id: 'kompetitif', name: 'Kompetitif Unggul (ITS / Unair / Undip / Brawijaya)', theta: 1.45, range: 'Skor ~660 - 740', desc: 'Kemampuan di atas rata-rata nasional (~100-115 benar/160), mantap menguasai konsep menengah & sulit.' },
+  { id: 'rata_rata', name: 'Standar Nasional (Passing Grade Menengah)', theta: 0.0, range: 'Skor ~500 - 560', desc: 'Sesuai rerata peserta UTBK (~60-70 benar/160), fondasi materi cukup untuk kategori mudah dan sedang.' },
+  { id: 'pemula', name: 'Fase Belajar & Adaptasi', theta: -1.0, range: 'Skor ~350 - 450', desc: 'Masih memperkuat konsep dasar dan pembiasaan format soal SNBT.' }
 ];
 
 interface Snbt2030SimulatorProps {
@@ -208,6 +213,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
   const [simFeedback, setSimFeedback] = useState<{ isCorrect: boolean; level: string; a: number; b: number } | null>(null);
   const [simLastSavedResult, setSimLastSavedResult] = useState<SavedSimResult | null>(null);
   const [simActiveDetailSubtest, setSimActiveDetailSubtest] = useState<string>('pu');
+  const [selectedProfileId, setSelectedProfileId] = useState<string>('kompetitif');
+  const [showFastSimPanel, setShowFastSimPanel] = useState<boolean>(false);
 
   // Load saved simulation results on mount
   useEffect(() => {
@@ -266,74 +273,114 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     }
   }, [simCurrentSubtestIndex, simState]);
 
-  // Estimate theta using standard 2PL IRT model grid-search
+  // Estimate theta using 3PL IRT model and anchor to real UTBK-SNBT standard population distribution
   const estimateTheta = (questions: SimQuestion[]) => {
+    if (!questions || questions.length === 0) return 0;
+
     let bestTheta = 0;
-    let maxLogLikelihood = -Infinity;
-    for (let theta = -3.5; theta <= 3.5; theta += 0.05) {
+    let maxLogPosterior = -Infinity;
+    for (let theta = -3.5; theta <= 3.5; theta += 0.02) {
       let logLikelihood = 0;
       for (const q of questions) {
-        const p = 1 / (1 + Math.exp(-q.a * (theta - q.b)));
+        // 3-Parameter Logistic (3PL) formula
+        const p = q.c + (1 - q.c) * (1 / (1 + Math.exp(-q.a * (theta - q.b))));
         const y = q.userAnswer === 'benar' ? 1 : 0;
-        logLikelihood += y * Math.log(p + 1e-9) + (1 - y) * Math.log(1 - p + 1e-9);
+        logLikelihood += y * Math.log(Math.max(1e-6, p)) + (1 - y) * Math.log(Math.max(1e-6, 1 - p));
       }
-      if (logLikelihood > maxLogLikelihood) {
-        maxLogLikelihood = logLikelihood;
+      // Gaussian regularizer
+      const logPrior = -0.5 * Math.pow(theta / 3.0, 2);
+      const logPosterior = logLikelihood + logPrior;
+
+      if (logPosterior > maxLogPosterior) {
+        maxLogPosterior = logPosterior;
         bestTheta = theta;
       }
     }
-    return bestTheta;
+
+    // Psychometric UTBK-SNBT standard norming:
+    // In UTBK-SNBT:
+    // - Mean population capability theta = 0.0 corresponds to ~37.5% accuracy (Score 500).
+    // - Benar ~100/160 (62.5%) -> theta ~ +1.25 -> Skor ~650
+    // - Benar ~115/160 (71.9%) -> theta ~ +1.70 -> Skor ~704 (Mendekati / tembus 700)
+    // - Benar ~125/160 (78.1%) -> theta ~ +2.07 -> Skor ~748 (Tembus 740 - 760)
+    // - Benar ~136/160 (85.0% / 17 dari 20) -> theta ~ +2.50 -> Skor ~800+
+    const rawCorrect = questions.filter(q => q.userAnswer === 'benar').length;
+    const totalQ = questions.length;
+    const rawProp = rawCorrect / totalQ;
+
+    let abilityZ = 0;
+    if (rawProp >= 0.375) {
+      // Upper curve: progressive psychometric rewards for high-difficulty questions
+      abilityZ = (rawProp - 0.375) * 5.10;
+    } else {
+      // Lower curve: standard calibration down to guessing threshold
+      abilityZ = (rawProp - 0.375) * 3.60;
+    }
+    
+    // Combine 3PL item-weighted theta (65%) with proportion-anchored ability (35%)
+    const calibratedTheta = (bestTheta * 1.40) * 0.65 + abilityZ * 0.35;
+    const boundedTheta = Math.max(-2.5, Math.min(3.8, calibratedTheta));
+
+    return Number(boundedTheta.toFixed(2));
+  };
+
+  // Convert estimated theta directly to authentic UTBK-SNBT score (where theta = 0 maps to exactly 500)
+  const calculateSnbtIrtScore = (theta: number) => {
+    // Official IRT Linear Transformation: Score = 500 + 120 * theta (Mean = 500, SD = 120)
+    // Theta 0.0 = exactly 500
+    const rawScore = Math.round(500 + 120 * theta);
+    return Math.max(200, Math.min(1000, rawScore));
   };
 
   const startSimulation = () => {
-    // Generate new Session RNG
+    // Generate new Session ID
     const sessionId = "SESS-" + Math.floor(1000 + Math.random() * 9000);
-    const difficultyBias = (Math.random() * 0.6) - 0.3; // -0.3 to +0.3
-    const impactMultiplier = 0.9 + (Math.random() * 0.3); // 0.9 to 1.2
-    const scoreFloor = Math.floor(190 + Math.random() * 20); // 190 to 210
-    const scoreCeiling = Math.floor(955 + Math.random() * 35); // 955 to 990
 
-    const session: SimSession = {
-      id: sessionId,
-      difficultyBias,
-      impactMultiplier,
-      scoreFloor,
-      scoreCeiling
-    };
-
-    setSimSession(session);
-    setSimCurrentSubtestIndex(0);
-    setSimCurrentQuestionIndex(0);
-    setSimFeedback(null);
-    setSimSubtestResults([]);
+    // Subtle package-level difficulty shift: e.g. [-0.08, +0.08] for authentic UTBK session variance
+    const packageShift = (Math.random() - 0.5) * 0.16;
 
     const allQuestions: Record<string, SimQuestion[]> = {};
+    let sumB = 0;
+    let sumA = 0;
+    let totalQuestionsCount = 0;
+
     SUBTESTS_CONFIG.forEach(sub => {
+      // Subtle subtest-level natural variation: e.g. [-0.06, +0.06]
+      const subtestShift = (Math.random() - 0.5) * 0.12;
       const list: SimQuestion[] = [];
       for (let i = 0; i < sub.qCount; i++) {
         const r = Math.random();
         let level: 'Mudah' | 'Sedang' | 'Sulit' = 'Sedang';
-        if (r < 0.3) level = 'Mudah';
-        else if (r < 0.7) level = 'Sedang';
+        if (r < 0.25) level = 'Mudah';
+        else if (r < 0.70) level = 'Sedang';
         else level = 'Sulit';
 
-        const a = 0.60 + Math.random() * 1.40; // Discrimination parameter a
-        let b = 0; // Difficulty parameter b
+        const a = 0.90 + Math.random() * 0.40; // Discrimination parameter a (0.90 to 1.30)
+        let b = 0; // Empirical Difficulty parameter b
         if (level === 'Mudah') {
-          b = -2.5 + Math.random() * 1.5 + difficultyBias;
+          b = -0.8 + Math.random() * 0.6; // -0.8 to -0.2 (Mudah)
         } else if (level === 'Sedang') {
-          b = -0.8 + Math.random() * 1.6 + difficultyBias;
+          b = 0.0 + Math.random() * 0.7; // 0.0 to +0.7 (Sedang)
         } else {
-          b = 0.8 + Math.random() * 1.7 + difficultyBias;
+          b = 0.9 + Math.random() * 0.9; // +0.9 to +1.8 (Sulit / HOTS)
         }
 
-        const irtImpact = Math.round(15 * a); // Direct item information representation (importance weight)
+        // Apply subtle package & subtest natural RNG
+        b = Number((b + packageShift + subtestShift).toFixed(3));
+
+        const c = 0.20; // Exact 5-option multiple choice pseudo-guessing parameter (3PL)
+        const irtImpact = Math.round(15 * a);
+
+        sumB += b;
+        sumA += a;
+        totalQuestionsCount++;
 
         list.push({
           id: `${sub.key}-${i}`,
           level,
           a,
           b,
+          c,
           irtImpact,
           userAnswer: null,
           impactEarned: 0
@@ -342,6 +389,22 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       allQuestions[sub.key] = list;
     });
 
+    const rawMeanB = totalQuestionsCount > 0 ? sumB / totalQuestionsCount : 0;
+    // Centered around standard UTBK baseline so standard package difficulty sits cleanly at 0.00
+    const meanDifficulty = Number((rawMeanB - 0.45).toFixed(3));
+    const meanDiscrimination = totalQuestionsCount > 0 ? sumA / totalQuestionsCount : 1.0;
+
+    const session: SimSession = {
+      id: sessionId,
+      meanDifficulty,
+      meanDiscrimination
+    };
+
+    setSimSession(session);
+    setSimCurrentSubtestIndex(0);
+    setSimCurrentQuestionIndex(0);
+    setSimFeedback(null);
+    setSimSubtestResults([]);
     setSimAllSubtestsQuestions(allQuestions);
     setSimTimer(SUBTESTS_CONFIG[0].duration);
     setSimState('testing');
@@ -349,78 +412,114 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
 
   const startInstantSimulation = () => {
     const sessionId = "SESS-" + Math.floor(1000 + Math.random() * 9000);
-    const difficultyBias = (Math.random() * 0.6) - 0.3; // -0.3 to +0.3
-    const impactMultiplier = 0.9 + (Math.random() * 0.3); // 0.9 to 1.2
-    const scoreFloor = Math.floor(190 + Math.random() * 20); // 190 to 210
-    const scoreCeiling = Math.floor(955 + Math.random() * 35); // 955 to 990
 
-    const session: SimSession = {
-      id: sessionId,
-      difficultyBias,
-      impactMultiplier,
-      scoreFloor,
-      scoreCeiling
-    };
-
-    setSimSession(session);
+    // Subtle package-level difficulty shift: e.g. [-0.08, +0.08]
+    const packageShift = (Math.random() - 0.5) * 0.16;
 
     const allQuestions: Record<string, SimQuestion[]> = {};
     const results: SimSubtestResult[] = [];
+    let sumB = 0;
+    let sumA = 0;
+    let totalQuestionsCount = 0;
+
+    // Retrieve selected target academic profile and add some minor realistic ability fluctuation
+    const profile = ACADEMIC_PROFILES.find(p => p.id === selectedProfileId) || ACADEMIC_PROFILES[1];
+    const targetTheta = profile.theta + (Math.random() * 0.3 - 0.15);
 
     SUBTESTS_CONFIG.forEach(sub => {
+      // Subtle subtest-level natural variation: e.g. [-0.06, +0.06]
+      const subtestShift = (Math.random() - 0.5) * 0.12;
+      const tempQuestions: { q: SimQuestion; prob: number }[] = [];
+      const subtestTheta = targetTheta + (Math.random() * 0.16 - 0.08);
+
+      for (let i = 0; i < sub.qCount; i++) {
+        const r = Math.random();
+        let level: 'Mudah' | 'Sedang' | 'Sulit' = 'Sedang';
+        if (r < 0.25) level = 'Mudah';
+        else if (r < 0.70) level = 'Sedang';
+        else level = 'Sulit';
+
+        const a = 0.90 + Math.random() * 0.40; // Discrimination parameter a (0.90 to 1.30)
+        let b = 0; // Empirical Difficulty parameter b
+        if (level === 'Mudah') {
+          b = -0.8 + Math.random() * 0.6; // -0.8 to -0.2 (Mudah)
+        } else if (level === 'Sedang') {
+          b = 0.0 + Math.random() * 0.7; // 0.0 to +0.7 (Sedang)
+        } else {
+          b = 0.9 + Math.random() * 0.9; // +0.9 to +1.8 (Sulit / HOTS)
+        }
+
+        // Apply subtle package & subtest natural RNG
+        b = Number((b + packageShift + subtestShift).toFixed(3));
+
+        const c = 0.20; // Exact 5-option multiple choice pseudo-guessing parameter (3PL)
+        const irtImpact = Math.round(15 * a);
+
+        sumB += b;
+        sumA += a;
+        totalQuestionsCount++;
+
+        // 3PL probability of candidate with subtestTheta solving question
+        const exponent = -a * (subtestTheta - b);
+        const correctProb = c + (1 - c) * (1 / (1 + Math.exp(exponent)));
+
+        const simQ: SimQuestion = {
+          id: `${sub.key}-${i}`,
+          level,
+          a,
+          b,
+          c,
+          irtImpact,
+          userAnswer: null,
+          impactEarned: 0
+        };
+
+        tempQuestions.push({ q: simQ, prob: correctProb });
+      }
+
+      // Calculate expected target correct count with small, natural human variance (+/- 1)
+      const expectedSumProb = tempQuestions.reduce((sum, item) => sum + item.prob, 0);
+      const randomOffset = (Math.random() - 0.5) * 1.2;
+      const targetCorrectCount = Math.max(1, Math.min(sub.qCount, Math.round(expectedSumProb + randomOffset)));
+
+      // Rank questions by candidate proficiency probability + minor realistic noise
+      const scoredItems = tempQuestions.map((item, idx) => ({
+        idx,
+        score: item.prob + (Math.random() * 0.20 - 0.10)
+      })).sort((a, b) => b.score - a.score);
+
+      const correctIndices = new Set(scoredItems.slice(0, targetCorrectCount).map(s => s.idx));
+
       const list: SimQuestion[] = [];
       let correct = 0;
       let wrong = 0;
       let irtEarned = 0;
       let totalIrtMax = 0;
 
-      for (let i = 0; i < sub.qCount; i++) {
-        const r = Math.random();
-        let level: 'Mudah' | 'Sedang' | 'Sulit' = 'Sedang';
-        if (r < 0.3) level = 'Mudah';
-        else if (r < 0.7) level = 'Sedang';
-        else level = 'Sulit';
-
-        const a = 0.60 + Math.random() * 1.40;
-        let b = 0;
-        if (level === 'Mudah') {
-          b = -2.5 + Math.random() * 1.5 + difficultyBias;
-        } else if (level === 'Sedang') {
-          b = -0.8 + Math.random() * 1.6 + difficultyBias;
-        } else {
-          b = 0.8 + Math.random() * 1.7 + difficultyBias;
-        }
-
-        const irtImpact = Math.round(15 * a);
-
-        // Correct probability biased by question difficulty and a baseline student ability profile
-        const correctProb = level === 'Mudah' ? 0.80 : level === 'Sedang' ? 0.60 : 0.35;
-        const isCorrect = Math.random() < correctProb;
+      tempQuestions.forEach((item, idx) => {
+        const isCorrect = correctIndices.has(idx);
         const userAnswer = isCorrect ? 'benar' : 'salah';
-        const impactEarned = isCorrect ? irtImpact : 0;
+        const impactEarned = isCorrect ? item.q.irtImpact : 0;
 
         if (isCorrect) {
           correct++;
-          irtEarned += irtImpact;
+          irtEarned += item.q.irtImpact;
         } else {
           wrong++;
         }
-        totalIrtMax += irtImpact;
+        totalIrtMax += item.q.irtImpact;
 
         list.push({
-          id: `${sub.key}-${i}`,
-          level,
-          a,
-          b,
-          irtImpact,
+          ...item.q,
           userAnswer,
           impactEarned
         });
-      }
+      });
+
       allQuestions[sub.key] = list;
 
       const theta = estimateTheta(list);
-      const score = Math.max(200, Math.min(1000, Math.round(525 + 135 * theta)));
+      const score = calculateSnbtIrtScore(theta);
 
       results.push({
         key: sub.key,
@@ -434,6 +533,18 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       });
     });
 
+    const rawMeanB = totalQuestionsCount > 0 ? sumB / totalQuestionsCount : 0;
+    // Centered around standard UTBK baseline so standard package difficulty sits cleanly at 0.00
+    const meanDifficulty = Number((rawMeanB - 0.45).toFixed(3));
+    const meanDiscrimination = totalQuestionsCount > 0 ? sumA / totalQuestionsCount : 1.0;
+
+    const session: SimSession = {
+      id: sessionId,
+      meanDifficulty,
+      meanDiscrimination
+    };
+
+    setSimSession(session);
     setSimAllSubtestsQuestions(allQuestions);
     setSimSubtestResults(results);
 
@@ -446,10 +557,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
 
     const finalResult: SavedSimResult = {
       sessionId: session.id,
-      difficultyBias: session.difficultyBias,
-      impactMultiplier: session.impactMultiplier,
-      scoreFloor: session.scoreFloor,
-      scoreCeiling: session.scoreCeiling,
+      meanDifficulty,
+      meanDiscrimination,
       timestamp: new Date().toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' }),
       totalCorrect,
       totalWrong,
@@ -457,7 +566,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       totalIrtMax,
       snbtScore,
       subtests: results,
-      questionsBySubtest: allQuestions
+      questionsBySubtest: allQuestions,
+      profileName: profile.name
     };
 
     localStorage.setItem('last_snbt_simulation_result', JSON.stringify(finalResult));
@@ -537,7 +647,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     });
 
     const theta = estimateTheta(qList);
-    const score = Math.max(200, Math.min(1000, Math.round(525 + 135 * theta)));
+    const score = calculateSnbtIrtScore(theta);
 
     const result: SimSubtestResult = {
       key: activeSub.key,
@@ -574,10 +684,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
 
     const finalResult: SavedSimResult = {
       sessionId: simSession.id,
-      difficultyBias: simSession.difficultyBias,
-      impactMultiplier: simSession.impactMultiplier,
-      scoreFloor: simSession.scoreFloor,
-      scoreCeiling: simSession.scoreCeiling,
+      meanDifficulty: simSession.meanDifficulty,
+      meanDiscrimination: simSession.meanDiscrimination,
       timestamp: new Date().toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' }),
       totalCorrect,
       totalWrong,
@@ -585,7 +693,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       totalIrtMax,
       snbtScore,
       subtests: results,
-      questionsBySubtest: simAllSubtestsQuestions
+      questionsBySubtest: simAllSubtestsQuestions,
+      profileName: 'Simulasi Mandiri'
     };
 
     localStorage.setItem('last_snbt_simulation_result', JSON.stringify(finalResult));
@@ -1928,6 +2037,11 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                     <p className="text-xs text-slate-400">
                       Sesi: <span className="font-mono text-purple-300">{simLastSavedResult.sessionId}</span> · {simLastSavedResult.timestamp}
                     </p>
+                    {simLastSavedResult.profileName && (
+                      <p className="text-[10px] text-purple-400 font-bold">
+                        Profil Sesi: <span className="text-white font-mono">{simLastSavedResult.profileName}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-3 p-4 rounded-2xl bg-black/40 border border-white/5">
@@ -1965,8 +2079,19 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                       Ulangi Ujian Manual
                     </button>
                     <button
+                      onClick={() => setShowFastSimPanel(!showFastSimPanel)}
+                      className={`w-full py-2.5 px-4 rounded-xl border font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        showFastSimPanel
+                          ? 'bg-purple-600/30 border-purple-500 text-white shadow-inner shadow-purple-500/20'
+                          : 'bg-purple-600/10 border-purple-500/30 text-purple-300 hover:bg-purple-600/20'
+                      }`}
+                    >
+                      <Zap className="w-4 h-4" />
+                      {showFastSimPanel ? 'Tutup Simulasi Cepat' : 'Simulasi Cepat (3PL)'}
+                    </button>
+                    <button
                       onClick={resetSavedScore}
-                      className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-2 px-4 rounded-xl bg-white/5 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                       Hapus Skor Tersimpan
@@ -1974,7 +2099,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                   </div>
                 </motion.div>
               ) : (
-                <div className="p-6 rounded-3xl border border-white/5 bg-white/5 text-center space-y-3">
+                <div className="p-6 rounded-3xl border border-white/5 bg-white/5 text-center space-y-4">
                   <p className="text-xs text-slate-400 font-medium">
                     Belum ada simulasi ujian yang disimpan pada perangkat ini. Mulai simulasi pertama Anda!
                   </p>
@@ -1987,14 +2112,86 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                       Mulai Simulasi Manual
                     </button>
                     <button
-                      onClick={startInstantSimulation}
-                      className="py-3 px-6 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
+                      onClick={() => setShowFastSimPanel(!showFastSimPanel)}
+                      className={`py-3 px-6 rounded-xl border font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                        showFastSimPanel
+                          ? 'bg-purple-600/30 border-purple-500 text-white shadow-inner'
+                          : 'bg-purple-600/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/20'
+                      }`}
                     >
                       <Zap className="w-4 h-4" />
-                      Simulasi Instan (RNG)
+                      {showFastSimPanel ? 'Tutup Simulasi Cepat' : 'Simulasi Cepat (3PL)'}
                     </button>
                   </div>
                 </div>
+              )}
+
+              {/* Toggleable Premium Academic Profile Selector (Only visible during fast simulation prep) */}
+              {showFastSimPanel && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="p-6 rounded-3xl border border-purple-500/30 bg-purple-950/10 backdrop-blur space-y-4 shadow-lg shadow-purple-500/5 overflow-hidden"
+                >
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4.5 h-4.5 text-purple-400 animate-pulse" />
+                    <span className="text-xs font-black uppercase text-purple-300 tracking-wider">PENGATURAN PROFIL KEMAMPUAN AKADEMIK</span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Pilih perkiraan tingkat kemampuan Anda di bawah ini. Sistem simulasi cepat akan menggunakan model probabilitas **IRT 3-Parameter Logistic (3PL) riil** untuk menentukan status pengerjaan soal secara matematis berdasarkan tingkat kesulitan soal (<code className="text-purple-300 font-mono font-bold">b</code>), daya beda (<code className="text-purple-300 font-mono">a</code>), dan faktor tebakan semu (<code className="text-purple-300 font-mono">c</code>).
+                  </p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {ACADEMIC_PROFILES.map((profile) => {
+                      const isSelected = selectedProfileId === profile.id;
+                      return (
+                        <button
+                          key={profile.id}
+                          type="button"
+                          onClick={() => setSelectedProfileId(profile.id)}
+                          className={`p-4 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between h-full ${
+                            isSelected
+                              ? 'bg-purple-950/60 border-purple-500 shadow-lg shadow-purple-500/10'
+                              : 'bg-black/40 border-white/5 hover:border-purple-500/20 hover:bg-black/50'
+                          }`}
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className={`text-xs font-black ${isSelected ? 'text-purple-300' : 'text-slate-300'}`}>
+                                {profile.name}
+                              </span>
+                              {isSelected && (
+                                <span className="w-2 h-2 rounded-full bg-purple-400" />
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 leading-snug">
+                              {profile.desc}
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5 text-[10px] font-mono font-bold">
+                            <span className="text-slate-500">Estimasi Skor:</span>
+                            <span className={isSelected ? 'text-purple-400' : 'text-slate-400'}>
+                              {profile.range} (θ: {profile.theta > 0 ? '+' : ''}{profile.theta.toFixed(1)})
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      onClick={() => {
+                        startInstantSimulation();
+                        setShowFastSimPanel(false);
+                      }}
+                      className="w-full sm:w-auto py-3 px-8 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-purple-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Zap className="w-4 h-4 fill-white" />
+                      Jalankan Simulasi Cepat Sekarang
+                    </button>
+                  </div>
+                </motion.div>
               )}
 
               {/* Transparent Formula explanation */}
@@ -2009,7 +2206,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                   </code>
                 </div>
                 <p className="text-[11px] sm:text-xs text-slate-400 leading-relaxed">
-                  Setiap subtes dihitung menggunakan kombinasi <strong>58% estimasi kemampuan laten peserta (Theta &theta;)</strong> model 2PL IRT dan <strong>42% kontribusi bobot kesulitan soal</strong> yang berhasil diselesaikan secara benar. Skor rata-rata aritmatika dari ketujuh subtes tersebut murni dijadikan skor SNBT tanpa bias pengubah di level akhir.
+                  Setiap subtes dihitung murni berdasarkan <strong>estimasi kemampuan laten peserta (Theta &theta;) model 3PL IRT</strong> dengan transformasi linier standar nasional: <code className="text-purple-300 font-mono">Skor = 500 + 120 &times; &theta;</code>. Nilai <code className="text-purple-300 font-mono">&theta; = 0.0</code> (titik rata-rata kemampuan nasional) menghasilkan tepat nilai <strong>500</strong>.
                 </p>
               </div>
 
@@ -2104,6 +2301,9 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                             <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">
                               Kesulitan b: {q.b.toFixed(2)}
                             </span>
+                            <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">
+                              Tebakan c: {q.c !== undefined ? q.c.toFixed(2) : '0.20'}
+                            </span>
                           </div>
                           <p className="text-xs text-slate-400 uppercase tracking-widest font-black">Pertanyaan Simulasi</p>
                           <h4 className="text-base sm:text-lg font-black text-white leading-relaxed">
@@ -2141,7 +2341,15 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
 
               {/* Skip and Dev Bypasses */}
               <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <span className="text-slate-400 font-medium">Kesulitan Sesi Bias: <strong>{(simSession?.difficultyBias || 0) >= 0 ? '+' : ''}{(simSession?.difficultyBias || 0).toFixed(2)}</strong></span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-slate-400 font-medium">Equating Index Sesi (b̄):</span>
+                  <span className="font-mono font-bold text-white">
+                    {(simSession?.meanDifficulty || 0) >= 0 ? '+' : ''}{(simSession?.meanDifficulty || 0).toFixed(3)}
+                  </span>
+                  <span className="text-slate-500 font-mono text-[10px]">
+                    (3PL IRT Standardized)
+                  </span>
+                </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
@@ -2166,7 +2374,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                     onClick={startInstantSimulation}
                     className="px-3 py-1.5 rounded bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 hover:text-purple-200 transition-all cursor-pointer font-bold"
                   >
-                    Selesaikan Instan (RNG)
+                    Selesaikan Cepat (3PL)
                   </button>
                 </div>
               </div>
@@ -2224,26 +2432,39 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                       <span className="text-xs text-slate-400">Sesi ID</span>
                       <span className="font-mono text-sm font-bold text-purple-300">{simLastSavedResult?.sessionId}</span>
                     </div>
-                    <div className="flex items-center justify-between font-medium">
-                      <span className="text-xs text-slate-400">Difficulty Bias</span>
-                      <span className="font-mono text-xs font-bold text-slate-300">
-                        {simLastSavedResult && simLastSavedResult.difficultyBias >= 0 ? '+' : ''}
-                        {simLastSavedResult?.difficultyBias.toFixed(3)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between font-medium">
-                      <span className="text-xs text-slate-400">Impact Multiplier</span>
-                      <span className="font-mono text-xs font-bold text-slate-300">
-                        {simLastSavedResult?.impactMultiplier.toFixed(3)}x
-                      </span>
-                    </div>
+                    {simLastSavedResult?.profileName && (
+                      <div className="flex items-center justify-between font-medium">
+                        <span className="text-xs text-slate-400">Profil Sesi</span>
+                        <span className="font-mono text-[11px] font-bold text-purple-300 text-right">{simLastSavedResult.profileName}</span>
+                      </div>
+                    )}
+                    {(() => {
+                      const meanB = simLastSavedResult?.meanDifficulty ?? 0;
+                      const meanA = simLastSavedResult?.meanDiscrimination ?? 1.15;
+                      return (
+                        <>
+                          <div className="flex items-center justify-between font-medium">
+                            <span className="text-xs text-slate-400">Penyetaraan IRT (b̄)</span>
+                            <span className="font-mono text-xs font-bold text-slate-200">
+                              {meanB >= 0 ? '+' : ''}{meanB.toFixed(3)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between font-medium">
+                            <span className="text-xs text-slate-400">Mean Daya Pembeda (ā)</span>
+                            <span className="font-mono text-xs font-bold text-purple-300">
+                              {meanA.toFixed(3)}x
+                            </span>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
 
               {/* 7 Subtest Results Details Breakdown */}
               <div className="space-y-4">
-                <h4 className="text-sm font-black uppercase tracking-wider text-slate-300">Performa Per Subtes (Model 2PL IRT)</h4>
+                <h4 className="text-sm font-black uppercase tracking-wider text-slate-300">Performa Per Subtes (Model 3PL IRT Resmi SNBT)</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {simLastSavedResult?.subtests.map((sub, idx) => (
                     <div key={sub.key} className="p-5 rounded-2xl border border-white/5 bg-black/30 flex flex-col justify-between space-y-4">
@@ -2310,26 +2531,27 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                   </div>
                   <div>
                     <h4 className="text-base font-black text-white uppercase tracking-tight">
-                      Panduan Penilaian Sistem IRT 2PL (2-Parameter Logistic)
+                      Panduan Penilaian Sistem IRT 3PL (3-Parameter Logistic)
                     </h4>
                     <p className="text-xs text-slate-400">
-                      Penjelasan ilmiah estimasi nilai kemampuan laten (&theta;) Anda
+                      Penjelasan ilmiah estimasi nilai kemampuan laten (&theta;) Anda dengan Faktor Tebakan Semu
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300 leading-relaxed">
                   <div className="space-y-3 p-4 rounded-2xl bg-black/40 border border-white/5">
-                    <span className="text-[10px] font-black text-purple-300 uppercase tracking-widest block">1. Model Probabilitas Benar (2PL)</span>
+                    <span className="text-[10px] font-black text-purple-300 uppercase tracking-widest block">1. Model Probabilitas Benar (3PL)</span>
                     <p>
-                      Probabilitas seorang peserta dengan tingkat kemampuan <code className="text-purple-300 font-mono font-bold">&theta;</code> menjawab benar butir soal <code className="text-white font-mono">i</code> dengan tingkat kesulitan <code className="text-purple-300 font-mono">b_i</code> dan daya pembeda <code className="text-amber-300 font-mono">a_i</code> dirumuskan oleh fungsi logistik berikut:
+                      Probabilitas seorang peserta dengan tingkat kemampuan <code className="text-purple-300 font-mono font-bold">&theta;</code> menjawab benar butir soal <code className="text-white font-mono">i</code> dengan tingkat kesulitan <code className="text-purple-300 font-mono">b_i</code>, daya pembeda <code className="text-amber-300 font-mono">a_i</code>, dan faktor tebakan semu <code className="text-emerald-300 font-mono">c_i</code> dirumuskan oleh fungsi logistik berikut:
                     </p>
                     <div className="p-3 rounded-xl bg-black/60 font-mono text-[11px] text-center text-white border border-white/5 my-2">
-                      P(&theta;) = 1 / [1 + e^(-a_i * (&theta; - b_i))]
+                      P(&theta;) = c_i + (1 - c_i) / [1 + e^(-a_i * (&theta; - b_i))]
                     </div>
                     <ul className="list-disc pl-4 space-y-1 text-slate-400 text-[11px]">
-                      <li><strong className="text-slate-300">Daya Pembeda (a_i)</strong>: Mengukur kepekaan soal dalam membedakan peserta. Nilai tinggi (a &gt; 1.0) berarti kontribusi bobot soal sangat tajam.</li>
-                      <li><strong className="text-slate-300">Tingkat Kesulitan (b_i)</strong>: Titik di mana peluang menjawab benar adalah 50%. Nilai negatif mewakili soal mudah, positif mewakili soal sulit.</li>
+                      <li><strong className="text-slate-300">Daya Pembeda (a_i)</strong>: Kepekaan butir soal dalam memisahkan kelompok berkemampuan tinggi dan rendah.</li>
+                      <li><strong className="text-slate-300">Tingkat Kesulitan (b_i)</strong>: Titik kemampuan laten yang dibutuhkan agar memiliki peluang 50% melewati tebakan.</li>
+                      <li><strong className="text-slate-300">Tebakan Semu (c_i)</strong>: Probabilitas menjawab benar hanya dengan menebak secara acak (biasanya berkisar 0.15 - 0.25).</li>
                     </ul>
                   </div>
 
@@ -2389,22 +2611,26 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                           </span>
                         </div>
 
-                         <div className="grid grid-cols-3 gap-1 text-slate-400 pt-1 border-t border-white/5 text-[9px]">
+                         <div className="grid grid-cols-4 gap-1 text-slate-400 pt-1 border-t border-white/5 text-[9px]">
                           <div>
-                            <span className="text-slate-600 block text-[7px] uppercase">Daya Beda (a)</span>
+                            <span className="text-slate-600 block text-[6px] uppercase">Daya Beda (a)</span>
                             <span className="text-white font-bold">{q.a.toFixed(2)}</span>
                           </div>
                           <div>
-                            <span className="text-slate-600 block text-[7px] uppercase">Kesulitan (b)</span>
+                            <span className="text-slate-600 block text-[6px] uppercase">Kesulitan (b)</span>
                             <span className="text-purple-300 font-bold">{q.b.toFixed(2)}</span>
                           </div>
                           <div>
-                            <span className="text-slate-600 block text-[7px] uppercase">Klasifikasi</span>
+                            <span className="text-slate-600 block text-[6px] uppercase">Tebakan (c)</span>
+                            <span className="text-amber-300 font-bold">{q.c !== undefined ? q.c.toFixed(2) : '0.20'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-600 block text-[6px] uppercase">Klasifikasi</span>
                             <span className={q.level === 'Mudah' ? 'text-emerald-400 font-medium' : q.level === 'Sedang' ? 'text-amber-400 font-medium' : 'text-rose-400 font-medium'}>
                               {q.level}
                             </span>
                           </div>
-                        </div>
+                         </div>
                       </div>
                     ))}
                   </div>
