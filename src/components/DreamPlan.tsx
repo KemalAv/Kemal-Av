@@ -40,6 +40,7 @@ import {
 
 import profileImg from '../assets/profile.jpg';
 import multiverseImg from '../assets/MULTIVERSE.jpg';
+import UniversityRoadmap from './UniversityRoadmap';
 
 export default function DreamPlan() {
   const [universe, setUniverse] = useState<'MAIN' | 'ALT'>('MAIN');
@@ -233,53 +234,8 @@ export default function DreamPlan() {
                     </div>
                   </div>
 
-                  {/* Higher Education Targets */}
-                  <div className="space-y-8">
-                    <div className="flex items-center gap-3">
-                      <GraduationCap className="text-indigo-600" />
-                      <h3 className="text-2xl font-bold text-slate-900">Target Pendidikan Tinggi</h3>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-bold text-indigo-600 mb-4 tracking-widest uppercase">Pilihan Strata 1 (S1)</h4>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {education.s1.map((edu, i) => (
-                          <div key={i} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                            <h5 className="font-bold text-slate-900 mb-1">{edu.title}</h5>
-                            <p className="text-indigo-600 text-sm font-bold mb-4">{edu.campus}</p>
-                            <div className="space-y-3">
-                              <div className="text-xs bg-emerald-50 text-emerald-700 p-3 rounded-xl">
-                                <strong>Strategi:</strong> {edu.strategy}
-                              </div>
-                              <div className="text-xs bg-indigo-50 text-indigo-700 p-3 rounded-xl">
-                                <strong>Manfaat:</strong> {edu.perks}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-sm font-bold text-indigo-600 mb-4 tracking-widest uppercase">Pilihan Strata 2 (S2)</h4>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {education.s2.map((edu, i) => (
-                          <div key={i} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                            <h5 className="font-bold text-slate-900 mb-1">{edu.title}</h5>
-                            <p className="text-indigo-600 text-sm font-bold mb-4">{edu.campus}</p>
-                            <div className="space-y-3">
-                              <div className="text-xs bg-amber-50 text-amber-700 p-3 rounded-xl">
-                                <strong>Detail:</strong> {edu.strategy}
-                              </div>
-                              <div className="text-xs bg-slate-50 text-slate-700 p-3 rounded-xl">
-                                <strong>Fokus:</strong> {edu.perks}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  {/* Higher Education Targets: University Roadmap */}
+                  <UniversityRoadmap />
 
                   {/* Career Ambition & Analysis */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -57,6 +57,7 @@ import {
 interface SimQuestion {
   id: string;
   level: 'Mudah' | 'Sedang' | 'Sulit';
+  qType?: 'Pilihan Ganda' | 'Isian Singkat';
   a: number; // discrimination
   b: number; // difficulty
   c: number; // pseudo-guessing (3PL parameter)
@@ -105,13 +106,6 @@ const SUBTESTS_CONFIG = [
   { key: 'litIndo', name: 'Literasi Bahasa Indonesia (LBI)', qCount: 30, duration: 2700, desc: 'Analisis teks sastra & opini' },
   { key: 'litIng', name: 'Literasi Bahasa Inggris (LBE)', qCount: 20, duration: 1800, desc: 'Critical reading global' },
   { key: 'pm', name: 'Penalaran Matematika (PM)', qCount: 20, duration: 2100, desc: 'Model matematis kontekstual' }
-];
-
-const ACADEMIC_PROFILES = [
-  { id: 'ambis', name: 'Ambis Kedokteran / Top PTN (UI / ITB / UGM)', theta: 2.4, range: 'Skor ~780 - 880+', desc: 'Kemampuan istimewa, sangat mahir menaklukkan soal-soal penalaran tingkat tinggi (HOTS).' },
-  { id: 'kompetitif', name: 'Kompetitif Unggul (ITS / Unair / Undip / Brawijaya)', theta: 1.45, range: 'Skor ~660 - 740', desc: 'Kemampuan di atas rata-rata nasional (~100-115 benar/160), mantap menguasai konsep menengah & sulit.' },
-  { id: 'rata_rata', name: 'Standar Nasional (Passing Grade Menengah)', theta: 0.0, range: 'Skor ~500 - 560', desc: 'Sesuai rerata peserta UTBK (~60-70 benar/160), fondasi materi cukup untuk kategori mudah dan sedang.' },
-  { id: 'pemula', name: 'Fase Belajar & Adaptasi', theta: -1.0, range: 'Skor ~350 - 450', desc: 'Masih memperkuat konsep dasar dan pembiasaan format soal SNBT.' }
 ];
 
 interface Snbt2030SimulatorProps {
@@ -213,8 +207,6 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
   const [simFeedback, setSimFeedback] = useState<{ isCorrect: boolean; level: string; a: number; b: number } | null>(null);
   const [simLastSavedResult, setSimLastSavedResult] = useState<SavedSimResult | null>(null);
   const [simActiveDetailSubtest, setSimActiveDetailSubtest] = useState<string>('pu');
-  const [selectedProfileId, setSelectedProfileId] = useState<string>('kompetitif');
-  const [showFastSimPanel, setShowFastSimPanel] = useState<boolean>(false);
 
   // Load saved simulation results on mount
   useEffect(() => {
@@ -332,6 +324,41 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     return Math.max(200, Math.min(1000, rawScore));
   };
 
+  // Helper to generate authentic 3PL pseudo-guessing parameter c matching real UTBK-SNBT:
+  // 1. Isian Singkat: for the last 2-3 questions in PK and PM, c = 0.00 (no multiple choice options to guess).
+  // 2. 5-Option Multiple Choice: c fluctuates empirically around 0.20 depending on distractor attractiveness.
+  const generateItemC = (
+    subKey: string,
+    qIndex: number,
+    qCount: number,
+    level: 'Mudah' | 'Sedang' | 'Sulit'
+  ): { c: number; qType: 'Pilihan Ganda' | 'Isian Singkat' } => {
+    // In official SNBT, PK and PM feature short-answer numeric fill-in (Isian Singkat) questions at the end
+    const isFillIn = (subKey === 'pk' && qIndex >= qCount - 2) || (subKey === 'pm' && qIndex >= qCount - 3);
+    if (isFillIn) {
+      return { c: 0.0, qType: 'Isian Singkat' };
+    }
+
+    // For standard 5-option multiple choice items:
+    // c varies based on distractor effectiveness & item difficulty
+    let cVal = 0.20;
+    if (level === 'Sulit') {
+      // Attractive, deceptive distractors reduce the likelihood of a successful blind guess
+      cVal = 0.13 + Math.random() * 0.05; // 0.13 to 0.18
+    } else if (level === 'Sedang') {
+      // Standard balanced distractors
+      cVal = 0.17 + Math.random() * 0.06; // 0.17 to 0.23
+    } else {
+      // Easier items where 1-2 distractors are readily eliminated by candidates
+      cVal = 0.21 + Math.random() * 0.05; // 0.21 to 0.26
+    }
+
+    return {
+      c: Number(cVal.toFixed(2)),
+      qType: 'Pilihan Ganda'
+    };
+  };
+
   const startSimulation = () => {
     // Generate new Session ID
     const sessionId = "SESS-" + Math.floor(1000 + Math.random() * 9000);
@@ -368,7 +395,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
         // Apply subtle package & subtest natural RNG
         b = Number((b + packageShift + subtestShift).toFixed(3));
 
-        const c = 0.20; // Exact 5-option multiple choice pseudo-guessing parameter (3PL)
+        // Authentic SNBT pseudo-guessing distribution (0.00 for Isian Singkat, 0.13-0.26 for Pilihan Ganda)
+        const { c, qType } = generateItemC(sub.key, i, sub.qCount, level);
         const irtImpact = Math.round(15 * a);
 
         sumB += b;
@@ -378,6 +406,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
         list.push({
           id: `${sub.key}-${i}`,
           level,
+          qType,
           a,
           b,
           c,
@@ -422,15 +451,18 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     let sumA = 0;
     let totalQuestionsCount = 0;
 
-    // Retrieve selected target academic profile and add some minor realistic ability fluctuation
-    const profile = ACADEMIC_PROFILES.find(p => p.id === selectedProfileId) || ACADEMIC_PROFILES[1];
-    const targetTheta = profile.theta + (Math.random() * 0.3 - 0.15);
+    // Pure RNG candidate capability across authentic national spectrum
+    // Gaussian-like random theta with mean ~0.25 and sd ~0.90, bounded realistically
+    const u1 = Math.random() || 0.001;
+    const u2 = Math.random() || 0.001;
+    const randNorm = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    const targetTheta = Math.max(-1.8, Math.min(2.8, 0.25 + randNorm * 0.90));
 
     SUBTESTS_CONFIG.forEach(sub => {
       // Subtle subtest-level natural variation: e.g. [-0.06, +0.06]
       const subtestShift = (Math.random() - 0.5) * 0.12;
       const tempQuestions: { q: SimQuestion; prob: number }[] = [];
-      const subtestTheta = targetTheta + (Math.random() * 0.16 - 0.08);
+      const subtestTheta = targetTheta + (Math.random() * 0.40 - 0.20);
 
       for (let i = 0; i < sub.qCount; i++) {
         const r = Math.random();
@@ -452,7 +484,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
         // Apply subtle package & subtest natural RNG
         b = Number((b + packageShift + subtestShift).toFixed(3));
 
-        const c = 0.20; // Exact 5-option multiple choice pseudo-guessing parameter (3PL)
+        // Authentic SNBT pseudo-guessing distribution (0.00 for Isian Singkat, 0.13-0.26 for Pilihan Ganda)
+        const { c, qType } = generateItemC(sub.key, i, sub.qCount, level);
         const irtImpact = Math.round(15 * a);
 
         sumB += b;
@@ -466,6 +499,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
         const simQ: SimQuestion = {
           id: `${sub.key}-${i}`,
           level,
+          qType,
           a,
           b,
           c,
@@ -566,8 +600,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       totalIrtMax,
       snbtScore,
       subtests: results,
-      questionsBySubtest: allQuestions,
-      profileName: profile.name
+      questionsBySubtest: allQuestions
     };
 
     localStorage.setItem('last_snbt_simulation_result', JSON.stringify(finalResult));
@@ -693,8 +726,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       totalIrtMax,
       snbtScore,
       subtests: results,
-      questionsBySubtest: simAllSubtestsQuestions,
-      profileName: 'Simulasi Mandiri'
+      questionsBySubtest: simAllSubtestsQuestions
     };
 
     localStorage.setItem('last_snbt_simulation_result', JSON.stringify(finalResult));
@@ -726,21 +758,6 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     const updated = { ...scores, [key]: val };
     setScores(updated);
     if (onScoresChange) onScoresChange(updated);
-  };
-
-  const handlePreset = (level: 'rata' | 'kompetitif' | 'medis' | 'dewa') => {
-    let newScores: UserUtbkScores;
-    if (level === 'rata') {
-      newScores = { pu: 520, pbm: 515, ppu: 525, pk: 510, litIndo: 530, litIng: 505, pm: 515 };
-    } else if (level === 'kompetitif') {
-      newScores = { pu: 645, pbm: 630, ppu: 640, pk: 660, litIndo: 635, litIng: 650, pm: 655 };
-    } else if (level === 'medis') {
-      newScores = { pu: 730, pbm: 710, ppu: 715, pk: 720, litIndo: 725, litIng: 740, pm: 735 };
-    } else {
-      newScores = { pu: 810, pbm: 795, ppu: 800, pk: 825, litIndo: 805, litIng: 815, pm: 830 };
-    }
-    setScores(newScores);
-    if (onScoresChange) onScoresChange(newScores);
   };
 
   const handleSubmitScores = () => {
@@ -1041,35 +1058,6 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                 <p className="text-xs font-medium text-slate-400">
                   Geser nilai setiap subtes (275 - 1000). Bobot PP jurusan disesuaikan otomatis berdasarkan rumpun program studi pilihan Anda.
                 </p>
-              </div>
-
-              {/* Presets & Submit */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Preset:</span>
-                <button
-                  onClick={() => handlePreset('rata')}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-all"
-                >
-                  Rata-rata (520)
-                </button>
-                <button
-                  onClick={() => handlePreset('kompetitif')}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-all"
-                >
-                  Kompetitif (640)
-                </button>
-                <button
-                  onClick={() => handlePreset('medis')}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-all"
-                >
-                  Medis/Top (725)
-                </button>
-                <button
-                  onClick={() => handlePreset('dewa')}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/5 hover:bg-white/10 text-amber-300 border border-amber-500/30 transition-all"
-                >
-                  Dewa (815+)
-                </button>
               </div>
             </div>
 
@@ -2037,11 +2025,6 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                     <p className="text-xs text-slate-400">
                       Sesi: <span className="font-mono text-purple-300">{simLastSavedResult.sessionId}</span> · {simLastSavedResult.timestamp}
                     </p>
-                    {simLastSavedResult.profileName && (
-                      <p className="text-[10px] text-purple-400 font-bold">
-                        Profil Sesi: <span className="text-white font-mono">{simLastSavedResult.profileName}</span>
-                      </p>
-                    )}
                   </div>
 
                   <div className="space-y-3 p-4 rounded-2xl bg-black/40 border border-white/5">
@@ -2079,15 +2062,11 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                       Ulangi Ujian Manual
                     </button>
                     <button
-                      onClick={() => setShowFastSimPanel(!showFastSimPanel)}
-                      className={`w-full py-2.5 px-4 rounded-xl border font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                        showFastSimPanel
-                          ? 'bg-purple-600/30 border-purple-500 text-white shadow-inner shadow-purple-500/20'
-                          : 'bg-purple-600/10 border-purple-500/30 text-purple-300 hover:bg-purple-600/20'
-                      }`}
+                      onClick={startInstantSimulation}
+                      className="w-full py-2.5 px-4 rounded-xl border border-purple-500/30 bg-purple-600/10 hover:bg-purple-600/20 text-purple-300 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <Zap className="w-4 h-4" />
-                      {showFastSimPanel ? 'Tutup Simulasi Cepat' : 'Simulasi Cepat (3PL)'}
+                      <Zap className="w-4 h-4 fill-purple-300" />
+                      Simulasi Cepat (Pure RNG)
                     </button>
                     <button
                       onClick={resetSavedScore}
@@ -2112,86 +2091,14 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                       Mulai Simulasi Manual
                     </button>
                     <button
-                      onClick={() => setShowFastSimPanel(!showFastSimPanel)}
-                      className={`py-3 px-6 rounded-xl border font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
-                        showFastSimPanel
-                          ? 'bg-purple-600/30 border-purple-500 text-white shadow-inner'
-                          : 'bg-purple-600/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/20'
-                      }`}
+                      onClick={startInstantSimulation}
+                      className="py-3 px-6 rounded-xl border border-purple-500/30 bg-purple-600/20 hover:bg-purple-500/30 text-purple-300 hover:text-white font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
                     >
-                      <Zap className="w-4 h-4" />
-                      {showFastSimPanel ? 'Tutup Simulasi Cepat' : 'Simulasi Cepat (3PL)'}
+                      <Zap className="w-4 h-4 fill-purple-300" />
+                      Simulasi Cepat (Pure RNG)
                     </button>
                   </div>
                 </div>
-              )}
-
-              {/* Toggleable Premium Academic Profile Selector (Only visible during fast simulation prep) */}
-              {showFastSimPanel && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="p-6 rounded-3xl border border-purple-500/30 bg-purple-950/10 backdrop-blur space-y-4 shadow-lg shadow-purple-500/5 overflow-hidden"
-                >
-                  <div className="flex items-center gap-2">
-                    <Award className="w-4.5 h-4.5 text-purple-400 animate-pulse" />
-                    <span className="text-xs font-black uppercase text-purple-300 tracking-wider">PENGATURAN PROFIL KEMAMPUAN AKADEMIK</span>
-                  </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Pilih perkiraan tingkat kemampuan Anda di bawah ini. Sistem simulasi cepat akan menggunakan model probabilitas **IRT 3-Parameter Logistic (3PL) riil** untuk menentukan status pengerjaan soal secara matematis berdasarkan tingkat kesulitan soal (<code className="text-purple-300 font-mono font-bold">b</code>), daya beda (<code className="text-purple-300 font-mono">a</code>), dan faktor tebakan semu (<code className="text-purple-300 font-mono">c</code>).
-                  </p>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {ACADEMIC_PROFILES.map((profile) => {
-                      const isSelected = selectedProfileId === profile.id;
-                      return (
-                        <button
-                          key={profile.id}
-                          type="button"
-                          onClick={() => setSelectedProfileId(profile.id)}
-                          className={`p-4 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between h-full ${
-                            isSelected
-                              ? 'bg-purple-950/60 border-purple-500 shadow-lg shadow-purple-500/10'
-                              : 'bg-black/40 border-white/5 hover:border-purple-500/20 hover:bg-black/50'
-                          }`}
-                        >
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <span className={`text-xs font-black ${isSelected ? 'text-purple-300' : 'text-slate-300'}`}>
-                                {profile.name}
-                              </span>
-                              {isSelected && (
-                                <span className="w-2 h-2 rounded-full bg-purple-400" />
-                              )}
-                            </div>
-                            <p className="text-[10px] text-slate-400 leading-snug">
-                              {profile.desc}
-                            </p>
-                          </div>
-                          <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5 text-[10px] font-mono font-bold">
-                            <span className="text-slate-500">Estimasi Skor:</span>
-                            <span className={isSelected ? 'text-purple-400' : 'text-slate-400'}>
-                              {profile.range} (θ: {profile.theta > 0 ? '+' : ''}{profile.theta.toFixed(1)})
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="pt-2 flex justify-end">
-                    <button
-                      onClick={() => {
-                        startInstantSimulation();
-                        setShowFastSimPanel(false);
-                      }}
-                      className="w-full sm:w-auto py-3 px-8 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-purple-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <Zap className="w-4 h-4 fill-white" />
-                      Jalankan Simulasi Cepat Sekarang
-                    </button>
-                  </div>
-                </motion.div>
               )}
 
               {/* Transparent Formula explanation */}
@@ -2295,14 +2202,19 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                             }`}>
                               {q.level}
                             </span>
+                            {q.qType && (
+                              <span className={`px-2 py-0.5 rounded ${q.qType === 'Isian Singkat' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-white/10 text-slate-300'}`}>
+                                {q.qType}
+                              </span>
+                            )}
                             <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300">
                               Daya Beda a: {q.a.toFixed(2)}
                             </span>
                             <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">
                               Kesulitan b: {q.b.toFixed(2)}
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">
-                              Tebakan c: {q.c !== undefined ? q.c.toFixed(2) : '0.20'}
+                            <span className={`px-2 py-0.5 rounded ${q.c === 0 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-amber-500/20 text-amber-300'}`}>
+                              Tebakan c: {q.c !== undefined ? q.c.toFixed(2) : '0.20'}{q.c === 0 ? ' (Isian Singkat)' : ''}
                             </span>
                           </div>
                           <p className="text-xs text-slate-400 uppercase tracking-widest font-black">Pertanyaan Simulasi</p>
@@ -2432,12 +2344,6 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                       <span className="text-xs text-slate-400">Sesi ID</span>
                       <span className="font-mono text-sm font-bold text-purple-300">{simLastSavedResult?.sessionId}</span>
                     </div>
-                    {simLastSavedResult?.profileName && (
-                      <div className="flex items-center justify-between font-medium">
-                        <span className="text-xs text-slate-400">Profil Sesi</span>
-                        <span className="font-mono text-[11px] font-bold text-purple-300 text-right">{simLastSavedResult.profileName}</span>
-                      </div>
-                    )}
                     {(() => {
                       const meanB = simLastSavedResult?.meanDifficulty ?? 0;
                       const meanA = simLastSavedResult?.meanDiscrimination ?? 1.15;
@@ -2549,9 +2455,9 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                       P(&theta;) = c_i + (1 - c_i) / [1 + e^(-a_i * (&theta; - b_i))]
                     </div>
                     <ul className="list-disc pl-4 space-y-1 text-slate-400 text-[11px]">
-                      <li><strong className="text-slate-300">Daya Pembeda (a_i)</strong>: Kepekaan butir soal dalam memisahkan kelompok berkemampuan tinggi dan rendah.</li>
+                      <li><strong className="text-slate-300">Daya Pembeda (a_i)</strong>: Kepekaan butir soal dalam memisahkan kelompok berkemampuan tinggi dan rendah (0.90 - 1.30).</li>
                       <li><strong className="text-slate-300">Tingkat Kesulitan (b_i)</strong>: Titik kemampuan laten yang dibutuhkan agar memiliki peluang 50% melewati tebakan.</li>
-                      <li><strong className="text-slate-300">Tebakan Semu (c_i)</strong>: Probabilitas menjawab benar hanya dengan menebak secara acak (biasanya berkisar 0.15 - 0.25).</li>
+                      <li><strong className="text-slate-300">Tebakan Semu (c_i)</strong>: Probabilitas menjawab benar secara acak/tebakan semu (berkisar 0.13 - 0.26 pada pilihan ganda sesuai daya kecoh distraktor, dan 0.00 pada format isian singkat).</li>
                     </ul>
                   </div>
 
@@ -2601,7 +2507,14 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                     {simLastSavedResult.questionsBySubtest[simActiveDetailSubtest].map((q, qidx) => (
                       <div key={q.id} className="p-3 rounded-xl border border-white/5 bg-black/40 space-y-1 text-center font-mono text-[10px]">
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500 font-bold">SOAL #{qidx + 1}</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-slate-500 font-bold">#{qidx + 1}</span>
+                            {q.qType === 'Isian Singkat' && (
+                              <span className="px-1 py-0.2 rounded text-[7px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                                ISIAN
+                              </span>
+                            )}
+                          </div>
                           <span className={`px-1.5 py-0.2 rounded text-[8px] font-bold ${
                             q.userAnswer === 'benar' 
                               ? 'bg-emerald-500/10 text-emerald-400' 
@@ -2611,7 +2524,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                           </span>
                         </div>
 
-                         <div className="grid grid-cols-4 gap-1 text-slate-400 pt-1 border-t border-white/5 text-[9px]">
+                          <div className="grid grid-cols-4 gap-1 text-slate-400 pt-1 border-t border-white/5 text-[9px]">
                           <div>
                             <span className="text-slate-600 block text-[6px] uppercase">Daya Beda (a)</span>
                             <span className="text-white font-bold">{q.a.toFixed(2)}</span>
@@ -2622,10 +2535,12 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                           </div>
                           <div>
                             <span className="text-slate-600 block text-[6px] uppercase">Tebakan (c)</span>
-                            <span className="text-amber-300 font-bold">{q.c !== undefined ? q.c.toFixed(2) : '0.20'}</span>
+                            <span className={`font-bold ${q.c === 0 ? 'text-cyan-300' : 'text-amber-300'}`}>
+                              {q.c !== undefined ? q.c.toFixed(2) : '0.20'}
+                            </span>
                           </div>
                           <div>
-                            <span className="text-slate-600 block text-[6px] uppercase">Klasifikasi</span>
+                            <span className="text-slate-600 block text-[6px] uppercase">Tingkat</span>
                             <span className={q.level === 'Mudah' ? 'text-emerald-400 font-medium' : q.level === 'Sedang' ? 'text-amber-400 font-medium' : 'text-rose-400 font-medium'}>
                               {q.level}
                             </span>

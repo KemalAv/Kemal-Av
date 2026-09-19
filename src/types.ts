@@ -63,6 +63,35 @@ export interface EducationTarget {
   perks: string;
 }
 
+export type ChoiceType = 'pilihan1' | 'pilihan2' | 'current';
+
+export interface UniversityProgramChoice {
+  type: ChoiceType;
+  label: string; // 'PILIHAN 1' | 'PILIHAN 2' | 'PROGRAM STUDI SAAT INI'
+  major: string;
+  degree?: string; // 'S1' | 'D4'
+  reason: string; // Alasan & Strategi
+  benefits: string; // Manfaat & Prospek
+}
+
+export interface UniversityPathway {
+  name: string;
+  shortType?: string;
+  choices: UniversityProgramChoice[];
+}
+
+export interface UniversityRoadmapCampus {
+  id: string;
+  name: string;
+  shortName: string;
+  location: string;
+  column: 1 | 2 | 3;
+  type: 'ptn' | 'pts' | 'current';
+  badge?: string;
+  isCurrentOption?: boolean;
+  pathways: UniversityPathway[];
+}
+
 export interface CareerGoal {
   title: string;
   reason: string;
