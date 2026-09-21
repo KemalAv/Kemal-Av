@@ -300,13 +300,25 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     const totalQ = questions.length;
     const rawProp = rawCorrect / totalQ;
 
+    const subtestKey = questions[0].id.split('-')[0];
+    let multiplierUpper = 5.10;
+    let multiplierLower = 3.60;
+
+    if (subtestKey === 'litIndo') {
+      multiplierUpper = 2.00;
+      multiplierLower = 1.50; // Adjusted proportionally
+    } else if (subtestKey === 'pu') {
+      multiplierUpper = 2.50;
+      multiplierLower = 1.80; // Adjusted proportionally
+    }
+
     let abilityZ = 0;
     if (rawProp >= 0.375) {
       // Upper curve: progressive psychometric rewards for high-difficulty questions
-      abilityZ = (rawProp - 0.375) * 5.10;
+      abilityZ = (rawProp - 0.375) * multiplierUpper;
     } else {
       // Lower curve: standard calibration down to guessing threshold
-      abilityZ = (rawProp - 0.375) * 3.60;
+      abilityZ = (rawProp - 0.375) * multiplierLower;
     }
     
     // Combine 3PL item-weighted theta (65%) with proportion-anchored ability (35%)
