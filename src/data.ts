@@ -41,6 +41,12 @@ export const works: Project[] = [
 
 export const apps: Project[] = [
   {
+    title: "Book Reader",
+    description: "Pembaca dokumen Word, PDF, dan teks dengan kontrol WPM, sorotan kata & huruf, auto-scroll, dan text-to-speech.",
+    link: "#",
+    type: "app"
+  },
+  {
     title: "Rencana Masa Depan",
     description: "Dashboard interaktif strategi hibrida tekno-finansial dan target masa depan Kemal.",
     link: "#",

@@ -20,7 +20,7 @@ export const getSubdomain = (): string | null => {
     
     // In many dev environments, the first part might be the app ID.
     // So we only want to treat it as a subdomain if it matches our known app subdomains.
-    const knownSubdomains = ['articles', 'quran', 'practice', 'exam', 'dream'];
+    const knownSubdomains = ['articles', 'quran', 'practice', 'exam', 'dream', 'reader', 'fable'];
     if (knownSubdomains.includes(parts[0])) {
       return parts[0];
     }

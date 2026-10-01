@@ -24,6 +24,7 @@ import { MultipleChoiceArea } from './components/MultipleChoiceArea';
 import { QuranMiniApp } from './components/quran-miniapp/App';
 import { ExamComparison } from './components/ExamComparison';
 import { Snbt2030Simulator } from './components/Snbt2030Simulator';
+import { BookReaderApp } from './components/book-reader/BookReaderApp';
 import { useLocalization } from './hooks/useLocalization';
 import { PracticeMode, PracticeView, Flashcard, MultipleChoiceQuestion, BlogPost } from './types';
 import { Icons } from './constants';
@@ -50,6 +51,8 @@ function SubdomainManager() {
       navigate('/app/perbandingan-pencapaian', { replace: true });
     } else if (subdomain === 'dream' && !currentPath.startsWith('/app/rencana-masa-depan')) {
       navigate('/app/rencana-masa-depan', { replace: true });
+    } else if ((subdomain === 'reader' || subdomain === 'fable') && !currentPath.startsWith('/app/fable-reader')) {
+      navigate('/app/fable-reader', { replace: true });
     }
   }, [navigate, location.pathname]);
 
@@ -368,6 +371,11 @@ export default function App() {
             <DreamPlan />
           </div>
         );
+      case 'book-reader':
+      case 'fable-reader':
+      case 'reader':
+      case 'fable':
+        return <BookReaderApp onBackToHome={() => navigate('/')} />;
       default:
         return <Navigate to="/" replace />;
     }
