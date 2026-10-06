@@ -25,6 +25,7 @@ import { QuranMiniApp } from './components/quran-miniapp/App';
 import { ExamComparison } from './components/ExamComparison';
 import { Snbt2030Simulator } from './components/Snbt2030Simulator';
 import { BookReaderApp } from './components/book-reader/BookReaderApp';
+import { InfinityBoardApp } from './components/infinity-board/InfinityBoardApp';
 import { useLocalization } from './hooks/useLocalization';
 import { PracticeMode, PracticeView, Flashcard, MultipleChoiceQuestion, BlogPost } from './types';
 import { Icons } from './constants';
@@ -53,6 +54,8 @@ function SubdomainManager() {
       navigate('/app/rencana-masa-depan', { replace: true });
     } else if ((subdomain === 'reader' || subdomain === 'fable') && !currentPath.startsWith('/app/fable-reader')) {
       navigate('/app/fable-reader', { replace: true });
+    } else if ((subdomain === 'board' || subdomain === 'infinity') && !currentPath.startsWith('/app/infinity-board')) {
+      navigate('/app/infinity-board', { replace: true });
     }
   }, [navigate, location.pathname]);
 
@@ -376,6 +379,11 @@ export default function App() {
       case 'reader':
       case 'fable':
         return <BookReaderApp onBackToHome={() => navigate('/')} />;
+      case 'infinity-board':
+      case 'infinity':
+      case 'board':
+      case 'sketch':
+        return <InfinityBoardApp onBackToHome={() => navigate('/')} />;
       default:
         return <Navigate to="/" replace />;
     }
@@ -386,6 +394,8 @@ export default function App() {
       <SubdomainManager />
       <Routes>
         <Route path="/" element={<MainSite />} />
+        <Route path="/board" element={<InfinityBoardApp onBackToHome={() => navigate('/')} />} />
+        <Route path="/infinity-board" element={<InfinityBoardApp onBackToHome={() => navigate('/')} />} />
         <Route path="/app/:title" element={<AppRouter />} />
         <Route path="/articles/:title" element={<ArticleReader />} />
         <Route path="/articles" element={<MainSite />} />

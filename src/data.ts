@@ -41,6 +41,12 @@ export const works: Project[] = [
 
 export const apps: Project[] = [
   {
+    title: "Infinity Board",
+    description: "Papan sketsa & kanvas tak terbatas. Coret-coret bebas dengan pen, pensil, stabilo, bentuk, upload gambar, multi-proyek, serta ekspor ke PNG, JPEG, SVG, dan JSON.",
+    link: "#",
+    type: "app"
+  },
+  {
     title: "Book Reader",
     description: "Pembaca dokumen Word, PDF, dan teks dengan kontrol WPM, sorotan kata & huruf, auto-scroll, dan text-to-speech.",
     link: "#",
