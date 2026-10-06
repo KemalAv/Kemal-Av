@@ -115,10 +115,10 @@ export const Minimap: React.FC<MinimapProps> = ({ elements, viewport, onNavigate
       <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-1 rounded-lg shadow-lg border border-slate-200/80 dark:border-slate-800">
         <canvas
           ref={canvasRef}
-          width={110}
-          height={75}
+          width={130}
+          height={85}
           onClick={handleClick}
-          className="rounded-md cursor-crosshair border border-slate-200/50 dark:border-slate-700/50"
+          className="rounded-lg cursor-crosshair border border-slate-200/50 dark:border-slate-700/50"
           title="Radar Kanvas - Klik untuk lompat ke area"
         />
       </div>

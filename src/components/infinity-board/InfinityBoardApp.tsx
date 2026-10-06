@@ -577,20 +577,17 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
     e.preventDefault();
     if (isCanvasLocked) return; // Frozen when locked
 
-    if (e.ctrlKey || e.metaKey) {
-      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
-      zoomAtPoint(zoomFactor, e.clientX, e.clientY);
-    } else {
-      setProject(prev => ({
-        ...prev,
-        viewport: {
-          ...prev.viewport,
-          x: prev.viewport.x - e.deltaX,
-          y: prev.viewport.y - e.deltaY,
-        },
-      }));
-    }
+    // Standard panning only (Zoom is disabled on wheel as requested by user)
+    setProject(prev => ({
+      ...prev,
+      viewport: {
+        ...prev.viewport,
+        x: prev.viewport.x - e.deltaX * 0.5,
+        y: prev.viewport.y - e.deltaY * 0.5,
+      },
+    }));
   };
+
   // TOUCH EVENTS (Pinch-to-zoom, Two-finger Pan & Single-touch Draw)
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (e.touches.length === 2 && !isCanvasLocked) {
@@ -630,20 +627,15 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
       const currentMidY = (t1.clientY + t2.clientY) / 2;
 
       const { initialDist, initialZoom, midX, midY } = touchStateRef.current;
-      const scale = dist / initialDist;
-      const newZoom = Math.min(Math.max(initialZoom * scale, 0.15), 4.5);
-
+      const newZoom = initialZoom; // Zoom remains locked during touch gestures as requested by user
       const wx = (midX - project.viewport.x) / project.viewport.zoom;
       const wy = (midY - project.viewport.y) / project.viewport.zoom;
-
-      const panDeltaX = currentMidX - midX;
-      const panDeltaY = currentMidY - midY;
 
       setProject(prev => ({
         ...prev,
         viewport: {
-          x: currentMidX - wx * newZoom + panDeltaX,
-          y: currentMidY - wy * newZoom + panDeltaY,
+          x: currentMidX - wx * newZoom,
+          y: currentMidY - wy * newZoom,
           zoom: newZoom,
         },
       }));
