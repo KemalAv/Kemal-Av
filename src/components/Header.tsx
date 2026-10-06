@@ -5,6 +5,7 @@
 
 import { motion } from 'motion/react';
 import { profile } from '../data';
+import { PWAInstallButton } from './PWAInstallButton';
 
 export default function Header() {
   const navItems = [
@@ -43,6 +44,7 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
+          <PWAInstallButton />
           <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-glow-blue" />
         </div>
       </div>

@@ -31,6 +31,7 @@ import { PracticeMode, PracticeView, Flashcard, MultipleChoiceQuestion, BlogPost
 import { Icons } from './constants';
 import { Button } from './components/Button';
 import { ContentRenderer } from './components/ContentRenderer';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 function SubdomainManager() {
   const navigate = useNavigate();
@@ -392,6 +393,7 @@ export default function App() {
   return (
     <>
       <SubdomainManager />
+      <OfflineIndicator />
       <Routes>
         <Route path="/" element={<MainSite />} />
         <Route path="/board" element={<InfinityBoardApp onBackToHome={() => navigate('/')} />} />

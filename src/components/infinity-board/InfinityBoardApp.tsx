@@ -591,8 +591,7 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
       }));
     }
   };
-
-  // TOUCH EVENTS (Pinch-to-zoom & Two-finger Pan)
+  // TOUCH EVENTS (Pinch-to-zoom, Two-finger Pan & Single-touch Draw)
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (e.touches.length === 2 && !isCanvasLocked) {
       // Pinch to zoom initiation
@@ -610,6 +609,14 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
         midX,
         midY,
       };
+    } else if (e.touches.length === 1) {
+      const t = e.touches[0];
+      handleMouseDown({
+        clientX: t.clientX,
+        clientY: t.clientY,
+        button: 0,
+        shiftKey: e.shiftKey,
+      });
     }
   };
 
@@ -640,15 +647,30 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
           zoom: newZoom,
         },
       }));
+    } else if (e.touches.length === 1) {
+      e.preventDefault(); // Prevents page bouncing / scrolling while drawing
+      const t = e.touches[0];
+      handleMouseMove({
+        clientX: t.clientX,
+        clientY: t.clientY,
+        shiftKey: e.shiftKey,
+      });
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
     touchStateRef.current = null;
+    handleMouseUp();
   };
 
   // MOUSE DOWN HANDLER
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseDown = (originalEvent: React.MouseEvent<HTMLCanvasElement> | { clientX: number; clientY: number; button?: number; shiftKey?: boolean }) => {
+    const e = {
+      clientX: originalEvent.clientX,
+      clientY: originalEvent.clientY,
+      button: 'button' in originalEvent ? originalEvent.button : 0,
+      shiftKey: !!originalEvent.shiftKey,
+    };
     const clientX = e.clientX;
     const clientY = e.clientY;
     const worldPos = screenToWorld(clientX, clientY, project.viewport);
@@ -985,7 +1007,12 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
   };
 
   // MOUSE MOVE HANDLER
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (originalEvent: React.MouseEvent<HTMLCanvasElement> | { clientX: number; clientY: number; shiftKey?: boolean }) => {
+    const e = {
+      clientX: originalEvent.clientX,
+      clientY: originalEvent.clientY,
+      shiftKey: !!originalEvent.shiftKey,
+    };
     const clientX = e.clientX;
     const clientY = e.clientY;
     const worldPos = screenToWorld(clientX, clientY, project.viewport);
