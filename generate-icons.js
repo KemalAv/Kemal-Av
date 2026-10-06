@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
-const svgPath = path.join(process.cwd(), 'public', 'icon.svg');
+const svgPath = path.join(process.cwd(), 'public', 'kemalav.jpg');
 const publicDir = path.join(process.cwd(), 'public');
 
 // Ensure public directory exists
@@ -13,7 +13,7 @@ if (!fs.existsSync(publicDir)) {
 
 async function generateIcons() {
   try {
-    console.log('Generating PWA icons from icon.svg...');
+    console.log('Generating PWA icons from kemalav.jpg...');
 
     // 1. Standard 192x192 icon
     await sharp(svgPath)
