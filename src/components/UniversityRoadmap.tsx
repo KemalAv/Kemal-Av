@@ -62,6 +62,8 @@ export default function UniversityRoadmap() {
               matchesFilter = majorLower.includes('komputer');
             } else if (filterMajor === 'si') {
               matchesFilter = majorLower.includes('sistem informasi');
+            } else if (filterMajor === 'agribisnis') {
+              matchesFilter = majorLower.includes('agribisnis');
             } else if (filterMajor === 'vokasi') {
               matchesFilter = choice.degree === 'D4' || majorLower.includes('tro') || majorLower.includes('logistik');
             } else if (filterMajor === 'semarang') {
@@ -168,6 +170,7 @@ export default function UniversityRoadmap() {
             { id: 'elektro', label: 'Teknik Elektro' },
             { id: 'komputer', label: 'Teknik Komputer' },
             { id: 'si', label: 'Sistem Informasi' },
+            { id: 'agribisnis', label: 'Agribisnis' },
             { id: 'vokasi', label: 'D4 Vokasi' },
             { id: 'semarang', label: 'Lokasi Semarang' }
           ].map(f => (

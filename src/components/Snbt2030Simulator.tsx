@@ -174,7 +174,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       ALL_ITB_MAJORS.find(m => m.id === 'itb-13321021'), // STEI-K
       ALL_UNDIP_MAJORS.find(m => m.id === 'fsm-informatika'), // Informatika
       ALL_ITB_MAJORS.find(m => m.id === 'itb-13321002'), // FTTM
-      ALL_UNDIP_MAJORS.find(m => m.id === 'ft-teknik-komputer'), // Teknik Komputer
+      ALL_UNDIP_MAJORS.find(m => m.id === 'fpp-agribisnis'), // Agribisnis
       ALL_ITB_MAJORS.find(m => m.id === 'itb-13321024'), // SBM
       ALL_UNDIP_MAJORS.find(m => m.id === 'feb-bisnis-digital'), // Bisnis Digital
       ALL_ITB_MAJORS.find(m => m.id === 'itb-13321028'), // FTI-SP
