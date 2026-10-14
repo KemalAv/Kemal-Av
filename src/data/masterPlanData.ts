@@ -31,7 +31,7 @@ export const masterPlanData: MasterPlanData = {
       {
         title: "Plan B (Jalur Teknis PTN)",
         campus: "Daftar Jalur Mandiri S1 UNDIP (Pilihan 1) / ITS (Pilihan 2) / UB (Pilihan 3) / UNNES (Pilihan 4)",
-        strategy: "Pilihan 1: S1 Teknik Elektro – Fokus pada implementasi teknologi Smart Home di aset Airbnb dan Apartemen keluarga untuk menaikkan nilai sewa. Pilihan 2: S1 Teknik Komputer – Berfokus pada integrasi sistem digital sebagai opsi pengaman terbaik jika Teknik Elektro tidak tembus.",
+        strategy: "Pilihan 1: S1 Teknik Elektro – Fokus pada implementasi teknologi Smart Home di aset Airbnb dan Apartemen keluarga untuk menaikkan nilai sewa. Pilihan 2: S1 Agribisnis – Berfokus pada manajemen rantai pasok komoditas sebagai opsi pengaman strategis di UNDIP.",
         perks: "Kurikulum teknik kuat, prospek kerja otomatisasi industri."
       },
       {
@@ -42,9 +42,9 @@ export const masterPlanData: MasterPlanData = {
       },
       {
         title: "Plan D (Jalur Swasta Premium)",
-        campus: "Daftar Telkom University / UDINUS",
-        strategy: "Pilihan 1: S1 Teknik Industri – Fokus pada efisiensi sistem dan manajemen operasional untuk otomatisasi alur barang serta stok di 3 franchise Bapak. Pilihan 2: S1 Sistem Informasi – Fokus pada digitalisasi data dan integrasi dasbor real-time untuk otomatisasi pemantauan penjualan di franchise Bapak.",
-        perks: "Fasilitas kampus lengkap, kurikulum industri, akses koding/IT kuat."
+        campus: "Daftar UDINUS",
+        strategy: "Pilihan 1: S1 Teknik Industri – Fokus pada efisiensi sistem, manajemen operasional, dan otomatisasi alur barang serta stok di 3 franchise Bapak melalui keunggulan institusi IT UDINUS di Semarang.",
+        perks: "Fasilitas kampus lengkap, kurikulum industri teknik industri, lokasi strategis di pusat kota."
       },
       {
         title: "Plan E (Jalur Bertahan & Otodidak)",

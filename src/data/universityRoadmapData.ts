@@ -7,7 +7,7 @@ import { UniversityRoadmapCampus } from '../types';
 
 export const universityRoadmapData: UniversityRoadmapCampus[] = [
   // ==========================================
-  // COLUMN 1: UGM, UB, TELKOM, UNDIP SAAT INI
+  // COLUMN 1: UGM, UB, UNDIP SAAT INI
   // ==========================================
   {
     id: 'ugm',
@@ -60,60 +60,6 @@ export const universityRoadmapData: UniversityRoadmapCampus[] = [
             degree: 'S1',
             reason: 'Alternatif pengaman di bidang hardware-software, berfokus pada arsitektur sistem cerdas, embedded microcontroller, IoT, dan jaringan komputer.',
             benefits: 'Penguasaan hardware cerdas untuk integrasi perangkat IoT mandiri (solar tracker, sensor pintar Airbnb), riset komputasi terapan, dan peluang karir embedded engineer.'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'telkom',
-    name: 'Telkom University',
-    shortName: 'Telkom University',
-    location: 'Bandung',
-    column: 1,
-    type: 'pts',
-    pathways: [
-      {
-        name: 'Jalur Prestasi Akademik (JPA) Telkom University',
-        shortType: 'JPA (Rapor)',
-        choices: [
-          {
-            type: 'pilihan1',
-            label: 'PILIHAN 1',
-            major: 'Teknik Industri',
-            degree: 'S1',
-            reason: 'Menggabungkan keilmuan teknik industri modern dengan ekosistem Information & Communication Technology (ICT) terdepan dan otomatisasi proses bisnis digital.',
-            benefits: 'Universitas swasta nomor 1 di Indonesia, koneksi langsung ke ekosistem Telkom Group dan BUMN, fasilitas lab industri 4.0 berstandar global, proses seleksi cepat tanpa tes.'
-          },
-          {
-            type: 'pilihan2',
-            label: 'PILIHAN 2',
-            major: 'Sistem Informasi',
-            degree: 'S1',
-            reason: 'Fokus pada tata kelola enterprise data, pengembangan sistem informasi terintegrasi, dan pembuatan dasbor visualisasi data bisnis franchise secara real-time.',
-            benefits: 'Akreditasi internasional ABET & IABEE, laboratorium enterprise resource planning (SAP/ERP) terlengkap, prospek karir IT Business Analyst dan Data Engineer.'
-          }
-        ]
-      },
-      {
-        name: 'Ujian Tulis Gelombang (UTG) Telkom University',
-        shortType: 'UTG (Tes Tulis)',
-        choices: [
-          {
-            type: 'pilihan1',
-            label: 'PILIHAN 1',
-            major: 'Teknik Industri',
-            degree: 'S1',
-            reason: 'Jalur ujian tertulis online/CBT sebagai proteksi cadangan jika jalur rapor belum membuahkan hasil, memastikan tetap memiliki tiket masuk ke prodi prioritas.',
-            benefits: 'Fleksibilitas jadwal ujian, peluang beasiswa prestasi parsial jalur tertulis, dan jaminan kurikulum rekayasa industri berorientasi teknologi digital.'
-          },
-          {
-            type: 'pilihan2',
-            label: 'PILIHAN 2',
-            major: 'Sistem Informasi',
-            degree: 'S1',
-            reason: 'Jaminan ketersediaan pilihan kedua bidang teknologi informasi terapan dan manajemen sistem komputasi bisnis.',
-            benefits: 'Koneksi karir korporat masif, akreditasi Unggul, kesiapan menghadapi transformasi digital enterprise.'
           }
         ]
       }
@@ -186,10 +132,10 @@ export const universityRoadmapData: UniversityRoadmapCampus[] = [
           {
             type: 'pilihan2',
             label: 'PILIHAN 2',
-            major: 'Teknik Komputer',
+            major: 'S1 Agribisnis',
             degree: 'S1',
-            reason: 'Opsi pengaman terbaik jika Teknik Elektro tidak tembus; berfokus pada integrasi sistem digital, firmware mikrokontroler, IoT, dan perancangan jaringan komputer cerdas.',
-            benefits: 'Keahlian terpadu antara hardware dan software, relevan untuk perakitan sistem energi cerdas rumah off-grid, dan prospek karir embedded systems engineer.'
+            reason: 'Opsi pengaman strategis di bidang agribisnis dan manajemen rantai pasok pertanian/pangan, relevan untuk optimasi suplai dan distribusi bisnis keluarga.',
+            benefits: 'Fakultas Peternakan dan Pertanian UNDIP terakreditasi Unggul, pemahaman mendalam tentang manajemen logistik komoditas, dan peluang karir di sektor agribisnis modern.'
           }
         ]
       },
@@ -208,10 +154,10 @@ export const universityRoadmapData: UniversityRoadmapCampus[] = [
           {
             type: 'pilihan2',
             label: 'PILIHAN 2',
-            major: 'Teknik Komputer',
+            major: 'S1 Agribisnis',
             degree: 'S1',
-            reason: 'Cadangan strategis di jalur kemitraan untuk mengamankan kursi di bidang rekayasa komputer dan sistem digital.',
-            benefits: 'Double-guarding untuk bidang teknologi komputer di kampus negeri terbaik Semarang.'
+            reason: 'Cadangan strategis di jalur kemitraan untuk mengamankan kursi di bidang manajemen agribisnis dan rantai pasok.',
+            benefits: 'Double-guarding untuk bidang agribisnis di kampus negeri terbaik Semarang.'
           }
         ]
       },
@@ -358,18 +304,18 @@ export const universityRoadmapData: UniversityRoadmapCampus[] = [
           {
             type: 'pilihan1',
             label: 'PILIHAN 1',
-            major: 'Sistem Informasi',
+            major: 'S1 Teknik Elektro',
             degree: 'S1',
-            reason: 'Fokus pada tata kelola sistem enterprise dan rekayasa platform data bisnis; lokasi kampus di Gunungpati sangat dekat dengan proyek rumah off-grid masa depan dan mudah dijangkau dari rumah.',
-            benefits: 'Biaya pendidikan PTN yang ekonomis, efisiensi mobilitas harian tanpa perlu kos, kurikulum sistem informasi bisnis yang aplikatif dan terus berkembang.'
+            reason: 'Fokus pada studi teknik kelistrikan, sistem tenaga, dan instrumentasi di PTN Semarang dengan akses logistik harian mudah dan praktis.',
+            benefits: 'Penguasaan kompetensi dasar elektronika, kendali dasar, dan sistem tenaga listrik di PTN Semarang dengan biaya terjangkau.'
           },
           {
             type: 'pilihan2',
             label: 'PILIHAN 2',
-            major: 'Teknik Elektro',
+            major: 'S1 Sistem Informasi',
             degree: 'S1',
-            reason: 'Alternatif studi teknik kelistrikan dan instrumentasi di PTN Semarang dengan akses logistik harian mudah dan praktis.',
-            benefits: 'Penguasaan kompetensi dasar elektronika, kendali dasar, dan sistem tenaga listrik di Semarang.'
+            reason: 'Fokus pada tata kelola sistem enterprise dan rekayasa platform data bisnis; lokasi kampus di Gunungpati sangat dekat dengan proyek rumah off-grid masa depan dan mudah dijangkau dari rumah.',
+            benefits: 'Biaya pendidikan PTN yang ekonomis, efisiensi mobilitas harian tanpa perlu kos, kurikulum sistem informasi bisnis yang aplikatif dan terus berkembang.'
           }
         ]
       },
@@ -380,18 +326,18 @@ export const universityRoadmapData: UniversityRoadmapCampus[] = [
           {
             type: 'pilihan1',
             label: 'PILIHAN 1',
-            major: 'Sistem Informasi',
+            major: 'S1 Teknik Elektro',
             degree: 'S1',
-            reason: 'Mengoptimalkan portofolio proyek perangkat lunak nyata (pengembangan website octaviapiano.com, Chrome extension, dan aplikasi web) untuk lolos tanpa tes tertulis.',
-            benefits: 'Jalur masuk berbasis validasi portofolio teknologi nyata, proses seleksi non-tes yang efisien, kepastian studi di PTN Semarang.'
+            reason: 'Memanfaatkan portofolio sains dan fisika SMA untuk mengamankan kursi di prodi Teknik Elektro UNNES jalur prestasi.',
+            benefits: 'Pemanfaatan prestasi dan keunggulan sains SMA untuk masuk prodi teknik elektro di PTN Semarang.'
           },
           {
             type: 'pilihan2',
             label: 'PILIHAN 2',
-            major: 'Teknik Elektro',
+            major: 'S1 Sistem Informasi',
             degree: 'S1',
-            reason: 'Opsi kedua jalur prestasi untuk mengamankan kursi di fakultas teknik UNNES.',
-            benefits: 'Pemanfaatan prestasi dan keunggulan sains SMA untuk masuk prodi teknik di PTN Semarang.'
+            reason: 'Mengoptimalkan portofolio proyek perangkat lunak nyata (pengembangan website octaviapiano.com, Chrome extension, dan aplikasi web) sebagai pilihan kedua.',
+            benefits: 'Jalur masuk berbasis validasi portofolio teknologi nyata, proses seleksi non-tes yang efisien, kepastian studi di PTN Semarang.'
           }
         ]
       }
@@ -412,10 +358,10 @@ export const universityRoadmapData: UniversityRoadmapCampus[] = [
           {
             type: 'pilihan1',
             label: 'PILIHAN 1',
-            major: 'Sistem Informasi',
+            major: 'S1 Teknik Industri',
             degree: 'S1',
-            reason: 'UDINUS merupakan kiblat dan pionir kampus IT swasta terakreditasi Unggul di Semarang, memiliki keunggulan kurikulum enterprise system, business intelligence, dan digital solution.',
-            benefits: 'Akreditasi institusi dan prodi Unggul, lokasi strategis di pusat kota Semarang (Imam Bonjol), fasilitas laboratorium komputer super modern, kultur startup dan koding IT yang sangat aktif, fleksibilitas tinggi untuk sinkronisasi proyek bisnis keluarga.'
+            reason: 'UDINUS memiliki keunggulan prodi teknik industri dengan kurikulum rekayasa sistem, manajemen operasional, dan efisiensi proses bisnis manufaktur & retail.',
+            benefits: 'Akreditasi institusi dan prodi unggul, lokasi strategis di pusat kota Semarang (Imam Bonjol), fasilitas laboratorium modern, kultur profesional tinggi untuk sinkronisasi manajemen bisnis keluarga.'
           }
         ]
       }
