@@ -239,15 +239,19 @@ export const ContinuousDocumentViewer: React.FC<ContinuousDocumentViewerProps> =
     }
   };
 
-  const containerMaxWidthClass = isExpandedWidth ? 'max-w-5xl' : 'max-w-3xl';
+  const containerMaxWidthClass = isExpandedWidth ? 'w-full max-w-none px-0' : 'max-w-3xl px-4 sm:px-6';
 
   return (
-    <div className={`w-full ${containerMaxWidthClass} mx-auto transition-all duration-200 py-8 px-4 sm:px-6`}>
-      <div className="space-y-10">
+    <div className={`w-full ${containerMaxWidthClass} mx-auto transition-all duration-200 ${isExpandedWidth ? 'py-1 sm:py-3' : 'py-6 sm:py-8'}`}>
+      <div className={isExpandedWidth ? "space-y-4" : "space-y-10"}>
         {pages.map((page) => (
           <article
             key={page.pageNumber}
-            className="bg-white rounded-xl border border-slate-200 p-6 sm:p-10 shadow-sm transition-all"
+            className={`bg-white transition-all ${
+              isExpandedWidth
+                ? 'w-full rounded-none border-x-0 border-y border-slate-200 p-5 sm:p-10 md:p-14 shadow-xs'
+                : 'rounded-xl border border-slate-200 p-6 sm:p-10 shadow-sm'
+            }`}
             style={{ fontSize: `${fontSizePercent}%` }}
           >
             {/* Page Header Indicator */}

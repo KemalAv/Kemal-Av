@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DocPage, HighlightColor, HighlightMode, WordItem } from '../types';
 import { Volume2, Play, Pause } from 'lucide-react';
 
@@ -16,6 +16,8 @@ interface OriginalPdfViewerProps {
   onHighlightColorChange?: (color: HighlightColor) => void;
   wpm?: number;
   isMuted?: boolean;
+  pdfDoc?: any;
+  fontSizePercent?: number;
 }
 
 const COLOR_CONFIGS: Record<HighlightColor, {
@@ -31,11 +33,11 @@ const COLOR_CONFIGS: Record<HighlightColor, {
 }> = {
   sky: {
     name: 'Biru Langit (Standar)',
-    bg: 'rgba(186, 230, 253, 0.82)', // sky-200 with 82% opacity matching PDF selection
+    bg: 'rgba(186, 230, 253, 0.82)',
     bothWordBg: 'rgba(224, 242, 254, 0.65)',
     border: '1.5px solid rgba(14, 165, 233, 0.85)',
     shadow: '0 0 0 1.5px rgba(56, 189, 248, 0.8), 0 2px 6px rgba(14, 165, 233, 0.28)',
-    letterBg: 'rgba(2, 132, 199, 0.92)', // vivid cursor on the active letter
+    letterBg: 'rgba(2, 132, 199, 0.92)',
     letterBorder: '1.5px solid #0369a1',
     letterShadow: '0 0 0 1.5px rgba(14, 165, 233, 0.95), 0 2px 5px rgba(2, 132, 199, 0.45)',
     dotClass: 'bg-sky-500',
@@ -75,6 +77,169 @@ const COLOR_CONFIGS: Record<HighlightColor, {
   },
 };
 
+interface HighResPdfPageCanvasProps {
+  pdfDoc?: any;
+  pageNumber: number;
+  fallbackUrl?: string;
+  isExpandedWidth: boolean;
+  fontSizePercent: number;
+}
+
+const HighResPdfPageCanvas: React.FC<HighResPdfPageCanvasProps> = ({
+  pdfDoc,
+  pageNumber,
+  fallbackUrl,
+  isExpandedWidth,
+  fontSizePercent,
+}) => {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [isRendered, setIsRendered] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+
+    let timeoutId: NodeJS.Timeout | null = null;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const w = Math.round(entry.contentRect.width);
+        if (w > 0) {
+          if (timeoutId) clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            setContainerWidth(w);
+          }, 80);
+        }
+      }
+    });
+
+    observer.observe(el);
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!pdfDoc || !canvasRef.current) return;
+
+    let cancelled = false;
+    let renderTask: any = null;
+
+    const renderHighDpiPage = async () => {
+      try {
+        const page = await pdfDoc.getPage(pageNumber);
+        if (cancelled || !canvasRef.current) return;
+
+        const baseViewport = page.getViewport({ scale: 1 });
+        const dpr = typeof window !== 'undefined' ? Math.max(window.devicePixelRatio || 1, 2.25) : 2.5;
+        const targetCssWidth = containerWidth > 0 ? containerWidth : (isExpandedWidth ? 1400 : 850);
+        const zoomFactor = Math.max(0.7, fontSizePercent / 100);
+
+        // Compute crisp vector scale matching exact display width * high-DPI supersampling
+        const desiredScale = (targetCssWidth / baseViewport.width) * dpr * zoomFactor;
+        const highResScale = Math.min(4.5, Math.max(3.0, desiredScale));
+
+        const viewport = page.getViewport({ scale: highResScale });
+        const offscreenCanvas = document.createElement('canvas');
+        offscreenCanvas.width = Math.floor(viewport.width);
+        offscreenCanvas.height = Math.floor(viewport.height);
+
+        const ctx = offscreenCanvas.getContext('2d', { alpha: false });
+        if (!ctx) return;
+
+        // Plain white background matching text reader
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+        renderTask = (page.render as any)({
+          canvasContext: ctx,
+          viewport,
+          canvas: offscreenCanvas,
+          background: '#ffffff',
+        });
+
+        await renderTask.promise;
+        if (cancelled || !canvasRef.current) return;
+
+        // Clean any faint off-white/gray paper tint so background is 100% plain white
+        try {
+          const imgData = ctx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+          const data = imgData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            if (r >= 235 && g >= 235 && b >= 230 && Math.abs(r - g) <= 12 && Math.abs(g - b) <= 16) {
+              data[i] = 255;
+              data[i + 1] = 255;
+              data[i + 2] = 255;
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+        } catch {
+          // Ignore if canvas pixel manipulation is restricted
+        }
+
+        const targetCanvas = canvasRef.current;
+        targetCanvas.width = offscreenCanvas.width;
+        targetCanvas.height = offscreenCanvas.height;
+        const targetCtx = targetCanvas.getContext('2d', { alpha: false });
+        if (targetCtx) {
+          targetCtx.drawImage(offscreenCanvas, 0, 0);
+          setIsRendered(true);
+        }
+      } catch (err: any) {
+        if (err?.name !== 'RenderingCancelledException') {
+          console.warn(`High-DPI render warning on page ${pageNumber}:`, err);
+        }
+      }
+    };
+
+    renderHighDpiPage();
+
+    return () => {
+      cancelled = true;
+      if (renderTask && typeof renderTask.cancel === 'function') {
+        try {
+          renderTask.cancel();
+        } catch {
+          // Ignore cancel error
+        }
+      }
+    };
+  }, [pdfDoc, pageNumber, containerWidth, isExpandedWidth, fontSizePercent]);
+
+  return (
+    <div ref={wrapperRef} className="w-full bg-white">
+      {pdfDoc ? (
+        <>
+          <canvas
+            ref={canvasRef}
+            className={`block w-full h-auto pointer-events-none bg-white ${isRendered ? '' : 'hidden'}`}
+          />
+          {!isRendered && fallbackUrl && (
+            <img
+              src={fallbackUrl}
+              alt={`Halaman PDF ${pageNumber}`}
+              className="block w-full h-auto pointer-events-none bg-white"
+              draggable={false}
+            />
+          )}
+        </>
+      ) : fallbackUrl ? (
+        <img
+          src={fallbackUrl}
+          alt={`Halaman PDF ${pageNumber}`}
+          className="block w-full h-auto pointer-events-none bg-white"
+          draggable={false}
+        />
+      ) : null}
+    </div>
+  );
+};
+
 export const OriginalPdfViewer: React.FC<OriginalPdfViewerProps> = ({
   pages,
   isExpandedWidth,
@@ -89,8 +254,10 @@ export const OriginalPdfViewer: React.FC<OriginalPdfViewerProps> = ({
   onHighlightColorChange,
   wpm = 180,
   isMuted = false,
+  pdfDoc,
+  fontSizePercent = 100,
 }) => {
-  const containerMaxWidthClass = isExpandedWidth ? 'max-w-5xl' : 'max-w-3xl';
+  const containerMaxWidthClass = isExpandedWidth ? 'w-full max-w-none px-0' : 'max-w-3xl px-4 sm:px-6';
   const activeWord = allWords[currentWordIndex];
   const activeHighlightRef = useRef<HTMLDivElement | null>(null);
 
@@ -144,23 +311,31 @@ export const OriginalPdfViewer: React.FC<OriginalPdfViewerProps> = ({
   };
 
   return (
-    <div className={`w-full ${containerMaxWidthClass} mx-auto transition-all duration-200 py-8 px-4 sm:px-6 relative pb-28`}>
-      <div className="space-y-8">
+    <div className={`w-full ${containerMaxWidthClass} mx-auto transition-all duration-200 ${isExpandedWidth ? 'py-1 sm:py-3' : 'py-6 sm:py-8'} relative pb-28`}>
+      <div className={isExpandedWidth ? "space-y-4" : "space-y-10"}>
         {pages.map((page) => {
           const isActivePage = activeWord?.pageIndex === page.pageNumber - 1;
           const pageWords = page.paragraphs.flatMap(p => p.words);
           const letterBounds = (isActivePage && activeWord) ? calculateLetterBounds(activeWord, activeCharIndexInWord) : null;
 
           return (
-            <div
+            <article
               key={page.pageNumber}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+              className={`bg-white transition-all ${
+                isExpandedWidth
+                  ? 'w-full rounded-none border-x-0 border-y border-slate-200 p-0 shadow-xs'
+                  : 'rounded-xl border border-slate-200 p-4 sm:p-10 shadow-sm'
+              }`}
             >
-              {/* Page Header */}
-              <div className="px-6 py-2.5 border-b border-slate-100 flex items-center justify-between text-[11px] font-medium text-slate-500 select-none bg-slate-50/70">
+              {/* Page Header Indicator (Plain white like Text Reader) */}
+              <div className={`flex items-center justify-between text-[11px] font-medium text-slate-400 select-none border-b border-slate-100 ${
+                isExpandedWidth ? 'px-4 sm:px-6 py-2.5 mb-2' : 'pb-4 mb-6'
+              }`}>
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${isActivePage && isPlaying ? 'bg-sky-500 animate-ping' : 'bg-emerald-500'} inline-block`} />
-                  <span className="font-semibold text-slate-700">Halaman PDF Asli {page.pageNumber}</span>
+                  <span className="font-semibold text-slate-500 uppercase tracking-wider">
+                    Halaman {page.pageNumber}
+                  </span>
                   {isActivePage && isPlaying && (
                     <span className="text-[10px] text-sky-600 bg-sky-50 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider border border-sky-200">
                       TTS Aktif
@@ -168,21 +343,25 @@ export const OriginalPdfViewer: React.FC<OriginalPdfViewerProps> = ({
                   )}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span>{page.totalWords} kata terdeteksi</span>
-                  <span className="text-slate-300">|</span>
-                  <span className="text-[10px] text-slate-400">Klik kata mana saja untuk membaca</span>
+                  <span>{page.totalWords} kata</span>
+                  <span className="text-slate-300 hidden sm:inline">|</span>
+                  <span className="text-[10px] text-slate-400 hidden sm:inline">Klik kata mana saja untuk membaca</span>
                 </div>
               </div>
 
-              {/* Page Canvas Image Container */}
-              <div className="p-4 sm:p-6 flex justify-center bg-slate-100/60 overflow-x-auto">
-                {page.originalCanvasUrl ? (
-                  <div className="relative inline-block max-w-full select-none shadow-sm rounded border border-slate-200/80 bg-white">
-                    <img
-                      src={page.originalCanvasUrl}
-                      alt={`Halaman PDF ${page.pageNumber}`}
-                      className="block max-w-full h-auto pointer-events-none"
-                      draggable={false}
+              {/* Plain White PDF Page Surface (No gray wrapper or inner border) */}
+              <div className="w-full bg-white overflow-x-auto">
+                {page.originalCanvasUrl || pdfDoc ? (
+                  <div
+                    className="relative w-full select-none bg-white mx-auto"
+                    style={fontSizePercent !== 100 ? { width: `${fontSizePercent}%` } : undefined}
+                  >
+                    <HighResPdfPageCanvas
+                      pdfDoc={pdfDoc}
+                      pageNumber={page.pageNumber}
+                      fallbackUrl={page.originalCanvasUrl}
+                      isExpandedWidth={isExpandedWidth}
+                      fontSizePercent={fontSizePercent}
                     />
 
                     {/* Word Hitboxes Layer for clicking directly on original PDF */}
@@ -247,20 +426,19 @@ export const OriginalPdfViewer: React.FC<OriginalPdfViewerProps> = ({
                     )}
                   </div>
                 ) : (
-                  <div className="py-16 text-center text-slate-400 text-sm">
+                  <div className="py-16 text-center text-slate-400 text-sm bg-white">
                     Pratinjau visual halaman PDF tidak tersedia. Silakan gunakan Mode Baca.
                   </div>
                 )}
               </div>
 
-              {/* Page Footer */}
-              <div className="px-6 py-2 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400 font-mono select-none bg-slate-50/40">
-                <span>— Halaman {page.pageNumber} dari {pages.length} —</span>
-                <span className="hidden sm:inline">
-                  {highlightMode === 'letter' ? 'Mode Sorotan: Per Huruf' : highlightMode === 'both' ? 'Mode Sorotan: Kata & Huruf' : 'Mode Sorotan: Per Kata'}
-                </span>
+              {/* Page Footer (Plain white like Text Reader) */}
+              <div className={`border-t border-slate-100 text-center text-[10px] text-slate-400 select-none font-mono ${
+                isExpandedWidth ? 'py-3 mt-2' : 'pt-6 mt-6'
+              }`}>
+                — {page.pageNumber} —
               </div>
-            </div>
+            </article>
           );
         })}
       </div>

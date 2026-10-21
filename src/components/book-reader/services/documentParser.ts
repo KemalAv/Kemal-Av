@@ -292,22 +292,47 @@ export async function parsePdfFile(file: File): Promise<DocumentState> {
     const page = await pdfDoc.getPage(pageNum);
     const textContent = await page.getTextContent();
 
-    const viewport = page.getViewport({ scale: 1.5 });
+    const renderScale = 3.0;
+    const viewport = page.getViewport({ scale: renderScale });
 
-    // Render original canvas thumbnail for "PDF Asli" view
+    // Render original canvas in ultra-sharp lossless quality with plain white background
     let originalCanvasUrl: string | undefined;
     try {
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { alpha: false });
       if (ctx) {
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         await (page.render as any)({
           canvasContext: ctx,
           viewport,
           canvas,
+          background: '#ffffff',
         }).promise;
-        originalCanvasUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+        // Normalize any light off-white/grayish paper background in the PDF to pure plain white
+        try {
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imgData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            if (r >= 235 && g >= 235 && b >= 230 && Math.abs(r - g) <= 12 && Math.abs(g - b) <= 16) {
+              data[i] = 255;
+              data[i + 1] = 255;
+              data[i + 2] = 255;
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+        } catch {
+          // Ignore pixel manipulation errors if any
+        }
+
+        originalCanvasUrl = canvas.toDataURL('image/png');
       }
     } catch (e) {
       console.warn(`Failed to render canvas for page ${pageNum}:`, e);
@@ -399,7 +424,7 @@ export async function parsePdfFile(file: File): Promise<DocumentState> {
             const pt = viewport.convertToViewportPoint(x, y);
             return [pt[0], pt[1]];
           }
-          return [x * 1.5, (viewport.height - y * 1.5)];
+          return [x * renderScale, (viewport.height - y * renderScale)];
         };
 
         const p1 = toVp(wordX1, yBottom);

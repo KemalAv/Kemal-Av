@@ -433,6 +433,11 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
     }
   };
 
+  // Toggle Expanded Width (Wide layout without browser OS fullscreen)
+  const handleToggleExpandWidth = useCallback(() => {
+    setIsExpandedWidth(prev => !prev);
+  }, []);
+
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -454,12 +459,14 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
         setFontSizePercent(prev => Math.min(200, prev + 10));
       } else if (e.key === '-') {
         setFontSizePercent(prev => Math.max(70, prev - 10));
+      } else if (e.key === 'Escape' && isExpandedWidth) {
+        setIsExpandedWidth(false);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleTogglePlay, handlePrevWord, handleNextWord]);
+  }, [handleTogglePlay, handlePrevWord, handleNextWord, isExpandedWidth]);
 
   // Clean up on unmount
   useEffect(() => {
@@ -501,6 +508,7 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
         onLoadSampleText={handleLoadSampleText}
         onBackToHome={onBackToHome}
         isProcessing={isProcessing}
+        isExpandedWidth={isExpandedWidth}
       />
 
       {/* 2. Document Info Bar */}
@@ -513,7 +521,7 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
         onIncreaseFontSize={() => setFontSizePercent(p => Math.min(200, p + 10))}
         onDecreaseFontSize={() => setFontSizePercent(p => Math.max(70, p - 10))}
         isExpandedWidth={isExpandedWidth}
-        onToggleExpandWidth={() => setIsExpandedWidth(prev => !prev)}
+        onToggleExpandWidth={handleToggleExpandWidth}
         pdfDisplayMode={pdfDisplayMode}
         onTogglePdfMode={setPdfDisplayMode}
       />
@@ -538,6 +546,7 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
         isTtsPanelOpen={isTtsPanelOpen}
         onToggleTtsPanel={() => setIsTtsPanelOpen(prev => !prev)}
         isMuted={isMuted}
+        isExpandedWidth={isExpandedWidth}
       />
 
       {/* 4. Collapsible TTS Settings Panel */}
@@ -590,6 +599,8 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
             onHighlightColorChange={setHighlightColor}
             wpm={wpm}
             isMuted={isMuted}
+            pdfDoc={docState.originalPdfDoc}
+            fontSizePercent={fontSizePercent}
           />
         ) : (
           <ContinuousDocumentViewer

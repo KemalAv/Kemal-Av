@@ -7,6 +7,7 @@ interface HeaderProps {
   onLoadSampleText?: () => void;
   onBackToHome?: () => void;
   isProcessing?: boolean;
+  isExpandedWidth?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -15,6 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLoadSampleText,
   onBackToHome,
   isProcessing = false,
+  isExpandedWidth = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <div className={`${isExpandedWidth ? 'max-w-none w-full' : 'max-w-7xl'} mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 transition-all`}>
         {/* Logo & Title */}
         <div className="flex items-center gap-3">
           {onBackToHome && (

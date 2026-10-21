@@ -33,6 +33,7 @@ interface ReadingControlPanelProps {
   isTtsPanelOpen: boolean;
   onToggleTtsPanel: () => void;
   isMuted: boolean;
+  isExpandedWidth?: boolean;
 }
 
 export const ReadingControlPanel: React.FC<ReadingControlPanelProps> = ({
@@ -54,6 +55,7 @@ export const ReadingControlPanel: React.FC<ReadingControlPanelProps> = ({
   isTtsPanelOpen,
   onToggleTtsPanel,
   isMuted,
+  isExpandedWidth = false,
 }) => {
   return (
     <div className="bg-white border-b border-slate-200 shadow-2xs sticky top-16 z-30">
@@ -65,7 +67,7 @@ export const ReadingControlPanel: React.FC<ReadingControlPanelProps> = ({
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+      <div className={`${isExpandedWidth ? 'max-w-none w-full' : 'max-w-7xl'} mx-auto px-4 sm:px-6 py-3 transition-all`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           
           {/* Section 1: Playback Controls & Skip Buttons */}

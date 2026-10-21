@@ -31,7 +31,7 @@ export const DocumentInfoBar: React.FC<DocumentInfoBarProps> = ({
 }) => {
   return (
     <div className="bg-white border-b border-slate-200 py-3 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className={`${isExpandedWidth ? 'max-w-none w-full' : 'max-w-7xl'} mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all`}>
         {/* Left: Document Metadata */}
         <div className="flex items-center gap-3 min-w-0">
           {/* Badge */}
@@ -75,7 +75,7 @@ export const DocumentInfoBar: React.FC<DocumentInfoBarProps> = ({
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
-                title="Tampilan halaman PDF asli"
+                title="Tampilan halaman PDF asli kualitas tinggi"
               >
                 <Layers className="w-3.5 h-3.5" />
                 <span>PDF Asli</span>
@@ -89,7 +89,7 @@ export const DocumentInfoBar: React.FC<DocumentInfoBarProps> = ({
               onClick={onDecreaseFontSize}
               disabled={fontSizePercent <= 70}
               className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-              title="Kecilkan teks (−)"
+              title="Kecilkan teks / zoom (−)"
               aria-label="Kecilkan ukuran teks"
             >
               <Minus className="w-3.5 h-3.5" />
@@ -101,7 +101,7 @@ export const DocumentInfoBar: React.FC<DocumentInfoBarProps> = ({
               onClick={onIncreaseFontSize}
               disabled={fontSizePercent >= 200}
               className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-              title="Besarkan teks (+)"
+              title="Besarkan teks / zoom (+)"
               aria-label="Besarkan ukuran teks"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -116,7 +116,7 @@ export const DocumentInfoBar: React.FC<DocumentInfoBarProps> = ({
                 ? 'bg-slate-900 text-white border-slate-900'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
-            title={isExpandedWidth ? 'Kembalikan ke lebar standar' : 'Perlebar area dokumen'}
+            title={isExpandedWidth ? 'Kembalikan ke lebar standar' : 'Perlebar area tampilan dokumen'}
           >
             {isExpandedWidth ? (
               <>
