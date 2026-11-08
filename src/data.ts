@@ -41,6 +41,12 @@ export const works: Project[] = [
 
 export const apps: Project[] = [
   {
+    title: "PDF Extract",
+    description: "Pemindai cerdas dokumen & ekstraksi teks berbasis algoritma open-source OSS Document Scanner (github.com/ossappscollective/OSS-DocumentScanner). Pindai via kamera web, deteksi sudut otomatis, perataan perspektif, filter Magic Doc & B&W, multi-halaman, ekspor PDF/ZIP, dan OCR.",
+    link: "#",
+    type: "app"
+  },
+  {
     title: "Infinity Board",
     description: "Papan sketsa & kanvas tak terbatas. Coret-coret bebas dengan pen, pensil, stabilo, bentuk, upload gambar, multi-proyek, serta ekspor ke PNG, JPEG, SVG, dan JSON.",
     link: "#",
