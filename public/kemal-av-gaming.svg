@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <!-- Bentuk awan flat (satu bentuk, dipakai ulang dengan ukuran berbeda) -->
+    <g id="cloud" fill="#FFFFFF">
+      <rect x="0" y="48" width="172" height="40" rx="20"/>
+      <circle cx="42" cy="54" r="24"/><circle cx="82" cy="36" r="34"/><circle cx="117" cy="44" r="22"/><circle cx="136" cy="58" r="18"/>
+    </g>
+  </defs>
+
+  <!-- Langit (flat) -->
+  <rect width="1280" height="720" fill="#00D4FF"/>
+
+  <!-- Matahari (posisi sama seperti gambar asli) -->
+  <g stroke="#FFD21F" stroke-width="7" stroke-linecap="round">
+    <line x1="1140" y1="14" x2="1176" y2="14"/>
+    <line x1="1150" y1="63" x2="1184" y2="48"/>
+    <line x1="1176" y1="102" x2="1202" y2="78"/>
+    <line x1="1218" y1="131" x2="1232" y2="100"/>
+    <line x1="1265" y1="140" x2="1265" y2="106"/>
+  </g>
+  <circle cx="1272" cy="12" r="90" fill="#FFE000"/>
+
+  <!-- Awan besar (simetris: kiri x=250, kanan x=806; lebar 224) -->
+  <use xlink:href="#cloud" transform="translate(250,40) scale(1.3)"/>
+  <use xlink:href="#cloud" transform="translate(806,40) scale(1.3)"/>
+
+  <!-- Awan sedang (simetris: kiri x=110 & 380, kanan x=1015 & 745; lebar 155) -->
+  <use xlink:href="#cloud" transform="translate(110,190) scale(0.9)"/>
+  <use xlink:href="#cloud" transform="translate(1015,190) scale(0.9)"/>
+  <use xlink:href="#cloud" transform="translate(380,230) scale(0.9)"/>
+  <use xlink:href="#cloud" transform="translate(745,230) scale(0.9)"/>
+
+  <!-- Awan kecil (simetris: kiri x=30 & 280, kanan x=1155 & 905; lebar 95) -->
+  <use xlink:href="#cloud" transform="translate(30,260) scale(0.55)"/>
+  <use xlink:href="#cloud" transform="translate(1155,260) scale(0.55)"/>
+  <use xlink:href="#cloud" transform="translate(280,310) scale(0.55)"/>
+  <use xlink:href="#cloud" transform="translate(905,310) scale(0.55)"/>
+
+  <!-- Awan tengah (berpusat di x=640; lebar 120) -->
+  <use xlink:href="#cloud" transform="translate(580,165) scale(0.7)"/>
+
+  <!-- Bukit belakang (flat hijau tua) -->
+  <path fill="#00C214" d="M0,430 C120,400 240,405 360,440 C470,472 560,445 660,438 C780,430 880,470 1000,440 C1100,415 1200,410 1280,425 L1280,720 L0,720 Z"/>
+
+  <!-- Bukit depan (flat, warna asli) -->
+  <path fill="#00FF19" d="M0,392 C25,410 45,440 80,440 C130,440 180,395 230,388 C300,380 360,445 420,450 C480,455 560,425 640,426 C720,427 800,455 860,450 C920,445 980,392 1040,388 C1100,384 1160,440 1205,440 C1240,440 1260,410 1280,395 L1280,720 L0,720 Z"/>
+
+  <!-- Pohon (flat, di depan bukit) -->
+  <g>
+    <rect x="110" y="455" width="10" height="34" fill="#7A4A21"/>
+    <circle cx="115" cy="440" r="24" fill="#0B8F2A"/>
+    <circle cx="99" cy="452" r="15" fill="#0B8F2A"/>
+    <circle cx="131" cy="452" r="15" fill="#0B8F2A"/>
+
+    <rect x="162" y="468" width="8" height="26" fill="#7A4A21"/>
+    <circle cx="166" cy="458" r="16" fill="#0B8F2A"/>
+    <circle cx="155" cy="466" r="10" fill="#0B8F2A"/>
+    <circle cx="177" cy="466" r="10" fill="#0B8F2A"/>
+
+    <rect x="1068" y="440" width="11" height="40" fill="#7A4A21"/>
+    <circle cx="1073" cy="424" r="27" fill="#0B8F2A"/>
+    <circle cx="1056" cy="438" r="17" fill="#0B8F2A"/>
+    <circle cx="1091" cy="438" r="17" fill="#0B8F2A"/>
+
+    <rect x="1124" y="458" width="8" height="26" fill="#7A4A21"/>
+    <circle cx="1128" cy="448" r="16" fill="#0B8F2A"/>
+    <circle cx="1117" cy="456" r="10" fill="#0B8F2A"/>
+    <circle cx="1139" cy="456" r="10" fill="#0B8F2A"/>
+  </g>
+
+  <!-- Rumput (flat) -->
+  <g stroke="#0B8F2A" stroke-width="4" stroke-linecap="round" fill="none">
+    <path d="M90,620 l-7,-18 M99,620 l0,-22 M108,620 l7,-18"/>
+    <path d="M330,650 l-7,-18 M339,650 l0,-22 M348,650 l7,-18"/>
+    <path d="M610,630 l-7,-18 M619,630 l0,-22 M628,630 l7,-18"/>
+    <path d="M900,640 l-7,-18 M909,640 l0,-22 M918,640 l7,-18"/>
+    <path d="M1180,615 l-7,-18 M1189,615 l0,-22 M1198,615 l7,-18"/>
+  </g>
+
+  <!-- Bunga (flat) -->
+  <g>
+    <circle cx="200" cy="600" r="7" fill="#FFFFFF"/><circle cx="200" cy="600" r="3" fill="#FFD21F"/>
+    <circle cx="470" cy="635" r="7" fill="#FF6FA8"/><circle cx="470" cy="635" r="3" fill="#FFFFFF"/>
+    <circle cx="760" cy="615" r="7" fill="#FFFFFF"/><circle cx="760" cy="615" r="3" fill="#FFD21F"/>
+    <circle cx="1040" cy="600" r="7" fill="#FF6FA8"/><circle cx="1040" cy="600" r="3" fill="#FFFFFF"/>
+    <circle cx="1240" cy="660" r="7" fill="#FFFFFF"/><circle cx="1240" cy="660" r="3" fill="#FFD21F"/>
+    <circle cx="40" cy="670" r="7" fill="#FF6FA8"/><circle cx="40" cy="670" r="3" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Teks: hitam seperti aslinya -->
+  <text x="640" y="380" text-anchor="middle" font-family="Roboto, Arial, Helvetica, sans-serif" font-size="50" fill="#000000">Kemal Av Gaming</text>
+</svg>

@@ -261,14 +261,14 @@ export const FableReaderApp: React.FC<FableReaderAppProps> = ({ onBackToHome }) 
         throw new Error('Format file tidak didukung. Harap pilih dokumen Microsoft Word (.docx) atau PDF (.pdf).');
       }
 
-      if (!parsedDoc.allWords || parsedDoc.allWords.length === 0) {
+      if ((!parsedDoc.allWords || parsedDoc.allWords.length === 0) && parsedDoc.type !== 'PDF') {
         throw new Error('Dokumen tidak berisi teks yang dapat dibaca.');
       }
 
       setDocState(parsedDoc);
       setCurrentWordIndex(0);
       setActiveCharIndexInWord(0);
-      setPdfDisplayMode('reader');
+      setPdfDisplayMode(parsedDoc.type === 'PDF' && parsedDoc.totalWords === 0 ? 'original' : 'reader');
     } catch (err: any) {
       console.error('Document parsing error:', err);
       setErrorMessage(err.message || 'Gagal memproses dokumen. Pastikan file valid.');
@@ -409,6 +409,7 @@ export const FableReaderApp: React.FC<FableReaderAppProps> = ({ onBackToHome }) 
         onToggleExpandWidth={() => setIsExpandedWidth(prev => !prev)}
         pdfDisplayMode={pdfDisplayMode}
         onTogglePdfMode={setPdfDisplayMode}
+        hasReadableText={docState.totalWords > 0}
       />
 
       {/* 3. Reading Control Panel */}
@@ -468,6 +469,11 @@ export const FableReaderApp: React.FC<FableReaderAppProps> = ({ onBackToHome }) 
       <main className="flex-1 pb-20">
         {isProcessing ? (
           <SkeletonLoader message={processingMessage} />
+        ) : docState.type === 'PDF' && pdfDisplayMode === 'original' ? (
+          <OriginalPdfViewer
+            pages={docState.pages}
+            isExpandedWidth={isExpandedWidth}
+          />
         ) : (
           <ContinuousDocumentViewer
             pages={docState.pages}

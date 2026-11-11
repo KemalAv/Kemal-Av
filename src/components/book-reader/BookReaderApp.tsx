@@ -367,7 +367,7 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
         throw new Error('Format file tidak didukung. Harap pilih dokumen Microsoft Word (.docx) atau PDF (.pdf).');
       }
 
-      if (!parsedDoc.allWords || parsedDoc.allWords.length === 0) {
+      if ((!parsedDoc.allWords || parsedDoc.allWords.length === 0) && parsedDoc.type !== 'PDF') {
         throw new Error('Dokumen tidak berisi teks yang dapat dibaca.');
       }
 
@@ -524,6 +524,7 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
         onToggleExpandWidth={handleToggleExpandWidth}
         pdfDisplayMode={pdfDisplayMode}
         onTogglePdfMode={setPdfDisplayMode}
+        hasReadableText={docState.totalWords > 0}
       />
 
       {/* 3. Reading Control Panel */}

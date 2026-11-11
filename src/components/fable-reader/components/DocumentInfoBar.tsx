@@ -14,6 +14,7 @@ interface DocumentInfoBarProps {
   onToggleExpandWidth: () => void;
   pdfDisplayMode: PdfDisplayMode;
   onTogglePdfMode: (mode: PdfDisplayMode) => void;
+  hasReadableText: boolean;
 }
 
 export const DocumentInfoBar: React.FC<DocumentInfoBarProps> = ({
@@ -28,6 +29,7 @@ export const DocumentInfoBar: React.FC<DocumentInfoBarProps> = ({
   onToggleExpandWidth,
   pdfDisplayMode,
   onTogglePdfMode,
+  hasReadableText,
 }) => {
   return (
     <div className="bg-white border-b border-slate-200 py-3 px-4 sm:px-6">
@@ -58,7 +60,8 @@ export const DocumentInfoBar: React.FC<DocumentInfoBarProps> = ({
             <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
               <button
                 onClick={() => onTogglePdfMode('reader')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer ${
+                disabled={!hasReadableText}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 ${
                   pdfDisplayMode === 'reader'
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
