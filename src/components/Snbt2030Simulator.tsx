@@ -328,11 +328,31 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     return Number(boundedTheta.toFixed(2));
   };
 
+  // Gentle calibration lift for the low/mid range. The pure IRT mapping (theta -> score) is kept as is;
+  // on top of it, scores below ~700 get a small, smooth bonus (max ~+34) that fades to 0 at 700,
+  // so the top range is untouched. Tuned so a total of ~90/160 correct lands around 610.
+  const SCORE_LIFT_POINTS: [number, number][] = [
+    [250, 0], [350, 8], [450, 20], [520, 28], [578, 34], [620, 26], [664, 9], [700, 0]
+  ];
+  const lowMidScoreLift = (score: number) => {
+    const pts = SCORE_LIFT_POINTS;
+    if (score <= pts[0][0] || score >= pts[pts.length - 1][0]) return 0;
+    for (let i = 1; i < pts.length; i++) {
+      if (score <= pts[i][0]) {
+        const [x0, y0] = pts[i - 1];
+        const [x1, y1] = pts[i];
+        return y0 + ((y1 - y0) * (score - x0)) / (x1 - x0);
+      }
+    }
+    return 0;
+  };
+
   // Convert estimated theta directly to authentic UTBK-SNBT score (where theta = 0 maps to exactly 500)
   const calculateSnbtIrtScore = (theta: number) => {
     // Official IRT Linear Transformation: Score = 500 + 120 * theta (Mean = 500, SD = 120)
     // Theta 0.0 = exactly 500
-    const rawScore = Math.round(500 + 120 * theta);
+    const baseScore = Math.round(500 + 120 * theta);
+    const rawScore = Math.round(baseScore + lowMidScoreLift(baseScore));
     return Math.max(200, Math.min(1000, rawScore));
   };
 

@@ -4,8 +4,6 @@ import {
   Pause,
   ChevronLeft,
   ChevronRight,
-  Eye,
-  EyeOff,
   Volume2,
   Clock,
   Gauge,
@@ -23,8 +21,6 @@ interface ReadingControlPanelProps {
   onWpmChange: (wpm: number) => void;
   highlightMode: HighlightMode;
   onHighlightModeChange: (mode: HighlightMode) => void;
-  showVisuals: boolean;
-  onToggleVisuals: () => void;
   pageRemainingTime: string;
   totalRemainingTime: string;
   progressPercent: number;
@@ -45,8 +41,6 @@ export const ReadingControlPanel: React.FC<ReadingControlPanelProps> = ({
   onWpmChange,
   highlightMode,
   onHighlightModeChange,
-  showVisuals,
-  onToggleVisuals,
   pageRemainingTime,
   totalRemainingTime,
   progressPercent,
@@ -202,29 +196,6 @@ export const ReadingControlPanel: React.FC<ReadingControlPanelProps> = ({
                 Keduanya
               </button>
             </div>
-
-            {/* Toggle Visual Objects (Images/Tables) */}
-            <button
-              onClick={onToggleVisuals}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer ${
-                showVisuals
-                  ? 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                  : 'bg-slate-100 text-slate-500 border-slate-300'
-              }`}
-              title={showVisuals ? 'Sembunyikan Gambar & Tabel Dokumen' : 'Tampilkan Gambar & Tabel Dokumen'}
-            >
-              {showVisuals ? (
-                <>
-                  <Eye className="w-3.5 h-3.5 text-slate-600" />
-                  <span className="hidden xl:inline">Objek Visual</span>
-                </>
-              ) : (
-                <>
-                  <EyeOff className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="hidden xl:inline">Objek Visual</span>
-                </>
-              )}
-            </button>
           </div>
 
           {/* Section 4: Time Estimation & Progress Indicator */}

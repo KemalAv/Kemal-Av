@@ -41,14 +41,14 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
   const [highlightColor, setHighlightColor] = useState<HighlightColor>('sky');
   const [fontSizePercent, setFontSizePercent] = useState(100);
   const [isExpandedWidth, setIsExpandedWidth] = useState(false);
-  const [showVisuals, setShowVisuals] = useState(true);
   const [pdfDisplayMode, setPdfDisplayMode] = useState<PdfDisplayMode>('reader');
 
   // TTS State
   const [isTtsPanelOpen, setIsTtsPanelOpen] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>('id');
   const [gender, setGender] = useState<VoiceGender>('female');
-  const [isMuted, setIsMuted] = useState(false);
+  // TTS mati secara default; pengguna menyalakannya lewat panel suara
+  const [isMuted, setIsMuted] = useState(true);
 
   // Modals & Drag State
   const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
@@ -537,8 +537,6 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
         onWpmChange={handleWpmChange}
         highlightMode={highlightMode}
         onHighlightModeChange={setHighlightMode}
-        showVisuals={showVisuals}
-        onToggleVisuals={() => setShowVisuals(prev => !prev)}
         pageRemainingTime={pageRemainingTime}
         totalRemainingTime={totalRemainingTime}
         progressPercent={progressPercent}
@@ -612,7 +610,7 @@ export const BookReaderApp: React.FC<BookReaderAppProps> = ({ onBackToHome }) =>
             highlightColor={highlightColor}
             fontSizePercent={fontSizePercent}
             isExpandedWidth={isExpandedWidth}
-            showVisuals={showVisuals}
+            showVisuals={true}
             onWordClick={handleWordClick}
             isPlaying={isPlaying}
           />

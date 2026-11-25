@@ -23,8 +23,8 @@ export const CLUSTER_WEIGHTS: Record<ProdiCluster, ClusterWeights> = {
     id: 'teknik',
     name: 'Teknik',
     icon: '🛠️',
-    desc: 'Penalaran Matematika & Pengetahuan Kuantitatif (PM 25%, PK 20%, PU 20%, LitIng 15%, LitIndo 10%, PBM 5%, PPU 5%)',
-    weights: { pu: 0.20, pbm: 0.05, ppu: 0.05, pk: 0.20, litIndo: 0.10, litIng: 0.15, pm: 0.25 }
+    desc: 'Penalaran Matematika & Pengetahuan Kuantitatif (PM 25%, PK 20%, PU 20%, LitIndo 15%, LitIng 10%, PBM 5%, PPU 5%)',
+    weights: { pu: 0.20, pbm: 0.05, ppu: 0.05, pk: 0.20, litIndo: 0.15, litIng: 0.10, pm: 0.25 }
   },
   sosial: {
     id: 'sosial',
@@ -44,15 +44,15 @@ export const CLUSTER_WEIGHTS: Record<ProdiCluster, ClusterWeights> = {
     id: 'bisnis',
     name: 'Bisnis',
     icon: '💼',
-    desc: 'Pengetahuan Kuantitatif & Penalaran Matematika (PK 25%, PM 25%, LitIng 15%, PU 15%, PBM 10%, LitIndo 5%, PPU 5%)',
-    weights: { pu: 0.15, pbm: 0.10, ppu: 0.05, pk: 0.25, litIndo: 0.05, litIng: 0.15, pm: 0.25 }
+    desc: 'Penalaran Umum & Literasi Bahasa Inggris (PU 20%, LitIng 20%, PK 15%, PM 15%, PBM 10%, LitIndo 10%, PPU 10%)',
+    weights: { pu: 0.20, pbm: 0.10, ppu: 0.10, pk: 0.15, litIndo: 0.10, litIng: 0.20, pm: 0.15 }
   },
   sastra: {
     id: 'sastra',
     name: 'Sastra',
     icon: '🎭',
-    desc: 'Literasi Bahasa Inggris & Pengetahuan Umum (LitIng 30%, PPU 25%, LitIndo 15%, PBM 10%, PU 10%, PM 5%, PK 5%)',
-    weights: { pu: 0.10, pbm: 0.10, ppu: 0.25, pk: 0.05, litIndo: 0.15, litIng: 0.30, pm: 0.05 }
+    desc: 'Literasi Bahasa Inggris & Pengetahuan Umum (LitIng 25%, PPU 25%, PU 15%, LitIndo 15%, PBM 10%, PM 5%, PK 5%)',
+    weights: { pu: 0.15, pbm: 0.10, ppu: 0.25, pk: 0.05, litIndo: 0.15, litIng: 0.25, pm: 0.05 }
   }
 };
 
@@ -1696,9 +1696,9 @@ export function getClusterHighlightText(cluster: ProdiCluster): string {
     case 'kesehatan':
       return 'PU 25% • Lit-EN 25% • PK 15% • PM 15%';
     case 'bisnis':
-      return 'PK 25% • PM 25% • Lit-EN 15% • PU 15%';
+      return 'PU 20% • Lit-EN 20% • PK 15% • PM 15%';
     case 'sastra':
-      return 'Lit-EN 30% • PPU 25% • Lit-ID 15%';
+      return 'Lit-EN 25% • PPU 25% • PU 15% • Lit-ID 15%';
     default:
       return 'Bobot Rumpun Standar';
   }

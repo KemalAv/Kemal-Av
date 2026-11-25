@@ -20,6 +20,7 @@ import {
   FlipVertical,
   Crop,
   Sparkles,
+  Wand2,
   Copy,
   Trash2,
   Plus,
@@ -37,6 +38,12 @@ import {
   ZoomOut,
   Maximize2
 } from 'lucide-react';
+import {
+  Point,
+  detectDocumentCorners,
+  computeOutputSize,
+  warpPerspective
+} from './documentCrop';
 
 interface PageItem {
   id: string;
@@ -65,11 +72,6 @@ interface DocumentItem {
     notes: string;
   };
   pages: PageItem[];
-}
-
-interface Point {
-  x: number;
-  y: number;
 }
 
 interface ToastMessage {
@@ -348,230 +350,140 @@ export const PdfExtractApp: React.FC<PdfExtractAppProps> = ({ onBackToHome = () 
     renderCanvas();
   }, [renderCanvas]);
 
-  // --- AKYLAS 4-CORNER PAPER DETECTION (PORTED FROM DocumentDetector.cpp) ---
-  const autoDetectPaperCorners = useCallback((canvas: HTMLCanvasElement): Point[] => {
-    const w = canvas.width;
-    const h = canvas.height;
-    if (!w || !h) return [];
+  // --- SMART DOCUMENT CROP (edge detection + true perspective correction, see documentCrop.ts) ---
 
-    const scale = 400.0 / Math.max(w, h);
-    const sw = Math.max(50, Math.round(w * scale));
-    const sh = Math.max(50, Math.round(h * scale));
-
-    const sampleCanvas = document.createElement('canvas');
-    sampleCanvas.width = sw;
-    sampleCanvas.height = sh;
-    const sctx = sampleCanvas.getContext('2d');
-    if (!sctx) return [];
-    sctx.drawImage(canvas, 0, 0, sw, sh);
-
-    const data = sctx.getImageData(0, 0, sw, sh).data;
-    const gray = new Float32Array(sw * sh);
-    for (let i = 0; i < gray.length; i++) {
-      const idx = i * 4;
-      gray[i] = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
-    }
-
-    const blurred = new Float32Array(sw * sh);
-    const k = 2;
-    for (let y = k; y < sh - k; y++) {
-      for (let x = k; x < sw - k; x++) {
-        let sum = 0;
-        for (let dy = -k; dy <= k; dy++) {
-          for (let dx = -k; dx <= k; dx++) {
-            sum += gray[(y + dy) * sw + (x + dx)];
-          }
+  /** Page image with only rotation/flip applied — no colour filters — so detection and warp see the real photo. */
+  const getBaseCanvas = useCallback((page: PageItem): Promise<HTMLCanvasElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const rot = (page.rotation || 0) % 360;
+        const swapped = rot === 90 || rot === 270;
+        const w = swapped ? img.height : img.width;
+        const h = swapped ? img.width : img.height;
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        const cctx = c.getContext('2d', { willReadFrequently: true });
+        if (!cctx) {
+          reject(new Error('canvas'));
+          return;
         }
-        blurred[y * sw + x] = sum / 25;
-      }
-    }
-
-    const hist = new Int32Array(256);
-    const total = sw * sh;
-    for (let i = 0; i < total; i++) hist[Math.round(blurred[i])]++;
-
-    let sumAll = 0;
-    for (let i = 0; i < 256; i++) sumAll += i * hist[i];
-
-    let sumB = 0, wB = 0, wF = 0, varMax = 0, otsuT = 128;
-    for (let t = 0; t < 256; t++) {
-      wB += hist[t];
-      if (wB === 0) continue;
-      wF = total - wB;
-      if (wF === 0) break;
-      sumB += t * hist[t];
-      const mB = sumB / wB;
-      const mF = (sumAll - sumB) / wF;
-      const varBetween = wB * wF * (mB - mF) * (mB - mF);
-      if (varBetween > varMax) {
-        varMax = varBetween;
-        otsuT = t;
-      }
-    }
-
-    let borderSum = 0, borderCount = 0;
-    for (let x = 0; x < sw; x++) {
-      borderSum += blurred[x] + blurred[(sh - 1) * sw + x];
-      borderCount += 2;
-    }
-    for (let y = 0; y < sh; y++) {
-      borderSum += blurred[y * sw] + blurred[y * sw + sw - 1];
-      borderCount += 2;
-    }
-    const bgMean = borderSum / borderCount;
-    const isPaperBrighter = otsuT >= bgMean;
-
-    const binary = new Uint8Array(sw * sh);
-    for (let i = 0; i < total; i++) {
-      const val = blurred[i];
-      binary[i] = (isPaperBrighter ? val >= otsuT : val <= otsuT) ? 1 : 0;
-    }
-
-    const dilated = new Uint8Array(sw * sh);
-    const rD = 3;
-    for (let y = rD; y < sh - rD; y++) {
-      for (let x = rD; x < sw - rD; x++) {
-        let hit = 0;
-        for (let dy = -rD; dy <= rD && !hit; dy++) {
-          for (let dx = -rD; dx <= rD; dx++) {
-            if (binary[(y + dy) * sw + (x + dx)] === 1) {
-              hit = 1;
-              break;
-            }
-          }
-        }
-        dilated[y * sw + x] = hit;
-      }
-    }
-
-    const edgePts: Point[] = [];
-    for (let y = 2; y < sh - 2; y++) {
-      for (let x = 2; x < sw - 2; x++) {
-        if (dilated[y * sw + x] === 1) {
-          if (dilated[y * sw + (x - 1)] === 0 || dilated[y * sw + (x + 1)] === 0 ||
-              dilated[(y - 1) * sw + x] === 0 || dilated[(y + 1) * sw + x] === 0) {
-            edgePts.push({ x, y });
-          }
-        }
-      }
-    }
-
-    let minSum = Infinity, maxSum = -Infinity;
-    let minDiff = Infinity, maxDiff = -Infinity;
-    let tl: Point | null = null, tr: Point | null = null, br: Point | null = null, bl: Point | null = null;
-
-    if (edgePts.length >= 35) {
-      for (let p of edgePts) {
-        const sum = p.x + p.y;
-        const diff = p.x - p.y;
-        if (sum < minSum) { minSum = sum; tl = p; }
-        if (diff > maxDiff) { maxDiff = diff; tr = p; }
-        if (sum > maxSum) { maxSum = sum; br = p; }
-        if (diff < minDiff) { minDiff = diff; bl = p; }
-      }
-    }
-
-    const minW = sw * 0.15;
-    const minH = sh * 0.15;
-    const isValid = tl && tr && br && bl &&
-      (tr.x - tl.x > minW) && (br.x - bl.x > minW) &&
-      (bl.y - tl.y > minH) && (br.y - tr.y > minH);
-
-    if (isValid && tl && tr && br && bl) {
-      return [
-        { x: Math.max(5, Math.min(w - 5, Math.round(tl.x / scale))), y: Math.max(5, Math.min(h - 5, Math.round(tl.y / scale))) },
-        { x: Math.max(5, Math.min(w - 5, Math.round(tr.x / scale))), y: Math.max(5, Math.min(h - 5, Math.round(tr.y / scale))) },
-        { x: Math.max(5, Math.min(w - 5, Math.round(br.x / scale))), y: Math.max(5, Math.min(h - 5, Math.round(br.y / scale))) },
-        { x: Math.max(5, Math.min(w - 5, Math.round(bl.x / scale))), y: Math.max(5, Math.min(h - 5, Math.round(bl.y / scale))) }
-      ];
-    }
-
-    return [
-      { x: Math.round(w * 0.05), y: Math.round(h * 0.05) },
-      { x: Math.round(w * 0.95), y: Math.round(h * 0.05) },
-      { x: Math.round(w * 0.95), y: Math.round(h * 0.95) },
-      { x: Math.round(w * 0.05), y: Math.round(h * 0.95) }
-    ];
+        cctx.translate(w / 2, h / 2);
+        cctx.rotate((rot * Math.PI) / 180);
+        if (page.flipH) cctx.scale(-1, 1);
+        if (page.flipV) cctx.scale(1, -1);
+        cctx.drawImage(img, -img.width / 2, -img.height / 2);
+        resolve(c);
+      };
+      img.onerror = () => reject(new Error('image'));
+      img.src = page.originalData;
+    });
   }, []);
 
-  const handleToggleCrop = useCallback(() => {
+  const detectCornersForPage = useCallback(async (page: PageItem) => {
+    const base = await getBaseCanvas(page);
+    const bctx = base.getContext('2d', { willReadFrequently: true });
+    if (!bctx) throw new Error('canvas');
+    const imgData = bctx.getImageData(0, 0, base.width, base.height);
+    return detectDocumentCorners({ data: imgData.data, width: base.width, height: base.height });
+  }, [getBaseCanvas]);
+
+  const reportDetection = useCallback((res: { found: boolean; confidence: number }) => {
+    if (!res.found) {
+      showToast('Tepi dokumen belum jelas terdeteksi. Geser keempat sudut secara manual.', 'warning');
+    } else if (res.confidence < 0.45) {
+      showToast('Tepi terdeteksi, tapi kurang yakin. Cek & rapikan sudutnya dulu.', 'info');
+    } else {
+      showToast('Tepi dokumen terdeteksi akurat. Tekan Terapkan untuk meluruskan.', 'success');
+    }
+  }, [showToast]);
+
+  const runSmartDetect = useCallback(async () => {
+    if (!activePage) return;
+    try {
+      const res = await detectCornersForPage(activePage);
+      setCropCorners(res.corners);
+      reportDetection(res);
+    } catch {
+      showToast('Gagal membaca gambar untuk deteksi.', 'error');
+    }
+  }, [activePage, detectCornersForPage, reportDetection, showToast]);
+
+  const handleToggleCrop = useCallback(async () => {
     if (!isCropMode) {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const corners = autoDetectPaperCorners(canvas);
-        setCropCorners(corners);
-        showToast('Tepi kertas terdeteksi otomatis (Metode OSS DocumentDetector)!', 'success');
-      }
       setIsCropMode(true);
+      await runSmartDetect();
     } else {
       setIsCropMode(false);
       setCropCorners(null);
     }
-  }, [isCropMode, autoDetectPaperCorners, showToast]);
+  }, [isCropMode, runSmartDetect]);
 
-  const applyWarp = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !cropCorners || !activePage || !activeDoc) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const warpWithCorners = useCallback(async (corners: Point[]) => {
+    if (!activePage || !activeDoc) return false;
+    try {
+      const base = await getBaseCanvas(activePage);
+      const bctx = base.getContext('2d', { willReadFrequently: true });
+      if (!bctx) return false;
+      const src = bctx.getImageData(0, 0, base.width, base.height);
 
-    const [tl, tr, br, bl] = cropCorners;
-    const dstW = Math.max(100, Math.round((Math.hypot(tr.x - tl.x, tr.y - tl.y) + Math.hypot(br.x - bl.x, br.y - bl.y)) / 2));
-    const dstH = Math.max(100, Math.round((Math.hypot(bl.x - tl.x, bl.y - tl.y) + Math.hypot(br.x - tr.x, br.y - tr.y)) / 2));
-
-    const srcW = canvas.width;
-    const srcH = canvas.height;
-    const srcData = ctx.getImageData(0, 0, srcW, srcH).data;
-
-    const warpCanvas = document.createElement('canvas');
-    warpCanvas.width = dstW;
-    warpCanvas.height = dstH;
-    const warpCtx = warpCanvas.getContext('2d');
-    if (!warpCtx) return;
-
-    const dstImgData = warpCtx.createImageData(dstW, dstH);
-    const dstData = dstImgData.data;
-
-    for (let dy = 0; dy < dstH; dy++) {
-      const v = dy / (dstH - 1);
-      const topX = tl.x + v * (bl.x - tl.x);
-      const topY = tl.y + v * (bl.y - tl.y);
-      const botX = tr.x + v * (br.x - tr.x);
-      const botY = tr.y + v * (br.y - tr.y);
-
-      for (let dx = 0; dx < dstW; dx++) {
-        const u = dx / (dstW - 1);
-        const sx = Math.round(topX + u * (botX - topX));
-        const sy = Math.round(topY + u * (botY - topY));
-
-        const dstIdx = (dy * dstW + dx) * 4;
-        if (sx >= 0 && sx < srcW && sy >= 0 && sy < srcH) {
-          const srcIdx = (sy * srcW + sx) * 4;
-          dstData[dstIdx] = srcData[srcIdx];
-          dstData[dstIdx + 1] = srcData[srcIdx + 1];
-          dstData[dstIdx + 2] = srcData[srcIdx + 2];
-          dstData[dstIdx + 3] = 255;
-        }
+      const { width, height } = computeOutputSize(corners, base.width, base.height, { maxDim: 2200 });
+      const warped = warpPerspective({ data: src.data, width: src.width, height: src.height }, corners, width, height);
+      if (!warped) {
+        showToast('Sudut tidak valid (garis sejajar / menumpuk). Atur ulang sudutnya.', 'error');
+        return false;
       }
+
+      const out = document.createElement('canvas');
+      out.width = warped.width;
+      out.height = warped.height;
+      const octx = out.getContext('2d');
+      if (!octx) return false;
+      octx.putImageData(new ImageData(new Uint8ClampedArray(warped.data), warped.width, warped.height), 0, 0);
+      const newB64 = out.toDataURL('image/jpeg', 0.9);
+
+      // Rotation/flip are now baked into the pixels; colour filters stay live (not baked).
+      const updatedPages = activeDoc.pages.map((p, i) =>
+        i === activePageIndex
+          ? { ...p, originalData: newB64, processedData: '', rotation: 0, flipH: false, flipV: false }
+          : p
+      );
+      saveDocuments(documents.map(d => (d.id === activeDoc.id ? { ...d, pages: updatedPages } : d)));
+      setIsCropMode(false);
+      setCropCorners(null);
+      return true;
+    } catch {
+      showToast('Gagal memproses crop perspektif.', 'error');
+      return false;
     }
+  }, [activePage, activeDoc, activePageIndex, documents, saveDocuments, getBaseCanvas, showToast]);
 
-    warpCtx.putImageData(dstImgData, 0, 0);
-    const newB64 = warpCanvas.toDataURL('image/jpeg', 0.92);
+  const applyWarp = useCallback(async () => {
+    if (!cropCorners) return;
+    if (await warpWithCorners(cropCorners)) {
+      showToast('Dokumen berhasil diluruskan (perspektif dikoreksi).', 'success');
+    }
+  }, [cropCorners, warpWithCorners, showToast]);
 
-    const updatedPages = activeDoc.pages.map((p, i) => {
-      if (i === activePageIndex) {
-        return { ...p, originalData: newB64, rotation: 0, flipH: false, flipV: false };
+  /** One tap: detect the sheet and straighten it immediately. */
+  const autoCropNow = useCallback(async () => {
+    if (!activePage) return;
+    try {
+      const res = await detectCornersForPage(activePage);
+      if (!res.found) {
+        setIsCropMode(true);
+        setCropCorners(res.corners);
+        reportDetection(res);
+        return;
       }
-      return p;
-    });
-
-    const updatedDocs = documents.map(d => d.id === activeDoc.id ? { ...d, pages: updatedPages } : d);
-    saveDocuments(updatedDocs);
-
-    setIsCropMode(false);
-    setCropCorners(null);
-    showToast('Koreksi perspektif sudut berhasil diterapkan!', 'success');
-  }, [cropCorners, activePage, activeDoc, activePageIndex, documents, saveDocuments, showToast]);
+      if (await warpWithCorners(res.corners)) {
+        showToast('Auto Crop selesai — dokumen diluruskan.', 'success');
+      }
+    } catch {
+      showToast('Auto Crop gagal membaca gambar.', 'error');
+    }
+  }, [activePage, detectCornersForPage, warpWithCorners, reportDetection, showToast]);
 
   // Corner Knob Dragging
   const handleKnobMouseDown = (index: number, e: React.MouseEvent | React.TouchEvent) => {
@@ -1175,6 +1087,16 @@ export const PdfExtractApp: React.FC<PdfExtractAppProps> = ({ onBackToHome = () 
 
             <div className="flex items-center gap-2">
               <button
+                onClick={autoCropNow}
+                disabled={isCropMode}
+                title="Deteksi tepi kertas lalu luruskan otomatis dalam sekali klik"
+                className="px-3 py-1.5 rounded-sm font-tech font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Wand2 size={14} />
+                <span>Auto Crop</span>
+              </button>
+
+              <button
                 onClick={handleToggleCrop}
                 className={`px-3 py-1.5 rounded-sm font-tech font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition ${
                   isCropMode
@@ -1258,16 +1180,10 @@ export const PdfExtractApp: React.FC<PdfExtractAppProps> = ({ onBackToHome = () 
                   <Crop size={14} /> Sudut Dokumen:
                 </span>
                 <button
-                  onClick={() => {
-                    if (canvasRef.current) {
-                      const corners = autoDetectPaperCorners(canvasRef.current);
-                      setCropCorners(corners);
-                      showToast('Tepi kertas berhasil dideteksi cerdas!', 'success');
-                    }
-                  }}
+                  onClick={runSmartDetect}
                   className="px-2.5 py-1 rounded-sm bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm"
                 >
-                  Deteksi Cerdas (AI)
+                  Deteksi Ulang (AI)
                 </button>
                 <button
                   onClick={() => {
@@ -1360,12 +1276,16 @@ export const PdfExtractApp: React.FC<PdfExtractAppProps> = ({ onBackToHome = () 
                     className="absolute inset-0 w-full h-full pointer-events-none"
                     style={{ zIndex: 10 }}
                   >
+                    <path
+                      fillRule="evenodd"
+                      fill="rgba(15, 23, 42, 0.45)"
+                      d={`M0,0 H${canvasRef.current.width} V${canvasRef.current.height} H0 Z M${cropCorners.map(p => `${p.x},${p.y}`).join(' L')} Z`}
+                    />
                     <polygon
                       points={cropCorners.map(p => `${p.x},${p.y}`).join(' ')}
-                      fill="rgba(14, 165, 233, 0.15)"
-                      stroke="#0284c7"
-                      strokeWidth="2.5"
-                      strokeDasharray="4 2"
+                      fill="rgba(14, 165, 233, 0.08)"
+                      stroke="#38bdf8"
+                      strokeWidth={Math.max(2, Math.round(canvasRef.current.width / 500))}
                     />
                   </svg>
 
