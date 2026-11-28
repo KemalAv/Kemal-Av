@@ -2374,7 +2374,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
 
               {/* 7 Subtest Results Details Breakdown */}
               <div className="space-y-4">
-                <h4 className="text-sm font-black uppercase tracking-wider text-slate-300">Performa Per Subtes (Model 3PL IRT Resmi SNBT)</h4>
+                <h4 className="text-sm font-black uppercase tracking-wider text-slate-300">Performa Per Subtes</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {simLastSavedResult?.subtests.map((sub, idx) => (
                     <div key={sub.key} className="p-5 rounded-2xl border border-white/5 bg-black/30 flex flex-col justify-between space-y-4">
