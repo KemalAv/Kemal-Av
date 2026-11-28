@@ -268,7 +268,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
   }, [simCurrentSubtestIndex, simState]);
 
   // Estimate theta with the 3PL IRT model (MLE + weak normal prior)
-  const EASY_MISS_WEIGHT = 2;
+  const EASY_MISS_WEIGHT = 1.25;
 
   // Score for one subtest. A perfect answer sheet always gets the subtest maximum.
   const scoreSubtest = (questions: SimQuestion[], theta: number, ceiling: number) => {
@@ -293,7 +293,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
         // 3-Parameter Logistic (3PL) formula
         const p = q.c + (1 - q.c) * (1 / (1 + Math.exp(-q.a * (theta - q.b))));
         const y = q.userAnswer === 'benar' ? 1 : 0;
-        // A wrong answer on an easy item (b < 0) counts twice as much, like SNBT where missing easy items hurts most
+        // A wrong answer on an easy item (b < 0) counts 1.25 times as much in the estimate
         const missWeight = y === 0 && q.b < 0 ? EASY_MISS_WEIGHT : 1;
         logLikelihood += missWeight * (y * Math.log(Math.max(1e-6, p)) + (1 - y) * Math.log(Math.max(1e-6, 1 - p)));
       }
@@ -357,7 +357,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       raw = y0 + ((y1 - y0) * (theta - x0)) / (x1 - x0);
     }
     raw = 500 + (raw - 500) * ((ceiling - 500) / (REF_MAX - 500));
-    return Math.max(200, Math.min(1000, Math.round(raw)));
+    return Math.max(250, Math.min(1000, Math.round(raw)));
   };
 
   // Helper to generate authentic 3PL pseudo-guessing parameter c matching real UTBK-SNBT:
