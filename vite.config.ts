@@ -11,7 +11,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'kemalav.jpg'],
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'kemalav.jpg', 'kemal-av-gaming.png', 'kemal-av-gaming.svg'],
         manifest: {
           id: '/',
           name: 'Personal Roadmap Kemal Avicenna Faza',

@@ -5,6 +5,7 @@
 
 import { motion } from 'motion/react';
 import { profile } from '../data';
+import profilePic from '../assets/profile.jpg';
 
 export default function Header() {
   const navItems = [
@@ -26,7 +27,11 @@ export default function Header() {
           whileHover={{ scale: 1.05 }}
           className="font-display font-bold text-2xl tracking-tighter text-slate-900 flex items-center gap-2"
         >
-          <div className="w-8 h-8 rounded-sm bg-blue-500 shadow-glow-blue" />
+          <img
+            src={profilePic}
+            alt={profile.name}
+            className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-glow-blue"
+          />
           <span className="uppercase tracking-widest">{profile.name}</span>
         </motion.div>
         

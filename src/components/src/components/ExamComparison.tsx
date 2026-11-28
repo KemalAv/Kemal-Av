@@ -1,0 +1,3423 @@
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { EXAM_COMPARISON_DATA, ComparisonRow, INTERPOLATION_DATA, InterpolationPoint } from '../data/examComparisonData';
+import { TIER_VISUAL_DATA, TierVisualInfo } from '../data/tierVisualData';
+import { PercentileBellCurve } from './PercentileBellCurve';
+import { Snbt2030Simulator } from './Snbt2030Simulator';
+import { 
+  Trophy, 
+  Search, 
+  Gamepad2, 
+  GraduationCap, 
+  Brain, 
+  Clock, 
+  Percent, 
+  Target,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid,
+  BarChart3,
+  Eye,
+  EyeOff,
+  Filter,
+  LineChart as LineChartIcon,
+  AreaChart as AreaChartIcon,
+  Settings2,
+  Minimize2,
+  Maximize2,
+  RefreshCw,
+  ZoomIn,
+  ZoomOut,
+  Square,
+  ChevronLeft,
+  ChevronRight,
+  Share2,
+  Terminal,
+  Zap,
+  Rocket,
+  Flame,
+  Activity,
+  ShieldAlert,
+  Thermometer,
+  CloudLightning,
+  Dices,
+  Sparkles,
+  Globe,
+  Flag
+} from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  ZAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Brush,
+} from 'recharts';
+
+type ViewMode = 'table' | 'chart' | 'calculator' | 'osu-pp-simulator';
+type ChartType = 'bar' | 'line' | 'area' | 'scatter';
+type CalcLayoutMode = 'grid' | 'single';
+
+const formatHeightValue = (valStr: string, unit: 'cm' | 'inch', currentGender: 'male' | 'female') => {
+  if (!valStr) return '';
+  
+  // If the input is already formatted in feet'inches (has a single quote), return as is
+  if (valStr.includes("'")) {
+    return valStr;
+  }
+
+  // Extract the part corresponding to the selected gender if there's a slash
+  let targetStr = valStr;
+  let isAlreadyGenderSpecific = false;
+  
+  if (valStr.includes('/')) {
+    const parts = valStr.split('/');
+    targetStr = currentGender === 'male' ? parts[0].trim() : (parts[1] ? parts[1].trim() : parts[0].trim());
+    isAlreadyGenderSpecific = true;
+  }
+
+  // If not pre-split and gender is female, adjust by subtracting 13 cm
+  if (!isAlreadyGenderSpecific && currentGender === 'female') {
+    targetStr = targetStr.replace(/([\d\.]+)/g, (match) => {
+      const num = parseFloat(match);
+      if (isNaN(num)) return match;
+      return (num - 13.0).toFixed(1);
+    });
+  }
+
+  // Clean up "cm" suffix and multiple spaces
+  targetStr = targetStr.replace(/\s*cm/g, '').replace(/\s+/g, ' ').trim();
+
+  if (unit === 'inch') {
+    return targetStr.replace(/([\d\.]+)/g, (match) => {
+      const cmVal = parseFloat(match);
+      if (isNaN(cmVal)) return match;
+      const totalInches = Math.round(cmVal / 2.54);
+      const feet = Math.floor(totalInches / 12);
+      const inches = totalInches % 12;
+      return `${feet}'${inches}`;
+    });
+  } else {
+    return targetStr + ' cm';
+  }
+};
+
+interface ExamComparisonProps {
+  t: any;
+  language: string;
+}
+
+export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) => {
+  const [gender, setGender] = useState<'male' | 'female'>('male');
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'inch'>('cm');
+
+  // Column definitions
+  const columns: { key: keyof ComparisonRow; label: string; icon: React.ReactNode; isChartable?: boolean; group: 'global' | 'indonesian' }[] = [
+    // Global Leaderboard
+    { key: 'percentile', label: t.cols.percentile, icon: <Percent className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'rankSNBT', label: t.cols.rankSNBT, icon: <Gamepad2 className="w-4 h-4" />, group: 'global' },
+    { key: 'gdDifficulty', label: t.cols.gdDifficulty, icon: <Gamepad2 className="w-4 h-4" />, group: 'global' },
+    { key: 'gdMap', label: t.cols.gdMap, icon: <Gamepad2 className="w-4 h-4" />, group: 'global' },
+    { key: 'osuPP', label: t.cols.osuPP, icon: <Gamepad2 className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'osuStar', label: t.cols.osuStar, icon: <Gamepad2 className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'playHour', label: t.cols.playHour, icon: <Clock className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'chessElo', label: t.cols.chessElo, icon: <Brain className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'psl', label: t.cols.psl, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'iq', label: t.cols.iq, icon: <Target className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'asetBersih', label: t.cols.asetBersih, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'gajiBulanan', label: t.cols.gajiBulanan, icon: <LayoutGrid className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { 
+      key: 'tinggiBadan', 
+      label: gender === 'male' 
+        ? (language === 'id' ? 'Tinggi Laki-laki' : 'Male Height') 
+        : (language === 'id' ? 'Tinggi Perempuan' : 'Female Height'), 
+      icon: <LayoutGrid className="w-4 h-4" />, 
+      isChartable: true, 
+      group: 'global' 
+    },
+    { key: 'sat', label: t.cols.sat, icon: <GraduationCap className="w-4 h-4" />, isChartable: true, group: 'global' },
+    { key: 'compoundDifficulty', label: t.cols.compoundDifficulty, icon: <Brain className="w-4 h-4" />, isChartable: true, group: 'global' },
+    
+    // Indonesian Leaderboard
+    { key: 'jumlahBenar', label: t.cols.jumlahBenar, icon: <Target className="w-4 h-4" />, isChartable: true, group: 'indonesian' },
+    { key: 'skorIRT', label: t.cols.skorIRT, icon: <GraduationCap className="w-4 h-4" />, isChartable: true, group: 'indonesian' },
+    { key: 'posisiNasional', label: t.cols.posisiNasional, icon: <Trophy className="w-4 h-4" />, isChartable: true, group: 'indonesian' },
+    { key: 'keketatan', label: t.cols.keketatan, icon: <Percent className="w-4 h-4" />, isChartable: true, group: 'indonesian' },
+    { key: 'statusPenerimaan', label: t.cols.statusPenerimaan, icon: <Target className="w-4 h-4" />, group: 'indonesian' },
+  ];
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<keyof ComparisonRow>('percentile');
+  const [isSortedAsc, setIsSortedAsc] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [osuSubTab, setOsuSubTab] = useState<'profile' | 'snbt2030'>('profile');
+  const [chartType, setChartType] = useState<ChartType>('bar');
+  const [calcLayoutMode, setCalcLayoutMode] = useState<CalcLayoutMode>('grid');
+  const [calcActiveIndex, setCalcActiveIndex] = useState(0);
+
+  const calculatorMetrics = useMemo(() => [
+    { key: 'mlbb', labelKey: 'rankSNBT', group: 'global' },
+    { key: 'gd', labelKey: 'gdDifficulty', group: 'global' },
+    { key: 'map', labelKey: 'gdMap', group: 'global' },
+    { key: 'pp', labelKey: 'osuPP', group: 'global' },
+    { key: 'star', labelKey: 'osuStar', group: 'global' },
+    { key: 'jam', labelKey: 'playHour', group: 'global' },
+    { key: 'elo', labelKey: 'chessElo', group: 'global' },
+    { key: 'psl', labelKey: 'psl', group: 'global' },
+    { key: 'iq', labelKey: 'iq', group: 'global' },
+    { key: 'asetBersih', labelKey: 'asetBersih', group: 'global' },
+    { key: 'gaji', labelKey: 'gajiBulanan', group: 'global' },
+    { key: 'tinggi', labelKey: 'tinggiBadan', group: 'global' },
+    { key: 'sat', labelKey: 'sat', group: 'global' },
+    { key: 'comp', labelKey: 'compoundDifficulty', group: 'global' },
+    { key: 'benar', labelKey: 'jumlahBenar', group: 'indonesian' },
+    { key: 'irt', labelKey: 'skorIRT', group: 'indonesian' },
+    { key: 'rank', labelKey: 'posisiNasional', group: 'indonesian' },
+    { key: 'sel', labelKey: 'keketatan', group: 'indonesian' },
+    { key: 'univ', labelKey: 'statusPenerimaan', group: 'indonesian' },
+  ], []);
+
+  const handleNextCalc = () => setCalcActiveIndex(prev => (prev + 1) % calculatorMetrics.length);
+  const handlePrevCalc = () => setCalcActiveIndex(prev => (prev - 1 + calculatorMetrics.length) % calculatorMetrics.length);
+
+  const [chartZoomX, setChartZoomX] = useState(1);
+  const [chartZoomY, setChartZoomY] = useState(1);
+  const [isNormalized, setIsNormalized] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // View Your Position State
+  const [calcInput, setCalcInput] = useState<string>('');
+  const [calcSubject, setCalcSubject] = useState<keyof ComparisonRow>('skorIRT');
+  const [isPulling, setIsPulling] = useState(false);
+  const [pullHistory, setPullHistory] = useState<{value: string, p: number}[]>([]);
+  const [selectedGachaIdx, setSelectedGachaIdx] = useState<number | null>(null);
+  
+  // Alternative value tracking for multi-value results (calculator and table)
+  const [altIndices, setAltIndices] = useState<Record<string, number>>({});
+  const [currencyMode, setCurrencyMode] = useState<'USD' | 'IDR'>(language === 'id' ? 'IDR' : 'USD');
+
+  // UTBK-SNBT to osu! PP simulator state variables
+  const [utbkPU, setUtbkPU] = useState<number>(600);
+  const [utbkPBM, setUtbkPBM] = useState<number>(600);
+  const [utbkPPU, setUtbkPPU] = useState<number>(600);
+  const [utbkPK, setUtbkPK] = useState<number>(600);
+  const [utbkLitIndo, setUtbkLitIndo] = useState<number>(600);
+  const [utbkLitIng, setUtbkLitIng] = useState<number>(600);
+  const [utbkPM, setUtbkPM] = useState<number>(600);
+  const [expandedWeights, setExpandedWeights] = useState<Record<string, boolean>>({});
+
+  // Sync Currency with Language changes
+  React.useEffect(() => {
+    setCurrencyMode(language === 'id' ? 'IDR' : 'USD');
+  }, [language]);
+
+  // Clear calculator state when switching modes
+  React.useEffect(() => {
+    if (viewMode !== 'calculator') {
+      setCalcInput('');
+      setPullHistory([]);
+      setSelectedGachaIdx(null);
+    }
+  }, [viewMode]);
+
+  const toggleCurrency = () => {
+    setCurrencyMode(prev => prev === 'USD' ? 'IDR' : 'USD');
+  };
+
+  const toggleAlt = (key: string, total: number) => {
+    setAltIndices(prev => ({
+      ...prev,
+      [key]: ((prev[key] || 0) + 1) % total
+    }));
+  };
+  
+  // Axis selection for All Charts
+  const chartableMetrics = useMemo(() => columns.filter(c => c.isChartable), [columns]);
+  const [xAxisMetric, setXAxisMetric] = useState<keyof ComparisonRow | 'Rank MLBB'>('rankSNBT'); 
+  const [yAxisMetrics, setYAxisMetrics] = useState<Set<keyof ComparisonRow>>(new Set(['skorIRT']));
+
+  const [visibleColumns, setVisibleColumns] = useState<Set<keyof ComparisonRow>>(
+    new Set(columns.map(c => c.key))
+  );
+
+  const toggleYMetric = (key: keyof ComparisonRow) => {
+    const newSet = new Set(yAxisMetrics);
+    if (newSet.has(key)) {
+      if (newSet.size > 1) newSet.delete(key);
+    } else {
+      newSet.add(key);
+    }
+    setYAxisMetrics(newSet);
+  };
+
+  const parseValue = (val: string): number => {
+    if (!val) return 0;
+    
+    // Clean string but keep meaningful characters for ranges and numbers
+    let cleaned = val.replace(/[^0-9\- \.,>★:%]/g, '').trim();
+    
+    const processNumber = (s: string) => {
+      if (!s || s.trim() === '') return NaN;
+      if (s.includes(':')) {
+        const parts = s.split(':');
+        return parseFloat(parts[parts.length - 1]) || 0;
+      }
+      if (s.toLowerCase().includes('accepted')) return 1;
+
+      // Remove thousand separators (dots or commas followed by 3 digits)
+      let res = s.trim();
+      let prev;
+      do {
+        prev = res;
+        res = res.replace(/([\.,])(\d{3})(?![0-9])/g, '$2');
+      } while (res !== prev);
+
+      // Normalize decimal separator
+      res = res.replace(',', '.');
+      return parseFloat(res);
+    };
+
+    // Handle ranges like "140–149" or "140-149" or "3.000-4.000"
+    if (cleaned.includes('-') || cleaned.includes('–')) {
+      const parts = cleaned.split(/[-–]/).map(p => processNumber(p));
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        return Math.min(parts[0], parts[1]);
+      }
+    }
+    
+    const result = processNumber(cleaned);
+    return isNaN(result) ? 0 : result;
+  };
+
+  const filteredData = useMemo(() => {
+    const filtered = EXAM_COMPARISON_DATA.filter(row => 
+      Object.values(row).some(val => val.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    if (!sortField) return filtered;
+
+    return [...filtered].sort((a, b) => {
+      const valA = a[sortField];
+      const valB = b[sortField];
+
+      const numA = parseValue(valA);
+      const numB = parseValue(valB);
+
+      let comparison = 0;
+      if (!isNaN(numA) && !isNaN(numB)) {
+        comparison = numA - numB;
+      } else {
+        comparison = String(valA).localeCompare(String(valB));
+      }
+
+      return isSortedAsc ? comparison : -comparison;
+    });
+  }, [searchTerm, sortField, isSortedAsc]);
+
+  const formatValue = (val: any, colKey: string) => {
+    if (colKey === 'tinggiBadan' || colKey === 'tinggi') {
+      if (typeof val === 'number') {
+        const adjustedVal = gender === 'female' ? val - 13.0 : val;
+        if (heightUnit === 'inch') {
+          const totalInches = Math.round(adjustedVal / 2.54);
+          const feet = Math.floor(totalInches / 12);
+          const inches = totalInches % 12;
+          return `${feet}'${inches}`;
+        }
+        return `${adjustedVal.toFixed(1)} cm`;
+      }
+      return formatHeightValue(String(val), heightUnit, gender);
+    }
+
+    // Early return for pre-formatted strings, EXCEPT for assets and wage which need currency conversion
+    if (colKey !== 'asetBersih' && colKey !== 'aset' && colKey !== 'gajiBulanan' && colKey !== 'gaji') {
+      if (typeof val === 'string' && (val.includes('-') || val.includes('–') || val.includes('★'))) {
+        return val;
+      }
+    }
+
+    if (colKey === 'percentile' || colKey === 'pct') {
+      if (typeof val === 'string' && val.includes('-')) return val;
+      const numVal = typeof val === 'number' ? val : parseFloat(String(val).replace(/[%]/g, ''));
+      if (isNaN(numVal)) return val;
+      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+    }
+
+    if (colKey === 'psl') {
+      const numVal = typeof val === 'number' ? val : parseFloat(String(val));
+      if (isNaN(numVal)) return val;
+      
+      let tierLabel = '';
+      if (numVal >= 7.0) tierLabel = 'Gigachad';
+      else if (numVal >= 6.0) tierLabel = 'Chad';
+      else if (numVal >= 5.5) tierLabel = 'Chadlite';
+      else if (numVal >= 5.0) tierLabel = 'High Tier Normie';
+      else if (numVal >= 4.0) tierLabel = 'Mid Tier Normie';
+      else if (numVal >= 3.0) tierLabel = 'Low Tier Normie';
+      else if (numVal >= 2.0) tierLabel = 'Truecel';
+      else if (numVal >= 1.0) tierLabel = 'Saint';
+      else tierLabel = 'Subhuman';
+      
+      return `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${tierLabel})`;
+    }
+
+    if (colKey === 'mlbb' || colKey === 'rankSNBT') {
+      if (typeof val === 'string') {
+        if (language === 'en') {
+          let translated = val;
+          if (translated.includes('Zona Manusia')) {
+            translated = translated.replace('Zona Manusia', t.zones.humanZone || 'Human Zone');
+          }
+          return translated;
+        }
+      }
+    }
+
+    if (colKey === 'asetBersih' || colKey === 'aset' || colKey === 'gajiBulanan' || colKey === 'gaji') {
+      if (typeof val === 'number') {
+        if (currencyMode === 'IDR') {
+          const rupiah = val * 18000;
+          const formatted = Math.abs(Math.round(rupiah)).toLocaleString('id-ID');
+          return `${val < 0 ? '-' : ''}Rp ${formatted}`;
+        }
+        const formatted = Math.abs(Math.round(val)).toLocaleString('en-US');
+        return `${val < 0 ? '-' : ''}$${formatted}`;
+      }
+      if (typeof val === 'string') {
+        if (currencyMode === 'IDR') {
+          // Replace any $xxxx with Rp yyyy
+          return val.replace(/\$([\d\.,\s]+)/g, (match, p1) => {
+            const usdStr = p1.replace(/[\.,\s]/g, '');
+            const usd = parseFloat(usdStr);
+            if (isNaN(usd)) return match;
+            const idr = usd * 18000;
+            return `Rp ${Math.round(idr).toLocaleString('id-ID')}`;
+          });
+        }
+      }
+      return val;
+    }
+
+    if (typeof val === 'number') {
+      const formatted = val.toLocaleString('en-US', { 
+        maximumFractionDigits: (colKey === 'percentile' || colKey === 'pct') ? 2 : 1 
+      });
+      if (colKey === 'percentile' || colKey === 'pct') return `${formatted}%`;
+      if (colKey === 'posisiNasional' || colKey === 'rank') return `#${formatted}`;
+      if (colKey === 'osuStar' || colKey === 'star') return `${formatted}★`;
+      if (colKey === 'playHour' || colKey === 'jam') return `${formatted}h`;
+      if (colKey === 'tinggiBadan' || colKey === 'tinggi') return `${formatted} cm`;
+      if (colKey === 'keketatan' || colKey === 'sel') {
+        const selVal = val < 2 ? val.toFixed(1) : Math.round(val).toLocaleString('en-US');
+        return `1:${selVal}`;
+      }
+      return formatted;
+    }
+    return val;
+  };
+
+  const chartData = useMemo(() => {
+    let data = filteredData.map(row => {
+      const entry: any = { 
+        name: row.rankSNBT || row.statusPenerimaan,
+        'Rank MLBB': row.rankSNBT,
+        _row: row
+      };
+      columns.forEach(col => {
+        if (col.isChartable) {
+          let rawVal = row[col.key];
+          let parsedVal = parseValue(rawVal);
+          if (col.key === 'tinggiBadan' && gender === 'female') {
+            parsedVal = parsedVal - 13.0;
+          }
+          if (col.key === 'tinggiBadan' && heightUnit === 'inch') {
+            parsedVal = parsedVal / 2.54;
+          }
+          if ((col.key === 'asetBersih' || col.key === 'gajiBulanan') && currencyMode === 'IDR') {
+            parsedVal = parsedVal * 18000;
+          }
+          entry[col.label] = parsedVal;
+          entry[col.label + 'Label'] = formatValue(rawVal, col.key);
+        }
+      });
+      return entry;
+    });
+
+    if (xAxisMetric !== 'rankSNBT') {
+      const xCol = columns.find(c => c.key === xAxisMetric);
+      const xLabel = xCol ? xCol.label : xAxisMetric;
+      data = [...data].sort((a, b) => (a[xLabel] || 0) - (b[xLabel] || 0));
+    } else {
+      data = [...data].reverse();
+    }
+
+    if (isNormalized && data.length > 0) {
+      const fixedMax: Record<string, number> = {
+        [t.cols.skorIRT]: 850,
+        [t.cols.jumlahBenar]: 160,
+        [t.cols.percentile]: 100,
+        [t.cols.posisiNasional]: 1000000, 
+        [t.cols.sat]: 1600,
+        [t.cols.iq]: 200,
+        [t.cols.playHour]: 5000,
+        [t.cols.chessElo]: 3000,
+        [t.cols.osuPP]: 1500,
+        [t.cols.osuStar]: 12,
+        [t.cols.keketatan]: 150,
+        [t.cols.compoundDifficulty]: 5000000,
+        [t.cols.gajiBulanan]: currencyMode === 'IDR' ? 10700000 * 18000 : 10700000,
+        [t.cols.tinggiBadan]: heightUnit === 'inch' ? 220 / 2.54 : 220,
+        [t.cols.asetBersih]: currencyMode === 'IDR' ? 1000000000 * 18000 : 1000000000,
+      };
+
+      return data.map(d => {
+        const normalizedEntry = { ...d };
+        columns.forEach(col => {
+          if (col.isChartable) {
+            const val = d[col.label] || 0;
+            const max = fixedMax[col.label] || Math.max(...data.map(item => item[col.label] || 0), 1);
+            
+            if (col.label === t.cols.posisiNasional) {
+              // Rank: lower is better, so 1 -> 100%, 1,000,000 -> 0%
+              normalizedEntry[col.label] = Math.max(0, ((max - val) / max) * 100);
+            } else {
+              normalizedEntry[col.label] = (val / max) * 100;
+            }
+          }
+        });
+        return normalizedEntry;
+      });
+    }
+
+    return data;
+  }, [filteredData, isNormalized, xAxisMetric, t, gender, heightUnit, currencyMode]);
+
+  const colToInterpKey: Record<string, keyof InterpolationPoint> = useMemo(() => ({
+    jumlahBenar: 'benar',
+    rankSNBT: 'mlbb',
+    skorIRT: 'irt',
+    posisiNasional: 'rank',
+    gdDifficulty: 'gd',
+    osuPP: 'pp',
+    keketatan: 'sel',
+    osuStar: 'star',
+    sat: 'sat',
+    playHour: 'jam',
+    percentile: 'pct',
+    compoundDifficulty: 'comp',
+    iq: 'iq',
+    psl: 'psl',
+    asetBersih: 'asetBersih',
+    gajiBulanan: 'gaji',
+    tinggiBadan: 'tinggi',
+    chessElo: 'elo',
+    statusPenerimaan: 'univ',
+    gdMap: 'map'
+  }), []);
+
+  const interpolationResult = useMemo(() => {
+    if (!calcInput) return null;
+    const cleanNumLocal = (s: string) => {
+      if (!s) return 0;
+      // Remove symbols like $, ★, etc.
+      let res = s.replace(/[$\★]/g, '');
+      // Handle thousand separators: if a dot/comma is followed by 3 digits, it's a separator
+      res = res.replace(/[\.,](\d{3})(?![0-9])/g, '$1');
+      // Handle "1:X" format typically used for selectivity
+      if (res.includes(':')) {
+        const parts = res.split(':');
+        res = parts[parts.length - 1];
+      }
+      // Normalize remaining comma to dot for decimal
+      res = res.replace(',', '.');
+      const match = res.match(/[\d\.]+/);
+      return match ? parseFloat(match[0]) : 0;
+    };
+
+    let inputNum = NaN;
+
+    if (calcSubject === 'tinggiBadan' && heightUnit === 'inch') {
+      const trimmed = calcInput.trim();
+      const matchFeetInches = trimmed.match(/^(\d+)'(\d+)?$/);
+      const matchSpace = trimmed.match(/^(\d+)\s+(\d+)$/);
+      if (matchFeetInches) {
+        const feet = parseInt(matchFeetInches[1]) || 0;
+        const inches = parseInt(matchFeetInches[2]) || 0;
+        inputNum = (feet * 12 + inches) * 2.54;
+      } else if (matchSpace) {
+        const feet = parseInt(matchSpace[1]) || 0;
+        const inches = parseInt(matchSpace[2]) || 0;
+        inputNum = (feet * 12 + inches) * 2.54;
+      } else {
+        const parsed = parseFloat(trimmed);
+        if (!isNaN(parsed)) {
+          if (parsed < 10) {
+            // Probably feet (e.g. 5.75)
+            inputNum = parsed * 12 * 2.54;
+          } else {
+            // Total inches (e.g. 70)
+            inputNum = parsed * 2.54;
+          }
+        }
+      }
+    } else {
+      inputNum = cleanNumLocal(calcInput);
+      if (calcSubject === 'sat' && !isNaN(inputNum)) {
+        inputNum = Math.round(inputNum / 10) * 10;
+      }
+    }
+
+    if (isNaN(inputNum)) return null;
+
+    // Convert currency input (IDR) to USD
+    if ((calcSubject === 'asetBersih' || calcSubject === 'gajiBulanan') && currencyMode === 'IDR') {
+      inputNum = inputNum / 18000;
+    }
+
+    // If subject is height and gender is female, translate input to male-equivalent scale
+    if (calcSubject === 'tinggiBadan' && gender === 'female') {
+      inputNum += 13.0;
+    }
+
+    const subjectKey = colToInterpKey[calcSubject];
+    if (!subjectKey) return null;
+
+    const cleanNum = (s: string) => {
+      if (!s) return 0;
+      // Remove thousand separators (dot followed by 3 digits, or comma in some contexts)
+      // Heuristic: if a dot/comma is followed by 3 digits, it's a separator
+      let res = s.replace(/[\.,](\d{3})(?![0-9])/g, '$1');
+      // Normalize remaining comma to dot for decimal
+      res = res.replace(',', '.');
+      // Extract first number found (handle negative if needed, but here mostly positive)
+      const match = res.match(/[\d\.]+/);
+      return match ? parseFloat(match[0]) : 0;
+    };
+
+    // Check if the key is numeric in INTERPOLATION_DATA
+    const isNumeric = typeof INTERPOLATION_DATA[0][subjectKey] === 'number';
+    if (!isNumeric) return null;
+
+    const sorted = [...INTERPOLATION_DATA].sort((a, b) => (a[subjectKey] as number) - (b[subjectKey] as number));
+    
+    let lower = sorted[0];
+    let upper = sorted[sorted.length - 1];
+
+    if (inputNum <= (lower[subjectKey] as number)) {
+      upper = sorted[1];
+    } else if (inputNum >= (upper[subjectKey] as number)) {
+      lower = sorted[sorted.length - 2];
+    } else {
+      for (let i = 0; i < sorted.length - 1; i++) {
+        if (inputNum >= (sorted[i][subjectKey] as number) && inputNum <= (sorted[i+1][subjectKey] as number)) {
+          lower = sorted[i];
+          upper = sorted[i+1];
+          break;
+        }
+      }
+    }
+
+    const lVal = lower[subjectKey] as number;
+    const uVal = upper[subjectKey] as number;
+    
+    // Clamp t_factor between 0 and 1
+    const t_factor = uVal === lVal ? 0 : Math.max(0, Math.min(1, (inputNum - lVal) / (uVal - lVal)));
+
+    const result: any = { _t: t_factor, _lower: lower, _upper: upper };
+    
+    const romanToNum: Record<string, number> = { 'V': 5, 'IV': 4, 'III': 3, 'II': 2, 'I': 1 };
+    const numToRoman = ['?', 'I', 'II', 'III', 'IV', 'V'];
+
+    (Object.keys(lower) as Array<keyof InterpolationPoint>).forEach(key => {
+      const l = lower[key];
+      const u = upper[key];
+      
+      if (key === 'gd') {
+        const gdPattern = /^Top\s+(\d+)\s+Extreme(?:\s+Demon)?\s*\(10★\)$/i;
+        const matchL = String(l).match(gdPattern);
+        const matchU = String(u).match(gdPattern);
+        if (matchL && matchU) {
+          const rankL = parseInt(matchL[1], 10);
+          const rankU = parseInt(matchU[1], 10);
+          const interpolatedRank = Math.round(rankL + t_factor * (rankU - rankL));
+          result[key] = `Top ${interpolatedRank} Extreme Demon (10★)`;
+          return;
+        }
+      }
+      
+      if (typeof l === 'number' && typeof u === 'number') {
+        const interpolated = l + t_factor * (u - l);
+        // Round to nearest integer for these specific keys
+        if (['rank', 'comp', 'jam', 'benar', 'iq', 'pp', 'elo', 'irt', 'sel', 'asetBersih', 'gaji'].includes(key)) {
+          result[key] = Math.round(interpolated);
+        } else if (key === 'sat') {
+          result[key] = Math.round(interpolated / 10) * 10;
+        } else {
+          result[key] = Number(interpolated.toFixed(2));
+        }
+      } else if (typeof l === 'string' && typeof u === 'string') {
+        // Handle ranges like "Name (X-Y)" or "Name (X-Y★)"
+        // Updated regex to include A-Z for Roman Numerals
+        const rangeMatch = l.match(/(.+)\s+\((?:[><])?([A-Z\d,.]+)(?:-([A-Z\d,.]+))?(★)?\)/);
+        
+        if (rangeMatch && rangeMatch[3]) {
+          const name = rangeMatch[1];
+          const startStr = rangeMatch[2];
+          const endStr = rangeMatch[3];
+          const unit = rangeMatch[4] || '';
+          
+          const startNum = cleanNum(startStr);
+          const endNum = cleanNum(endStr);
+
+          if (!isNaN(startNum)) {
+            const current = startNum + t_factor * (endNum - startNum);
+            
+            if (key === 'mlbb') {
+              // Convert to Roman for Warrior-Legend
+              const mlbbRankNames = ['Warrior', 'Elite', 'Master', 'Grandmaster', 'Epic', 'Legend'];
+              const isRomanRank = mlbbRankNames.some(r => name.includes(r));
+              
+              if (isRomanRank) {
+                const startTier = romanToNum[startStr] || 0;
+                const endTier = romanToNum[endStr] || 0;
+                if (startTier && endTier) {
+                  const currentTierIdx = Math.round(startTier + t_factor * (endTier - startTier));
+                  result[key] = `${name} ${numToRoman[currentTierIdx] || startStr}`;
+                } else {
+                  // Fallback if no subdivisions found in string
+                  result[key] = t_factor < 1.0 ? l : u;
+                }
+              } else {
+                result[key] = `${name} (${Math.round(current).toLocaleString('en-US')}★)`;
+              }
+            } else if (key === 'gd') {
+              // User requested no decimals for GD difficulty
+              result[key] = `${name} ${Math.round(current)}★`;
+            } else {
+              result[key] = `${name} ${Math.round(current)}${unit}`;
+            }
+          } else {
+            // Handle Roman numeral ranges like (V-I) or (III-I)
+            const startTier = romanToNum[startStr];
+            const endTier = romanToNum[endStr];
+            if (startTier && endTier) {
+              const currentTierIdx = Math.round(startTier + t_factor * (endTier - startTier));
+              result[key] = `${name} ${numToRoman[currentTierIdx] || startStr}`;
+            } else {
+              result[key] = t_factor < 1.0 ? l : u;
+            }
+          }
+        } else {
+          // Fallback: Check if names match between l and u and they are star-based
+          const starMatchL = l.match(/(.+)\s+\((?:[><])?([\d,.]+)(?:-([\d,.]+))?★\)/);
+          const starMatchU = u.match(/(.+)\s+\((?:[><])?([\d,.]+)(?:-([\d,.]+))?★\)/);
+
+          if (starMatchL && starMatchU && starMatchL[1] === starMatchU[1]) {
+            const start = cleanNum(starMatchL[3] || starMatchL[2]);
+            const end = cleanNum(starMatchU[3] || starMatchU[2]);
+            const currentStars = Math.round(start + t_factor * (end - start));
+            result[key] = `${starMatchL[1]} (${currentStars.toLocaleString('en-US')}★)`;
+          } else {
+            // General text fields: pick lower label until next point reached
+            result[key] = t_factor < 1.0 ? l : u;
+          }
+        }
+      }
+    });
+
+    return result;
+  }, [calcInput, calcSubject, colToInterpKey]);
+
+  const osuInterpolationResult = useMemo(() => {
+    if (viewMode !== 'osu-pp-simulator') return null;
+    
+    const avgScore = (utbkPU + utbkPBM + utbkPPU + utbkPK + utbkLitIndo + utbkLitIng + utbkPM) / 7;
+    
+    const sorted = [...INTERPOLATION_DATA].sort((a, b) => a.irt - b.irt);
+    let lower = sorted[0];
+    let upper = sorted[sorted.length - 1];
+    
+    if (avgScore <= lower.irt) {
+      upper = sorted[1];
+    } else if (avgScore >= upper.irt) {
+      lower = sorted[sorted.length - 2];
+    } else {
+      for (let i = 0; i < sorted.length - 1; i++) {
+        if (avgScore >= sorted[i].irt && avgScore <= sorted[i+1].irt) {
+          lower = sorted[i];
+          upper = sorted[i+1];
+          break;
+        }
+      }
+    }
+    
+    const t_factor = (avgScore - lower.irt) / (upper.irt - lower.irt || 1);
+    
+    return {
+      benar: Math.round(lower.benar + t_factor * (upper.benar - lower.benar)),
+      iq: Math.round(lower.iq + t_factor * (upper.iq - lower.iq)),
+    };
+  }, [viewMode, utbkPU, utbkPBM, utbkPPU, utbkPK, utbkLitIndo, utbkLitIng, utbkPM]);
+
+  const activeTierVisual = useMemo(() => {
+    const source = (viewMode === 'osu-pp-simulator') ? osuInterpolationResult : interpolationResult;
+    if (!source) return null;
+    const iqValue = source.iq;
+    
+    let tierId = "40-74";
+    if (iqValue >= 145) tierId = "145-160";
+    else if (iqValue >= 135) tierId = "135-145";
+    else if (iqValue >= 130) tierId = "130-134";
+    else if (iqValue >= 125) tierId = "125-129";
+    else if (iqValue >= 120) tierId = "120-124";
+    else if (iqValue >= 115) tierId = "115-119";
+    else if (iqValue >= 110) tierId = "110-114";
+    else if (iqValue >= 105) tierId = "105-109";
+    else if (iqValue >= 100) tierId = "100-104";
+    else if (iqValue >= 95) tierId = "95-99";
+    else if (iqValue >= 90) tierId = "90-94";
+    else if (iqValue >= 87) tierId = "87-89";
+    else if (iqValue >= 85) tierId = "85-86";
+    else if (iqValue >= 75) tierId = "75-84";
+    
+    return TIER_VISUAL_DATA[tierId] || TIER_VISUAL_DATA["40-74"] || null;
+  }, [interpolationResult, osuInterpolationResult, viewMode]);
+
+  const activeColumns = columns.filter(col => visibleColumns.has(col.key));
+
+  const handlePull = (count: number = 1) => {
+    if (isPulling) return;
+    setIsPulling(true);
+    setSelectedGachaIdx(null);
+    if (count === 10) setPullHistory([]);
+
+    const generateOne = () => {
+        // 1. PersentilAcak murni (0-100)
+        const PersentilAcak = Math.random() * 100;
+        
+        // 2. Get Subject and interpolation points
+        const subjectKey = colToInterpKey[calcSubject] as keyof InterpolationPoint;
+        const sorted = [...INTERPOLATION_DATA].sort((a, b) => a.pct - b.pct);
+        
+        // Find interval
+        let lower = sorted[0];
+        let upper = sorted[sorted.length - 1];
+        for (let j = 0; j < sorted.length - 1; j++) {
+          if (PersentilAcak >= sorted[j].pct && PersentilAcak <= sorted[j+1].pct) {
+            lower = sorted[j];
+            upper = sorted[j+1];
+            break;
+          }
+        }
+        
+        const t_val = (PersentilAcak - lower.pct) / (upper.pct - lower.pct || 1);
+        
+        const cleanVal = (val: any) => {
+          if (typeof val === 'number') return val;
+          const m = String(val).match(/[\d\.]+/);
+          return m ? parseFloat(m[0]) : 0;
+        };
+
+        const valLow = cleanVal(lower[subjectKey]);
+        const valHigh = cleanVal(upper[subjectKey]);
+        
+        // Interpolate value
+        let resultValue = valLow + t_val * (valHigh - valLow);
+
+        // Subtract 13.0 if subject is height and gender is female
+        if (calcSubject === 'tinggiBadan' && gender === 'female') {
+          resultValue -= 13.0;
+        }
+        
+        let finalValue = "";
+        if (['osuStar', 'psl'].includes(calcSubject)) {
+          finalValue = resultValue.toFixed(2);
+        } else if (calcSubject === 'tinggiBadan') {
+          if (heightUnit === 'inch') {
+            const totalInches = Math.round(resultValue / 2.54);
+            const feet = Math.floor(totalInches / 12);
+            const inches = totalInches % 12;
+            finalValue = `${feet}'${inches}`;
+          } else {
+            finalValue = resultValue.toFixed(1);
+          }
+        } else if (calcSubject === 'asetBersih' || calcSubject === 'gajiBulanan') {
+          if (currencyMode === 'IDR') {
+            finalValue = Math.round(resultValue * 18000).toString();
+          } else {
+            finalValue = Math.round(resultValue).toString();
+          }
+        } else {
+          finalValue = Math.round(resultValue).toString();
+        }
+
+        return { value: finalValue, p: PersentilAcak };
+      };
+
+    if (count === 1) {
+      const result = generateOne();
+      let frames = 0;
+      const maxFrames = 20;
+      
+      const subjectKey = colToInterpKey[calcSubject] as keyof InterpolationPoint;
+      const sorted = [...INTERPOLATION_DATA].sort((a, b) => a.pct - b.pct);
+      const cleanVal = (val: any) => {
+        if (typeof val === 'number') return val;
+        const m = String(val).match(/[\d\.]+/);
+        return m ? parseFloat(m[0]) : 0;
+      };
+      const AngkaMin = cleanVal(sorted[0][subjectKey]);
+      const AngkaMax = cleanVal(sorted[sorted.length - 1][subjectKey]);
+
+      const interval = setInterval(() => {
+        frames++;
+        if (frames < maxFrames) {
+          const tempP = Math.random() * 100;
+          let tempValNum = AngkaMin + (AngkaMax - AngkaMin) * (tempP / 100);
+          if (calcSubject === 'tinggiBadan' && gender === 'female') {
+            tempValNum -= 13.0;
+          }
+          let tempVal = "";
+          if (['osuStar', 'psl'].includes(calcSubject)) {
+            tempVal = tempValNum.toFixed(2);
+          } else if (calcSubject === 'tinggiBadan') {
+            if (heightUnit === 'inch') {
+              const totalInches = Math.round(tempValNum / 2.54);
+              const feet = Math.floor(totalInches / 12);
+              const inches = totalInches % 12;
+              tempVal = `${feet}'${inches}`;
+            } else {
+              tempVal = tempValNum.toFixed(1);
+            }
+          } else if (calcSubject === 'asetBersih' || calcSubject === 'gajiBulanan') {
+            if (currencyMode === 'IDR') {
+              tempVal = Math.round(tempValNum * 18000).toString();
+            } else {
+              tempVal = Math.round(tempValNum).toString();
+            }
+          } else {
+            tempVal = Math.round(tempValNum).toString();
+          }
+          setCalcInput(tempVal);
+        } else {
+          clearInterval(interval);
+          setCalcInput(result.value);
+          setIsPulling(false);
+          setPullHistory([result]);
+        }
+      }, 50);
+    } else {
+      // Pull 10
+      const results = Array.from({ length: 10 }, () => generateOne());
+      let currentIdx = 0;
+      const interval = setInterval(() => {
+        if (currentIdx < 10) {
+          setPullHistory(prev => [...prev, results[currentIdx]]);
+          setCalcInput(results[currentIdx].value);
+          currentIdx++;
+        } else {
+          clearInterval(interval);
+          setIsPulling(false);
+        }
+      }, 120);
+    }
+  };
+
+  const handleAdjustment = (direction: 'up' | 'down') => {
+    if (calcSubject === 'tinggiBadan' && heightUnit === 'inch') {
+      const trimmed = calcInput.trim();
+      const matchFeetInches = trimmed.match(/^(\d+)'(\d+)?$/);
+      let feet = 5;
+      let inches = 0;
+      if (matchFeetInches) {
+        feet = parseInt(matchFeetInches[1]) || 0;
+        inches = parseInt(matchFeetInches[2]) || 0;
+      } else {
+        const parsed = parseFloat(trimmed);
+        if (!isNaN(parsed)) {
+          if (parsed < 10) {
+            feet = Math.floor(parsed);
+            inches = Math.round((parsed - feet) * 12);
+          } else {
+            const totalInches = Math.round(parsed / 2.54);
+            feet = Math.floor(totalInches / 12);
+            inches = totalInches % 12;
+          }
+        }
+      }
+      let totalInches = feet * 12 + inches;
+      totalInches = direction === 'up' ? totalInches + 1 : totalInches - 1;
+      if (totalInches < 0) totalInches = 0;
+      const newFeet = Math.floor(totalInches / 12);
+      const newInches = totalInches % 12;
+      setCalcInput(`${newFeet}'${newInches}`);
+      return;
+    }
+
+    const currentVal = parseFloat(calcInput) || 0;
+    // Determine step size based on subject
+    let step = 1;
+    if (['osuStar', 'psl'].includes(calcSubject)) {
+      step = 0.1;
+    } else if (calcSubject === 'rankSNBT') {
+      step = 500;
+    } else if (calcSubject === 'sat') {
+      step = 10;
+    } else if (calcSubject === 'iq') {
+      step = 1;
+    } else if (calcSubject === 'gajiBulanan') {
+      step = 100;
+    } else if (calcSubject === 'tinggiBadan') {
+      step = 1;
+    }
+    
+    const newVal = direction === 'up' ? currentVal + step : currentVal - step;
+    
+    // Format based on subject
+    let formatted = "";
+    if (['osuStar', 'psl'].includes(calcSubject)) {
+      formatted = newVal.toFixed(2);
+    } else if (calcSubject === 'tinggiBadan') {
+      formatted = Math.max(0, newVal).toFixed(1);
+    } else {
+      formatted = Math.max(0, Math.round(newVal)).toString();
+    }
+    
+    setCalcInput(formatted);
+  };
+
+  const renderChart = () => {
+    const commonProps = {
+      data: chartData,
+      margin: { top: 20, right: 30, left: 90, bottom: 100 }
+    };
+
+    const isXNumeric = xAxisMetric !== 'rankSNBT';
+    const activeYLabels = Array.from(yAxisMetrics).map(k => {
+      const col = columns.find(c => c.key === k);
+      return col ? col.label : k as string;
+    });
+    const yAxisLabelText = activeYLabels.length > 2 
+      ? "Selected Metrics" 
+      : activeYLabels.join(', ');
+
+    const getOriginalValue = (item: any, label: string) => {
+      const col = columns.find(c => c.label === label);
+      let val;
+      if (col && item._row) val = item._row[col.key];
+      else val = item[label];
+      
+      return formatValue(val, col?.key || label);
+    };
+
+    const isRankSNBT = activeYLabels.length === 1 && activeYLabels[0] === t.cols.posisiNasional;
+
+    const getYAxisProps = () => {
+      const props: any = {
+        tick: { fontSize: 10, fill: '#94a3b8' },
+        unit: isNormalized ? '%' : '',
+        label: { value: yAxisLabelText, angle: -90, position: 'insideLeft', offset: -70, fontSize: 10, fontWeight: 800, fill: '#94a3b8' },
+        tickFormatter: (val: any) => {
+          if (isNormalized) return `${val}%`;
+          if (activeYLabels.length === 1) {
+            const label = activeYLabels[0];
+            const col = columns.find(c => c.label === label);
+            if (col?.key === 'asetBersih' || col?.key === 'gajiBulanan') {
+              if (currencyMode === 'IDR') {
+                const absVal = Math.abs(val);
+                const prefix = val < 0 ? '-' : '';
+                if (absVal >= 1000000000) return `${prefix}Rp ${(absVal / 1000000000).toFixed(1)} Milyar`;
+                if (absVal >= 1000000) return `${prefix}Rp ${(absVal / 1000000).toFixed(0)} jt`;
+                return `${prefix}Rp ${absVal.toLocaleString('id-ID')}`;
+              }
+              const absVal = Math.abs(val);
+              const prefix = val < 0 ? '-' : '';
+              if (absVal >= 1000000) return `${prefix}$${(absVal / 1000000).toFixed(1)}M`;
+              if (absVal >= 1000) return `${prefix}$${(absVal / 1000).toFixed(1)}K`;
+              return `${prefix}$${absVal}`;
+            }
+            if (col?.key === 'tinggiBadan') {
+              if (heightUnit === 'inch') {
+                const totalInches = Math.round(val);
+                const feet = Math.floor(totalInches / 12);
+                const inches = totalInches % 12;
+                return `${feet}'${inches}`;
+              }
+              return `${val} cm`;
+            }
+          }
+          return typeof val === 'number' ? val.toLocaleString('en-US') : val;
+        }
+      };
+
+      if (isNormalized) {
+        props.domain = [0, 100];
+      } else if (activeYLabels.length === 1) {
+        const label = activeYLabels[0];
+        if (label === t.cols.skorIRT) props.domain = [0, 850];
+        else if (label === t.cols.jumlahBenar) props.domain = [0, 160];
+        else if (label === t.cols.percentile) props.domain = [0, 100];
+        else if (label === t.cols.sat) props.domain = [400, 1600];
+        else if (label === t.cols.iq) props.domain = [0, 160];
+        else if (label === t.cols.playHour) props.domain = [0, 'auto'];
+        else if (label === t.cols.posisiNasional) {
+          props.domain = [0, 'auto'];
+          props.reversed = true; // Lower rank is at the top
+        }
+        else if (label === t.cols.keketatan) props.domain = [0, 150];
+        else if (label === t.cols.psl) props.domain = [1, 10];
+        else if (label === t.cols.asetBersih) props.domain = [0, 'auto'];
+        else if (label === t.cols.gajiBulanan) props.domain = [0, 'auto'];
+        else if (label === t.cols.tinggiBadan) {
+          props.domain = heightUnit === 'inch' ? [40, 90] : [100, 220];
+        }
+      }
+      return props;
+    };
+
+    if (chartType === 'scatter') {
+      const scatterY = (activeYLabels[0] || 'IRT SNBT') as string;
+      const yAxisProps = getYAxisProps();
+      
+      const isXNumericValue = xAxisMetric !== 'rankSNBT';
+      const xAxisDataKey = isXNumericValue ? (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric) : 'Rank MLBB';
+      const xAxisLabelText = xAxisMetric === 'rankSNBT' ? t.cols.rankSNBT : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric);
+
+      return (
+        <ScatterChart {...commonProps}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+          <XAxis 
+            type={isXNumericValue ? "number" : "category"} 
+            dataKey={isXNumericValue ? xAxisDataKey : "Rank MLBB"} 
+            name={xAxisLabelText} 
+            domain={isXNumericValue ? ['auto', 'auto'] : undefined}
+            unit={isNormalized ? '%' : ''} 
+            label={{ value: xAxisLabelText, position: 'insideBottom', offset: -80, fontSize: 12, fill: '#64748b', fontWeight: 800 }} 
+            tick={{ fontSize: 10, fill: '#94a3b8' }}
+            tickFormatter={(val) => {
+              if (xAxisMetric === 'tinggiBadan' && isXNumericValue && typeof val === 'number') {
+                if (heightUnit === 'inch') {
+                  const totalInches = Math.round(val);
+                  const feet = Math.floor(totalInches / 12);
+                  const inches = totalInches % 12;
+                  return `${feet}'${inches}`;
+                }
+                return `${val} cm`;
+              }
+              if ((xAxisMetric === 'asetBersih' || xAxisMetric === 'gajiBulanan') && isXNumericValue && typeof val === 'number') {
+                if (currencyMode === 'IDR') {
+                  const absVal = Math.abs(val);
+                  const prefix = val < 0 ? '-' : '';
+                  if (absVal >= 1000000000) return `${prefix}Rp ${(absVal / 1000000000).toFixed(1)}M`;
+                  if (absVal >= 1000000) return `${prefix}Rp ${(absVal / 1000000).toFixed(0)} jt`;
+                  return `${prefix}Rp ${absVal.toLocaleString('id-ID')}`;
+                }
+                const absVal = Math.abs(val);
+                const prefix = val < 0 ? '-' : '';
+                if (absVal >= 1000000) return `${prefix}$${(absVal / 1000000).toFixed(1)}M`;
+                if (absVal >= 1000) return `${prefix}$${(absVal / 1000).toFixed(1)}K`;
+                return `${prefix}$${absVal}`;
+              }
+              return typeof val === 'number' ? val.toLocaleString('en-US') : val;
+            }}
+          />
+          <YAxis 
+            {...yAxisProps}
+            type="number" 
+            dataKey={scatterY as any} 
+            name={scatterY} 
+            label={{ value: scatterY, angle: -90, position: 'insideLeft', offset: -70, fontSize: 12, fill: '#64748b', fontWeight: 800 }} 
+            tickFormatter={(val) => {
+              const col = columns.find(c => c.label === scatterY);
+              if (col?.key === 'asetBersih' || col?.key === 'gajiBulanan') {
+                if (currencyMode === 'IDR') {
+                  const absVal = Math.abs(val);
+                  const prefix = val < 0 ? '-' : '';
+                  if (absVal >= 1000000000) return `${prefix}Rp ${(absVal / 1000000000).toFixed(1)} Milyar`;
+                  if (absVal >= 1000000) return `${prefix}Rp ${(absVal / 1000000).toFixed(0)} jt`;
+                  return `${prefix}Rp ${absVal.toLocaleString('id-ID')}`;
+                }
+                const absVal = Math.abs(val);
+                const prefix = val < 0 ? '-' : '';
+                if (absVal >= 1000000) return `${prefix}$${(absVal / 1000000).toFixed(1)}M`;
+                if (absVal >= 1000) return `${prefix}$${(absVal / 1000).toFixed(1)}K`;
+                return `${prefix}$${absVal}`;
+              }
+              if (col?.key === 'tinggiBadan') {
+                if (heightUnit === 'inch') {
+                  const totalInches = Math.round(val);
+                  const feet = Math.floor(totalInches / 12);
+                  const inches = totalInches % 12;
+                  return `${feet}'${inches}`;
+                }
+                return `${val} cm`;
+              }
+              return val.toLocaleString('en-US');
+            }}
+          />
+          <Tooltip 
+            cursor={{ strokeDasharray: '3 3' }} 
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const item = payload[0].payload as any;
+                const xLabel = xAxisLabelText;
+                return (
+                  <div className="bg-white p-3 rounded-xl shadow-xl border border-slate-100">
+                    <p className="font-black text-slate-800 border-b pb-1 mb-2 text-xs">{item.name}</p>
+                    <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tight">
+                      {xLabel}: {xAxisMetric === 'rankSNBT' ? item['Rank MLBB'] : getOriginalValue(item, xLabel)}
+                    </p>
+                    <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">
+                      {scatterY}: {getOriginalValue(item, scatterY)}
+                    </p>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
+          <Scatter name="Data" data={chartData} fill="#3b82f6" isAnimationActive={false} />
+          <Brush 
+            dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric)} 
+            height={30} 
+            stroke={activeTierVisual ? "#3b82f6" : "#cbd5e1"}
+            fill={activeTierVisual ? "rgba(0,0,0,0.4)" : "#f8fafc"}
+            padding={{ top: 20, bottom: 0, left: 0, right: 0 }}
+          />
+        </ScatterChart>
+      );
+    }
+
+    const XComponent = <XAxis 
+      dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (
+        (() => {
+          const col = columns.find(c => c.key === xAxisMetric);
+          return col ? col.label + 'Label' : xAxisMetric + 'Label';
+        })()
+      )} 
+      type={"category"}
+      angle={-45} 
+      textAnchor="end" 
+      interval={0} 
+      height={100} 
+      tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} 
+      label={{ 
+        value: xAxisMetric === 'rankSNBT' ? t.cols.rankSNBT : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric), 
+        position: 'insideBottom', 
+        offset: -25, 
+        fontSize: 10, 
+        fontWeight: 800, 
+        fill: '#94a3b8' 
+      }}
+    />;
+
+    const CustomTooltip = ({ active, payload, label }: any) => {
+      if (active && payload && payload.length) {
+        return (
+          <div className="bg-white p-3 rounded-xl shadow-xl border border-slate-100 min-w-[150px]">
+            <p className="font-black text-slate-800 border-b pb-1 mb-2 text-xs">{label}</p>
+            {payload.map((p: any, i: number) => (
+              <p key={i} className="text-[10px] font-bold uppercase tracking-tight mb-1" style={{ color: p.color }}>
+                {p.name}: {getOriginalValue(p.payload, p.name)}
+              </p>
+            ))}
+          </div>
+        );
+      }
+      return null;
+    };
+
+    if (chartType === 'bar') {
+      return (
+        <BarChart {...commonProps}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+          {XComponent}
+          <YAxis {...getYAxisProps()} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+          <Legend wrapperStyle={{ paddingTop: '40px' }} />
+          {activeYLabels.map((label, index) => (
+            <Bar key={label} dataKey={label as any} fill={`hsl(${210 + (index * 35)}, 75%, 55%)`} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+          ))}
+          <Brush 
+            dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric)} 
+            height={30} 
+            stroke={activeTierVisual ? "#3b82f6" : "#cbd5e1"}
+            fill={activeTierVisual ? "rgba(0,0,0,0.4)" : "#f8fafc"}
+            padding={{ top: 20, bottom: 0, left: 0, right: 0 }}
+          />
+        </BarChart>
+      );
+    }
+
+    if (chartType === 'line') {
+      return (
+        <LineChart {...commonProps}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+          {XComponent}
+          <YAxis {...getYAxisProps()} />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend wrapperStyle={{ paddingTop: '40px' }} />
+          {activeYLabels.map((label, index) => (
+            <Line key={label} type="monotone" dataKey={label as any} stroke={`hsl(${210 + (index * 35)}, 75%, 55%)`} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} isAnimationActive={false} />
+          ))}
+          <Brush 
+            dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric)} 
+            height={30} 
+            stroke={activeTierVisual ? "#3b82f6" : "#cbd5e1"}
+            fill={activeTierVisual ? "rgba(0,0,0,0.4)" : "#f8fafc"}
+            padding={{ top: 20, bottom: 0, left: 0, right: 0 }}
+          />
+        </LineChart>
+      );
+    }
+
+    return (
+      <AreaChart {...commonProps}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+        {XComponent}
+        <YAxis {...getYAxisProps()} />
+        <Tooltip content={<CustomTooltip />} />
+        <Legend wrapperStyle={{ paddingTop: '40px' }} />
+        {activeYLabels.map((label, index) => (
+          <Area key={label} type="monotone" dataKey={label as any} stackId="1" stroke={`hsl(${210 + (index * 35)}, 75%, 55%)`} fill={`hsl(${210 + (index * 35)}, 75%, 55%)`} fillOpacity={0.6} isAnimationActive={false} />
+        ))}
+        <Brush 
+          dataKey={xAxisMetric === 'rankSNBT' ? 'Rank MLBB' : (columns.find(c => c.key === xAxisMetric)?.label || xAxisMetric)} 
+          height={30} 
+          stroke={activeTierVisual ? "#3b82f6" : "#cbd5e1"}
+          fill={activeTierVisual ? "rgba(0,0,0,0.4)" : "#f8fafc"}
+          padding={{ top: 20, bottom: 0, left: 0, right: 0 }}
+        />
+      </AreaChart>
+    );
+  };
+
+  // Decorative SVG Patterns for Backgrounds
+  const DecorativeSVGBackground = ({ b, hex }: { b: number; hex: string }) => {
+    const isUnderground = b < 75;
+    const isGround = b >= 75 && b < 90;
+    const isSkies = b >= 90 && b < 130;
+    const isSpace = b >= 130;
+
+    return (
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 opacity-80 mix-blend-plus-lighter">
+          {/* UNDERGROUND: Topsoil, Bedrock, Lithosphere, Mantle, Core */}
+          {isUnderground && (
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+              <rect width="1000" height="1000" fill="url(#undergroundGrad)" />
+              <defs>
+                <linearGradient id="undergroundGrad" x1="0" y1="0" x2="0" y2="1">
+                  {/* Dynamic coloring based on depth */}
+                  <stop offset="0%" stopColor={b >= 70 ? "#3d2b1f" : (b >= 40 ? "#1a1a1e" : "#120300")} />
+                  <stop offset="100%" stopColor={b < 40 ? "#4D0000" : "#0d0d0d"} />
+                </linearGradient>
+              </defs>
+              
+              {/* TOP SOIL Layer (70-74): Roots, Humus, Fossils */}
+              {b >= 70 && b < 75 && (
+                <g>
+                  {/* Tree Roots */}
+                  <path d="M500,0 C520,300 480,600 500,1000" stroke="#4a3525" strokeWidth="2" fill="none" opacity="0.4" />
+                  <path d="M200,0 C250,400 150,700 300,1000" stroke="#4a3525" strokeWidth="1" fill="none" opacity="0.3" />
+                  <path d="M800,0 C750,300 850,600 700,1000" stroke="#4a3525" strokeWidth="1.5" fill="none" opacity="0.3" />
+                  
+                  {/* Fossils */}
+                  {[...Array(6)].map((_, i) => (
+                    <g key={`fossil-${i}`} opacity="0.25" transform={`translate(${150 + (i * 140) % 700}, ${100 + (i * 150) % 600}) rotate(${i * 45}) scale(${0.7 + Math.random() * 0.4})`}>
+                      <path d="M0,0 L25,0" stroke="#fdf5e6" strokeWidth="4" strokeLinecap="round" />
+                      <circle cx="0" cy="-2" r="4" fill="#fdf5e6" />
+                      <circle cx="0" cy="2" r="4" fill="#fdf5e6" />
+                      <circle cx="25" cy="-2" r="4" fill="#fdf5e6" />
+                      <circle cx="25" cy="2" r="4" fill="#fdf5e6" />
+                    </g>
+                  ))}
+                  
+                  {/* Soil Texture */}
+                  {[...Array(40)].map((_, i) => (
+                    <circle key={`soil-${i}`} cx={Math.random() * 1000} cy={Math.random() * 1000} r={Math.random() * 2 + 1} fill="#3d2b1f" opacity="0.3" />
+                  ))}
+                </g>
+              )}
+
+              {/* BEDROCK & GUA Layer (60-69): Rock Walls, Giant Fossils */}
+              {b >= 60 && b < 70 && (
+                <g opacity="0.4">
+                  <path d="M0,300 L1000,320 M500,0 L520,1000" stroke="#000" strokeWidth="3" opacity="0.3" />
+                  {/* Cave texture / rock sheets */}
+                  {[...Array(10)].map((_, i) => (
+                     <rect key={i} x={Math.random()*800} y={Math.random()*800} width={200} height={20} fill="#000" opacity="0.1" transform={`rotate(${Math.random()*20})`} />
+                  ))}
+                </g>
+              )}
+
+              {/* LITHOSPHERE & CRUST (40-59): Tectonic cracks, Crystals, Smoke */}
+              {b >= 40 && b < 60 && (
+                <g>
+                   {/* Tectonic Cracks */}
+                   {[...Array(5)].map((_, i) => (
+                     <motion.path
+                        key={`crack-${i}`}
+                        d={`M${200 * i},0 L${250 * i + 50},500 L${200 * i},1000`}
+                        stroke={b < 50 ? "#FF3300" : "#FF5500"}
+                        strokeWidth="1.5"
+                        fill="none"
+                        opacity="0.2"
+                        animate={{ opacity: [0.1, 0.3, 0.1] }}
+                        transition={{ repeat: Infinity, duration: 4 + i }}
+                     />
+                   ))}
+                   {/* Sulfur Smoke / Thermal Vents */}
+                   {[...Array(15)].map((_, i) => (
+                     <motion.circle
+                        key={`smoke-${i}`}
+                        cx={200 + Math.random() * 600}
+                        cy={1000}
+                        r={20 + Math.random() * 40}
+                        fill={b < 50 ? "#4a1c00" : "#4a3b00"}
+                        initial={{ y: 1000, opacity: 0 }}
+                        animate={{ y: -200, opacity: [0, 0.2, 0] }}
+                        transition={{ repeat: Infinity, duration: 8 + Math.random() * 5, delay: i * 0.5 }}
+                     />
+                   ))}
+                   {/* Glowing Crystals (40-49 focus) */}
+                   {b < 50 && [...Array(12)].map((_, i) => (
+                    <motion.path
+                      key={`crystal-${i}`}
+                      d={`M${Math.random() * 800 + 100},${Math.random() * 800 + 100} l10,-20 l10,20 z`}
+                      fill="#FF3300"
+                      opacity="0.3"
+                      animate={{ opacity: [0.2, 0.7, 0.2], scale: [1, 1.1, 1] }}
+                      transition={{ repeat: Infinity, duration: 2 + Math.random() * 3 }}
+                    />
+                  ))}
+                </g>
+              )}
+
+              {/* MANTLE & CORE (<40): Lava, Magma Lake, Black Heat */}
+              {b < 40 && (
+                <g>
+                  {/* Lava Streams */}
+                  {[...Array(8)].map((_, i) => (
+                    <motion.path
+                      key={`lava-${i}`}
+                      d={`M${150 * i},0 C${150*i + 100},300 ${150*i - 100},700 ${150 * i},1000`}
+                      stroke="#FF4D00"
+                      strokeWidth={b < 2 ? "12" : "4"}
+                      fill="none"
+                      opacity="0.4"
+                      animate={{ strokeWidth: [4, 8, 4], opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ repeat: Infinity, duration: 3 + i }}
+                    />
+                  ))}
+                  {/* Magma Bubbles */}
+                  {[...Array(25)].map((_, i) => (
+                    <motion.circle
+                      key={`bubble-${i}`}
+                      cx={Math.random() * 1000}
+                      cy={1000}
+                      r={Math.random() * 15 + 5}
+                      fill="#FF9900"
+                      initial={{ y: 1000, opacity: 0 }}
+                      animate={{ y: -200, opacity: [0, 0.6, 0], scale: [0.5, 1.5, 0.8] }}
+                      transition={{ repeat: Infinity, duration: 5 + Math.random() * 4, delay: i * 0.3 }}
+                    />
+                  ))}
+                  {/* Black Smoke for Core */}
+                  {b < 2 && [...Array(20)].map((_, i) => (
+                    <motion.circle
+                       key={`black-smoke-${i}`}
+                       cx={Math.random() * 1000}
+                       cy={Math.random() * 1000}
+                       r={50 + Math.random() * 50}
+                       fill="#000000"
+                       opacity="0.4"
+                       animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+                       transition={{ repeat: Infinity, duration: 6 + Math.random() * 4 }}
+                    />
+                  ))}
+                </g>
+              )}
+            </svg>
+          )}
+
+          {/* GROUND LEVEL (75-89): Grass, Power Poles, Azure Sky, Campus Silhouette */}
+          {isGround && (
+            <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMax slice">
+              <defs>
+                <linearGradient id="sunsetGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#0EA5E9" />
+                  <stop offset="100%" stopColor="#e0f2fe" />
+                </linearGradient>
+              </defs>
+              <rect width="1000" height="600" fill="url(#sunsetGrad)" opacity="0.6" />
+
+              {/* Distant Campus Silhouette (Simplified Unnes) */}
+              <g transform="translate(0, 100)" opacity="0.3">
+                <path d="M0,500 L200,500 L250,300 L300,500 L500,500 L550,200 L600,500 L1000,500 L1000,600 L0,600 Z" fill="#1a1a1a" />
+                <rect x="535" y="150" width="30" height="100" fill="#1a1a1a" /> {/* Central Tower idea */}
+              </g>
+              
+              {/* Power Poles / Tiang Listrik */}
+              {[150, 450, 750].map((x, i) => (
+                <g key={`pole-${i}`} transform={`translate(${x}, 350)`}>
+                   <rect x="-3" y="0" width="6" height="250" fill="#111" />
+                   <rect x="-40" y="20" width="80" height="4" fill="#111" />
+                   <circle cx="-35" cy="18" r="3" fill="#222" />
+                   <circle cx="35" cy="18" r="3" fill="#222" />
+                   {/* Wires */}
+                   <path d="M-35,18 Q-150,50 -300,20" stroke="#111" strokeWidth="0.5" fill="none" />
+                   <path d="M35,18 Q150,50 300,20" stroke="#111" strokeWidth="0.5" fill="none" />
+                </g>
+              ))}
+
+              {/* Foreground Grass Field */}
+              <path d="M0,600 Q200,560 500,590 T1000,570 L1000,600 L0,600 Z" fill="#2e5a44" opacity="0.9" />
+              
+              {/* Human Elements: Unnes specific or just props */}
+              <g transform="translate(850, 560)" opacity="0.8">
+                 <rect x="-10" y="0" width="20" height="40" fill="#333" /> {/* simplified coffee/phone context? maybe not */}
+              </g>
+            </svg>
+          )}
+
+          {/* SKIES (90-129): Troposphere, Stratosphere, Mesosphere, Thermosphere */}
+          {isSkies && (
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="skyAtmosphere" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={b >= 120 ? "#001433" : (b >= 110 ? "#001c4e" : (b >= 100 ? "#1a3b70" : "#3a7ca5"))} />
+                  <stop offset="100%" stopColor="transparent" />
+                </linearGradient>
+              </defs>
+              <rect width="1000" height="1000" fill="url(#skyAtmosphere)" />
+              
+              {/* TROPOSPHERE (90-99): Azure Sky, Eagles, Clouds */}
+              {b < 100 && (
+                <g>
+                  {/* Fluffy Cumulus Clouds */}
+                  {[...Array(8)].map((_, i) => (
+                    <motion.g
+                      key={`cumulus-${i}`}
+                      initial={{ x: Math.random() * 1200 - 200, y: 50 + i * 110 }}
+                      animate={{ x: 1200 }}
+                      transition={{ repeat: Infinity, duration: 40 + i * 15, ease: "linear" }}
+                      className="opacity-40"
+                    >
+                      <circle cx="50" cy="50" r="40" fill="white" />
+                      <circle cx="85" cy="55" r="35" fill="white" />
+                      <circle cx="25" cy="55" r="35" fill="white" />
+                      <circle cx="55" cy="25" r="30" fill="white" />
+                    </motion.g>
+                  ))}
+                  
+                  {/* Eagles */}
+                  {[...Array(8)].map((_, i) => (
+                    <motion.path
+                      key={`eagle-${i}`}
+                      d="M0,0 L15,10 L30,0"
+                      stroke="#222"
+                      strokeWidth="2.5"
+                      fill="none"
+                      initial={{ x: Math.random() * 1200 - 100, y: 200 + i * 100 }}
+                      animate={{ x: -100, y: [200+i*100, 240+i*100, 200+i*100] }}
+                      transition={{ repeat: Infinity, duration: 15 + i*2, ease: "linear" }}
+                    />
+                  ))}
+                </g>
+              )}
+
+              {/* STRATOSPHERE (100-109): Clouds, Jet Fighters */}
+              {b >= 100 && b < 110 && (
+                <g>
+                   {[...Array(15)].map((_, i) => (
+                    <motion.ellipse
+                      key={`cloud-${i}`}
+                      cx={Math.random() * 1000}
+                      cy={Math.random() * 1000}
+                      rx={100 + Math.random() * 100}
+                      ry={40 + Math.random() * 40}
+                      fill="white"
+                      opacity="0.6"
+                      animate={{ x: [0, 50, 0] }}
+                      transition={{ repeat: Infinity, duration: 20 + i*2 }}
+                    />
+                  ))}
+                  {/* Jet Fighters */}
+                  <motion.path
+                    d="M0,0 L40,10 L0,20 Z"
+                    fill="#555"
+                    initial={{ x: -100, y: 400 }}
+                    animate={{ x: 1200 }}
+                    transition={{ repeat: Infinity, duration: 3, delay: 5 }}
+                  />
+                </g>
+              )}
+
+              {/* MESOSPHERE (110-119): Meteor Streaks, Burning */}
+              {b >= 110 && b < 120 && (
+                 <g>
+                    {[...Array(8)].map((_, i) => (
+                      <motion.line
+                        key={`meteor-${i}`}
+                        x1="1000" y1={Math.random() * 500}
+                        x2="800" y2={Math.random() * 500 + 200}
+                        stroke="#FFD700"
+                        strokeWidth="2"
+                        initial={{ opacity: 0, pathLength: 0 }}
+                        animate={{ opacity: [0, 1, 0], pathLength: [0, 1, 0] }}
+                        transition={{ repeat: Infinity, duration: 1 + Math.random(), delay: i * 2 }}
+                      />
+                    ))}
+                 </g>
+              )}
+
+              {/* THERMOSPHERE (120-129): ISS, Aurora */}
+              {b >= 120 && (
+                <g>
+                  {/* Aurora Waves */}
+                  {[...Array(4)].map((_, i) => (
+                    <motion.path
+                      key={`aurora-${i}`}
+                      d="M0,300 Q250,100 500,300 T1000,300"
+                      stroke={i % 2 === 0 ? "#4ade80" : "#22c55e"}
+                      strokeWidth="120"
+                      fill="none"
+                      opacity="0.12"
+                      animate={{ 
+                        opacity: [0.08, 0.25, 0.08], 
+                        d: [
+                          `M0,${300 + i * 20} Q${250 + i * 50},${100 + i * 30} 500,${300 + i * 20} T1000,${300 + i * 20}`,
+                          `M0,${350 + i * 20} Q${250 - i * 50},${150 - i * 30} 500,${350 + i * 20} T1000,${350 + i * 20}`
+                        ] 
+                      }}
+                      transition={{ repeat: Infinity, duration: 6 + i, repeatType: "reverse" }}
+                    />
+                  ))}
+                  {/* ISS Silhouette */}
+                  <motion.g animate={{ x: [1100, -200], y: [200, 250] }} transition={{ repeat: Infinity, duration: 40, ease: "linear" }}>
+                    <rect width="60" height="20" fill="#888" />
+                    <rect x="25" y="-30" width="10" height="80" fill="#555" />
+                    <rect x="10" y="-30" width="40" height="2" fill="#333" />
+                  </motion.g>
+                </g>
+              )}
+            </svg>
+          )}
+
+          {/* SPACE (130-160): Exosphere, Solar Belt, Deep Space */}
+          {isSpace && (
+             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+                <rect width="1000" height="1000" fill="#050510" />
+                
+                {/* STARS Background */}
+                {[...Array(100)].map((_, i) => (
+                  <circle key={i} cx={Math.random()*1000} cy={Math.random()*1000} r={Math.random()*1.5} fill="white" opacity={Math.random()*0.8} />
+                ))}
+
+                {/* EXOSPHERE (130-139): Earth Curve, Micrometeoroids */}
+                {b < 140 && (
+                  <g>
+                    <circle cx="500" cy="1500" r="1000" fill="#003366" opacity="0.4" /> {/* Earth edge */}
+                    <circle cx="500" cy="1500" r="1010" fill="none" stroke="#00F0FF" strokeWidth="5" opacity="0.2" /> {/* Ionization line */}
+                    {/* Micrometeoroids */}
+                    {[...Array(10)].map((_, i) => (
+                      <motion.circle
+                        key={`m-meteor-${i}`}
+                        cx={Math.random()*1000}
+                        cy={Math.random()*1000}
+                        r="1"
+                        fill="white"
+                        animate={{ x: [0, -50], y: [0, 100], opacity: [0, 1, 0] }}
+                        transition={{ repeat: Infinity, duration: 2 + Math.random()*3, delay: i*0.2 }}
+                      />
+                    ))}
+                  </g>
+                )}
+
+                {/* SOLAR BELT (140-149): Saturn, Comets */}
+                {b >= 140 && b < 150 && (
+                  <g transform="translate(700, 200)">
+                    {/* Saturn */}
+                    <circle r="60" fill="#f0e68c" />
+                    <ellipse rx="150" ry="20" fill="none" stroke="#f0e68c" strokeWidth="4" opacity="0.4" transform="rotate(-20)" />
+                    {/* Comets */}
+                    {[...Array(2)].map((_, i) => (
+                      <motion.circle
+                        key={`comet-${i}`}
+                        r="3"
+                        fill="white"
+                        initial={{ x: -1000, y: 500 }}
+                        animate={{ x: 1000, y: -200 }}
+                        transition={{ repeat: Infinity, duration: 4, delay: i*15 }}
+                      />
+                    ))}
+                  </g>
+                )}
+
+                {/* DEEP SPACE (150-160): Galaxy, Black Hole */}
+                {b >= 150 && (
+                  <g transform="translate(500, 500)">
+                    {/* Spiral Galaxy idea */}
+                    {[...Array(4)].map((_, i) => (
+                      <motion.ellipse
+                        key={`galaxy-${i}`}
+                        rx={100 + i*50} ry={20 + i*10}
+                        fill="none"
+                        stroke={i % 2 === 0 ? "#BF00FF" : "#00F0FF"}
+                        strokeWidth="2"
+                        opacity="0.2"
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 20 + i*10, ease: "linear" }}
+                      />
+                    ))}
+                    {/* Black Hole center */}
+                    <circle r="30" fill="black" />
+                    <circle r="35" fill="none" stroke="#00F0FF" strokeWidth="2" opacity="0.3">
+                       <animate attributeName="r" values="35;45;35" dur="3s" repeatCount="indefinite" />
+                    </circle>
+                  </g>
+                )}
+             </svg>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const AstronautVisual = ({ tierId, hex }: { tierId: string; hex: string }) => {
+    return (
+      <motion.div 
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 0.9 }}
+        className="absolute bottom-10 right-10 lg:right-20 z-0 pointer-events-none select-none hidden md:block"
+      >
+        <svg width="300" height="400" viewBox="0 0 100 130" className="drop-shadow-2xl">
+          <defs>
+            <radialGradient id="visorReflect" cx="30%" cy="30%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="black" />
+            </radialGradient>
+          </defs>
+          
+          {/* Life Support Pack */}
+          <rect x="22" y="45" width="20" height="50" rx="4" fill={hex} opacity="0.6" />
+          <path d="M42,50 L58,50" stroke="white" strokeWidth="2" opacity="0.2" />
+
+          {/* Suit Base */}
+          <rect x="30" y="40" width="40" height="65" rx="12" fill={hex} opacity="0.3" stroke={hex} strokeWidth="1" />
+          <path d="M30,70 L70,70" stroke={hex} strokeWidth="0.5" opacity="0.3" />
+          
+          {/* Boots */}
+          <rect x="32" y="105" width="15" height="8" rx="2" fill={hex} opacity="0.5" />
+          <rect x="53" y="105" width="15" height="8" rx="2" fill={hex} opacity="0.5" />
+
+          {/* Helmet Architecture */}
+          <circle cx="50" cy="30" r="22" fill={hex} opacity="0.1" stroke={hex} strokeWidth="1" />
+          <circle cx="50" cy="30" r="18" fill="url(#visorReflect)" stroke="white" strokeWidth="0.5" opacity="0.8" />
+          
+          {/* HUD Reflection on Visor */}
+          <rect x="42" y="25" width="4" height="1" fill={hex} opacity="0.8">
+             <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
+          </rect>
+
+          {/* Equipment Labels */}
+          <motion.g animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 4 }}>
+             <rect x="40" y="55" width="20" height="2" rx="1" fill="white" opacity="0.2" />
+             <rect x="40" y="60" width="12" height="2" rx="1" fill="white" opacity="0.2" />
+          </motion.g>
+
+          {/* Status Bezel */}
+          <motion.circle 
+            animate={{ scale: [1, 1.2, 1], opacity: [1, 0.5, 1] }} 
+            transition={{ repeat: Infinity, duration: 1.5 }}
+            cx="38" cy="85" r="2" fill="#00ff00" 
+          />
+        </svg>
+      </motion.div>
+    );
+  };
+
+  const renderOsuSimulator = () => {
+    const localNormalCDF = (z: number): number => {
+      const a1 =  0.254829592;
+      const a2 = -0.284496736;
+      const a3 =  1.421413741;
+      const a4 = -1.453152027;
+      const a5 =  1.061405429;
+      const p  =  0.3275911;
+
+      const sign = (z >= 0) ? 1 : -1;
+      const absX = Math.abs(z) / Math.sqrt(2);
+
+      const t = 1.0 / (1.0 + p * absX);
+      const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+
+      return 0.5 * (1 + sign * y);
+    };
+
+    const getSubtestRank = (score: number) => {
+      const Z = (score - 500) / 105;
+      const cdfVal = localNormalCDF(Z);
+      return Math.max(1, Math.min(850000, Math.round((1 - cdfVal) * 850000)));
+    };
+
+    const getGlobalRank = (score: number) => {
+      const CDF_User = localNormalCDF((score - 525) / 80);
+      const CDF_Max = localNormalCDF((825 - 525) / 80);
+      const CDF_Min = localNormalCDF((275 - 525) / 80);
+      const Persentil_Scaled = (CDF_User - CDF_Min) / (CDF_Max - CDF_Min || 1);
+      return Math.max(1, Math.min(850000, Math.round((1 - Persentil_Scaled) * 850000)));
+    };
+
+    const getOsuPP = (score: number) => {
+      if (score >= 700) {
+        return 500 + ((score - 700) / (1000 - 700)) * (2000 - 500);
+      } else if (score >= 500) {
+        return 100 + ((score - 500) / (700 - 500)) * (500 - 100);
+      } else if (score >= 232) {
+        return 1 + ((score - 232) / (500 - 232)) * (100 - 1);
+      } else {
+        return 1;
+      }
+    };
+
+    const rawTeknik = (0.25 * utbkPM) + (0.20 * utbkPK) + (0.20 * utbkPU) + (0.15 * utbkLitIng) + (0.10 * utbkLitIndo) + (0.05 * utbkPBM) + (0.05 * utbkPPU);
+    const rawSosial = (0.25 * utbkPBM) + (0.25 * utbkLitIndo) + (0.15 * utbkPPU) + (0.15 * utbkPU) + (0.10 * utbkLitIng) + (0.05 * utbkPM) + (0.05 * utbkPK);
+    const rawKesehatan = (0.25 * utbkPU) + (0.25 * utbkLitIng) + (0.15 * utbkPK) + (0.15 * utbkPM) + (0.10 * utbkLitIndo) + (0.05 * utbkPBM) + (0.05 * utbkPPU);
+    const rawBisnis = (0.25 * utbkPK) + (0.25 * utbkPM) + (0.15 * utbkLitIng) + (0.15 * utbkPU) + (0.10 * utbkPBM) + (0.05 * utbkLitIndo) + (0.05 * utbkPPU);
+    const rawSastra = (0.30 * utbkLitIng) + (0.25 * utbkPPU) + (0.15 * utbkLitIndo) + (0.10 * utbkPBM) + (0.10 * utbkPU) + (0.05 * utbkPM) + (0.05 * utbkPK);
+
+    const scores = [utbkPU, utbkPBM, utbkPPU, utbkPK, utbkLitIndo, utbkLitIng, utbkPM];
+    const Rata_Rata_Murni = scores.reduce((a, b) => a + b, 0) / 7;
+
+    const mean = Rata_Rata_Murni;
+    const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / 7;
+    const SD_Internal = Math.sqrt(variance);
+    const Min_Subtest = Math.min(...scores);
+    const Z_Internal = (mean - Min_Subtest) / Math.max(1, SD_Internal);
+
+    const subtestsInfo = [
+      { key: "pu", label: "PU", val: utbkPU, wTeknik: 0.20, wSosial: 0.15, wKesehatan: 0.25, wBisnis: 0.15, wSastra: 0.10 },
+      { key: "pbm", label: "PBM", val: utbkPBM, wTeknik: 0.05, wSosial: 0.25, wKesehatan: 0.05, wBisnis: 0.10, wSastra: 0.10 },
+      { key: "ppu", label: "PPU", val: utbkPPU, wTeknik: 0.05, wSosial: 0.15, wKesehatan: 0.05, wBisnis: 0.05, wSastra: 0.25 },
+      { key: "pk", label: "PK", val: utbkPK, wTeknik: 0.20, wSosial: 0.05, wKesehatan: 0.15, wBisnis: 0.25, wSastra: 0.05 },
+      { key: "litIndo", label: "Literasi Indonesia", val: utbkLitIndo, wTeknik: 0.10, wSosial: 0.25, wKesehatan: 0.10, wBisnis: 0.05, wSastra: 0.15 },
+      { key: "litIng", label: "Literasi Inggris", val: utbkLitIng, wTeknik: 0.15, wSosial: 0.10, wKesehatan: 0.25, wBisnis: 0.15, wSastra: 0.30 },
+      { key: "pm", label: "PM", val: utbkPM, wTeknik: 0.25, wSosial: 0.05, wKesehatan: 0.15, wBisnis: 0.25, wSastra: 0.05 },
+    ];
+
+    let minSubInfo = subtestsInfo[0];
+    for (const info of subtestsInfo) {
+      if (info.val < minSubInfo.val) {
+        minSubInfo = info;
+      }
+    }
+
+    // Dynamic weighted Z-score penalty (prioritises subtests with higher weights when Z_nat < 1.0, with heavier nerf if below 0)
+    let sumTeknikSeverity = 0;
+    let sumSosialSeverity = 0;
+    let sumKesehatanSeverity = 0;
+    let sumBisnisSeverity = 0;
+    let sumSastraSeverity = 0;
+
+    subtestsInfo.forEach(sub => {
+      const zNat = (sub.val - 500) / 105;
+      if (zNat < 1.0) {
+        let severity = 0;
+        if (zNat >= 0.0) {
+          // Z is between 0 and 1 (Score between 500 and 600)
+          severity = (1.0 - zNat) * 1.5;
+        } else {
+          // Z is below 0 (Score below 500) - much heavier nerf
+          severity = 1.5 + Math.abs(zNat) * 4.0;
+        }
+        sumTeknikSeverity += sub.wTeknik * severity;
+        sumSosialSeverity += sub.wSosial * severity;
+        sumKesehatanSeverity += sub.wKesehatan * severity;
+        sumBisnisSeverity += sub.wBisnis * severity;
+        sumSastraSeverity += sub.wSastra * severity;
+      }
+    });
+
+    const penaltyTeknik = 1.0 - Math.min(0.10, sumTeknikSeverity * 0.10);
+    const penaltySosial = 1.0 - Math.min(0.10, sumSosialSeverity * 0.10);
+    const penaltyKesehatan = 1.0 - Math.min(0.10, sumKesehatanSeverity * 0.10);
+    const penaltyBisnis = 1.0 - Math.min(0.10, sumBisnisSeverity * 0.10);
+    const penaltySastra = 1.0 - Math.min(0.10, sumSastraSeverity * 0.10);
+
+    const hasPenalty = (1.0 - penaltyTeknik) > 0.001 || 
+                       (1.0 - penaltySosial) > 0.001 || 
+                       (1.0 - penaltyKesehatan) > 0.001 || 
+                       (1.0 - penaltyBisnis) > 0.001 || 
+                       (1.0 - penaltySastra) > 0.001;
+
+    const scoreTeknik = rawTeknik * penaltyTeknik;
+    const scoreSosial = rawSosial * penaltySosial;
+    const scoreKesehatan = rawKesehatan * penaltyKesehatan;
+    const scoreBisnis = rawBisnis * penaltyBisnis;
+    const scoreSastra = rawSastra * penaltySastra;
+
+    const ppTeknik = getOsuPP(scoreTeknik);
+    const ppSosial = getOsuPP(scoreSosial);
+    const ppKesehatan = getOsuPP(scoreKesehatan);
+    const ppBisnis = getOsuPP(scoreBisnis);
+    const ppSastra = getOsuPP(scoreSastra);
+
+    const Rata_Rata_Berbobot = (scoreTeknik + scoreSosial + scoreKesehatan + scoreBisnis + scoreSastra) / 5;
+
+    const rawTopPlays = [
+      { id: "teknik", name: "Teknik", raw: rawTeknik, final: scoreTeknik, pp: ppTeknik, icon: "🛠️", color: "from-blue-500 to-cyan-400", desc: "Penalaran Matematika & Pengetahuan Kuantitatif" },
+      { id: "sosial", name: "Sosial", raw: rawSosial, final: scoreSosial, pp: ppSosial, icon: "📚", color: "from-amber-500 to-orange-400", desc: "Pemahaman Bacaan, Menulis & Literasi Indonesia" },
+      { id: "kesehatan", name: "Kesehatan", raw: rawKesehatan, final: scoreKesehatan, pp: ppKesehatan, icon: "🏥", color: "from-emerald-500 to-teal-400", desc: "Penalaran Umum & Literasi Bahasa Inggris" },
+      { id: "bisnis", name: "Bisnis", raw: rawBisnis, final: scoreBisnis, pp: ppBisnis, icon: "💼", color: "from-purple-500 to-indigo-400", desc: "Pengetahuan Kuantitatif & Penalaran Matematika" },
+      { id: "sastra", name: "Sastra", raw: rawSastra, final: scoreSastra, pp: ppSastra, icon: "🎭", color: "from-pink-500 to-rose-400", desc: "Literasi Bahasa Inggris & Pengetahuan Umum" },
+    ];
+
+    const topPlays = [...rawTopPlays].sort((a, b) => b.pp - a.pp);
+    const maxPP = Math.max(ppTeknik, ppSosial, ppKesehatan, ppBisnis, ppSastra);
+
+    let playerStatus = "6-Digit Hardstuck";
+    let statusColor = "text-slate-400 border-slate-500 bg-slate-500/10";
+    if (maxPP >= 1000) {
+      playerStatus = "God Play";
+      statusColor = "text-amber-400 border-amber-400/50 bg-amber-400/10 shadow-[0_0_15px_rgba(245,158,11,0.2)]";
+    } else if (maxPP >= 500) {
+      playerStatus = "Pro Play";
+      statusColor = "text-purple-400 border-purple-400/50 bg-purple-400/10 shadow-[0_0_12px_rgba(168,85,247,0.2)]";
+    } else if (maxPP >= 150) {
+      playerStatus = "Median Play";
+      statusColor = "text-blue-400 border-blue-400/50 bg-blue-400/10 shadow-[0_0_10px_rgba(59,130,246,0.2)]";
+    }
+
+    return (
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-6xl mx-auto space-y-8"
+      >
+        {/* Sleek Sub-Tab Switcher inside osu! PP Simulator */}
+        <div className="flex items-center justify-center p-1.5 rounded-2xl bg-white/5 border border-white/10 max-w-md mx-auto">
+          <button
+            onClick={() => setOsuSubTab('profile')}
+            className={`flex-1 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+              osuSubTab === 'profile'
+                ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg shadow-pink-600/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Gamepad2 className="w-4 h-4" />
+            osu! PP Profile
+          </button>
+          <button
+            onClick={() => setOsuSubTab('snbt2030')}
+            className={`flex-1 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+              osuSubTab === 'snbt2030'
+                ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg shadow-pink-600/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <GraduationCap className="w-4 h-4" />
+            SNBT 2030 Simulator
+          </button>
+        </div>
+
+        {osuSubTab === 'profile' ? (
+          <>
+            <div className="relative p-6 sm:p-8 rounded-3xl border border-white/10 bg-black/50 backdrop-blur-xl overflow-hidden shadow-2xl">
+              <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-pink-500/20 blur-3xl" />
+              <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-purple-500/20 blur-3xl" />
+          
+          <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 p-1 shadow-lg shadow-pink-500/20 active:scale-95 transition-transform">
+                <div className="w-full h-full rounded-xl bg-slate-950 flex flex-col items-center justify-center overflow-hidden relative">
+                  <Gamepad2 className="w-12 h-12 text-pink-400 animate-pulse" />
+                  <div className="absolute bottom-1 bg-black/60 text-[8px] font-black tracking-widest text-pink-300 px-1.5 py-0.5 rounded uppercase">
+                    LV.99
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center sm:text-left space-y-2">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                  <h2 className="text-3xl font-black tracking-tight text-white uppercase italic">
+                    osu! UTBK Profile Dashboard
+                  </h2>
+                  <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${statusColor}`}>
+                    {playerStatus}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-slate-400 leading-relaxed max-w-xl">
+                  Selamat datang di simulator integrasi performa akademik UTBK-SNBT terhadap sistem ranking lagu osu! PP. Geser nilai subtes di bawah dan pantau skor Top Plays kamu secara real-time!
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center md:items-end text-center md:text-right p-4 rounded-2xl bg-white/5 border border-white/5 min-w-[200px]">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-pink-400">Total Active Play PP</span>
+              <span className="text-5xl font-black text-white italic tracking-tighter drop-shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+                {Math.round(maxPP).toLocaleString('en-US')}
+                <span className="text-xl ml-1 text-pink-400 font-bold">pp</span>
+              </span>
+              <span className="text-[9px] font-bold text-slate-400 mt-1">
+                Berdasarkan Rumpun Jurusan Tertinggi
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md flex items-center justify-between shadow-lg relative group overflow-hidden">
+            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-all duration-500" />
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Rata-Rata Murni</span>
+              <h3 className="text-3xl font-black text-white font-mono">{Rata_Rata_Murni.toFixed(1)}</h3>
+              <p className="text-[10px] font-semibold text-slate-400">Arithmetic Mean 7 Subtes</p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+              <Activity className="w-6 h-6 animate-pulse" />
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md flex items-center justify-between shadow-lg relative group overflow-hidden">
+            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-all duration-500" />
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Peringkat Rata-Rata Asli</span>
+              <h3 className="text-3xl font-black text-white font-mono">
+                #{getGlobalRank(Rata_Rata_Murni).toLocaleString('en-US')}
+              </h3>
+              <p className="text-[10px] font-semibold text-slate-400">Peringkat Nasional (Jalur 2B μ=525, σ=80)</p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+              <Trophy className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md flex items-center justify-between shadow-lg relative group overflow-hidden">
+            <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-pink-500/5 rounded-full blur-2xl group-hover:bg-pink-500/10 transition-all duration-500" />
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-pink-400">Rata-Rata Skor Berbobot</span>
+              <h3 className="text-3xl font-black text-white font-mono">{Rata_Rata_Berbobot.toFixed(1)}</h3>
+              <p className="text-[10px] font-semibold text-slate-400">Skor Jurusan Pasca-Penalti</p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400">
+              <Target className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
+        {hasPenalty && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-2xl border border-rose-500/30 bg-rose-950/20 backdrop-blur-md flex items-start gap-4 shadow-xl shadow-rose-950/10"
+          >
+            <div className="p-2 rounded-xl bg-rose-500/25 border border-rose-500/40 text-rose-400">
+              <ShieldAlert className="w-5 h-5 animate-bounce" />
+            </div>
+            <div className="space-y-1 flex-1">
+              <h4 className="text-sm font-black uppercase text-rose-400 tracking-wide">
+                TERDETEKSI PENALTI SUBTES DI BAWAH RERATA NASIONAL (Z-Score &lt; 1.0)
+              </h4>
+              <p className="text-xs font-bold text-slate-300 leading-relaxed">
+                Beberapa nilai subtes Anda memiliki nilai Z-Score nasional di bawah 1.0 (Skor &lt; 600) dengan dampak penalti jauh lebih berat untuk subtes di bawah 500 (Z-Score &lt; 0.0). Sistem secara dinamis memberikan penalti proporsional yang **mengutamakan subtes dengan bobot tinggi** pada tiap rumpun jurusan secara independen (maksimal potongan dibatasi aman hingga 10% agar tidak terlalu brutal).
+              </p>
+              <div className="text-[10px] font-mono text-rose-300/60 pt-1 flex flex-wrap gap-x-4">
+                <span>Rata murni: {Rata_Rata_Murni.toFixed(1)}</span>
+                <span>Terendah: {minSubInfo.label} ({minSubInfo.val})</span>
+                <span>Internal SD: {SD_Internal.toFixed(1)}</span>
+                <span>SD-Kriteria: Nasional (μ=500, σ=105)</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-6 p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-6">
+            <div className="border-b border-white/5 pb-4">
+              <h3 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <Target className="w-5 h-5 text-pink-500" />
+                7 SUBTES UTBK-SNBT SLIDERS
+              </h3>
+              <p className="text-[10px] font-bold text-slate-400 mt-1">
+                Tarik slider untuk mengubah skor subtes mandiri (275 - 1000)
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              {[
+                { label: "PU (Penalaran Umum)", val: utbkPU, setter: setUtbkPU, color: "accent-blue-500" },
+                { label: "PBM (Pemahaman Bacaan & Menulis)", val: utbkPBM, setter: setUtbkPBM, color: "accent-indigo-500" },
+                { label: "PPU (Pengetahuan & Pemahaman Umum)", val: utbkPPU, setter: setUtbkPPU, color: "accent-purple-500" },
+                { label: "PK (Pengetahuan Kuantitatif)", val: utbkPK, setter: setUtbkPK, color: "accent-emerald-500" },
+                { label: "Literasi Bahasa Indonesia", val: utbkLitIndo, setter: setUtbkLitIndo, color: "accent-amber-500" },
+                { label: "Literasi Bahasa Inggris", val: utbkLitIng, setter: setUtbkLitIng, color: "accent-rose-500" },
+                { label: "PM (Penalaran Matematika)", val: utbkPM, setter: setUtbkPM, color: "accent-teal-500" },
+              ].map((sub, index) => {
+                const subRank = getSubtestRank(sub.val);
+                return (
+                  <div key={index} className="space-y-1.5 p-3 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/5 transition-all">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-black text-slate-200 tracking-wide">{sub.label}</span>
+                      <span className="text-sm font-black text-white font-mono bg-white/10 px-2 py-0.5 rounded">
+                        {sub.val}
+                      </span>
+                    </div>
+                    <input 
+                      type="range"
+                      min={275}
+                      max={1000}
+                      value={sub.val}
+                      onChange={(e) => sub.setter(parseInt(e.target.value))}
+                      className="w-full cursor-pointer h-2 bg-slate-900 rounded-lg outline-none transition-all accent-pink-500"
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-[10px] font-medium text-slate-400/80">
+                        Peringkat Nasional: <span className="text-slate-300 font-bold">Peringkat #{subRank.toLocaleString('en-US')}</span>
+                      </p>
+                      <p className="text-[9px] font-mono text-slate-500">
+                        Z: {((sub.val - 500) / 105).toFixed(2)} (μ=500, σ=105)
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="lg:col-span-6 p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-6">
+            <div className="border-b border-white/5 pb-4">
+              <h3 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-pink-500 animate-pulse" />
+                TOP PP PLAYS LEADERBOARD
+              </h3>
+              <p className="text-[10px] font-bold text-slate-400 mt-1">
+                Daftar top play individu terurut murni berdasarkan pp tertinggi layaknya profil osu!
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {(() => {
+                const jurusansWeights: Record<string, { key: string; label: string; weight: number; score: number }[]> = {
+                  teknik: [
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.25, score: utbkPM },
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.20, score: utbkPK },
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.20, score: utbkPU },
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.15, score: utbkLitIng },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.10, score: utbkLitIndo },
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.05, score: utbkPBM },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.05, score: utbkPPU },
+                  ],
+                  sosial: [
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.25, score: utbkPBM },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.25, score: utbkLitIndo },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.15, score: utbkPPU },
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.15, score: utbkPU },
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.10, score: utbkLitIng },
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.05, score: utbkPM },
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.05, score: utbkPK },
+                  ],
+                  kesehatan: [
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.25, score: utbkPU },
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.25, score: utbkLitIng },
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.15, score: utbkPK },
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.15, score: utbkPM },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.10, score: utbkLitIndo },
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.05, score: utbkPBM },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.05, score: utbkPPU },
+                  ],
+                  bisnis: [
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.25, score: utbkPK },
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.25, score: utbkPM },
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.15, score: utbkLitIng },
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.15, score: utbkPU },
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.10, score: utbkPBM },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.05, score: utbkLitIndo },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.05, score: utbkPPU },
+                  ],
+                  sastra: [
+                    { key: "litIng", label: "Literasi Inggris", weight: 0.30, score: utbkLitIng },
+                    { key: "ppu", label: "PPU (Pengetahuan & Pemahaman Umum)", weight: 0.25, score: utbkPPU },
+                    { key: "litIndo", label: "Literasi Indonesia", weight: 0.15, score: utbkLitIndo },
+                    { key: "pbm", label: "PBM (Pemahaman Bacaan & Menulis)", weight: 0.10, score: utbkPBM },
+                    { key: "pu", label: "PU (Penalaran Umum)", weight: 0.10, score: utbkPU },
+                    { key: "pm", label: "PM (Penalaran Matematika)", weight: 0.05, score: utbkPM },
+                    { key: "pk", label: "PK (Pengetahuan Kuantitatif)", weight: 0.05, score: utbkPK },
+                  ],
+                };
+
+                const jurusansPenalties: Record<string, number> = {
+                  teknik: penaltyTeknik,
+                  sosial: penaltySosial,
+                  kesehatan: penaltyKesehatan,
+                  bisnis: penaltyBisnis,
+                  sastra: penaltySastra,
+                };
+
+                return topPlays.map((item, index) => {
+                  const globalRank = getGlobalRank(item.final);
+                  const weights = jurusansWeights[item.id] || [];
+                  const penaltyVal = jurusansPenalties[item.id] ?? 1.0;
+                  const isExpanded = !!expandedWeights[item.id];
+
+                  return (
+                    <motion.div 
+                      key={item.id}
+                      layoutId={`play-row-${item.id}`}
+                      onClick={() => setExpandedWeights(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
+                      className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all flex flex-col gap-3 relative overflow-hidden group shadow-md cursor-pointer select-none"
+                    >
+                      <div className="absolute inset-y-0 left-0 bg-white/[0.02] transition-all group-hover:bg-white/[0.04] pointer-events-none" style={{ width: `${(item.final / 1000) * 100}%` }} />
+                      
+                      <div className="flex items-center justify-between w-full relative z-10">
+                        <div className="flex items-center gap-4">
+                          <span className="text-lg font-black italic text-pink-400 font-mono w-6 text-center">
+                            #{index + 1}
+                          </span>
+                          
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-black text-white tracking-wide flex items-center gap-1.5">
+                                {item.icon} {item.name}
+                              </span>
+                              {hasPenalty && (
+                                <span className="text-[8px] font-black uppercase text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
+                                  -{Math.round((1 - (item.final / (item.raw || 1))) * 100)}% Penalti
+                                </span>
+                              )}
+                              <span className="text-[8px] font-black uppercase text-pink-300 bg-pink-500/10 px-1.5 py-0.5 rounded border border-pink-500/20 flex items-center gap-1">
+                                {isExpanded ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
+                                {isExpanded ? "Sembunyikan" : "Detail Bobot"}
+                              </span>
+                            </div>
+                            <p className="text-[10px] font-medium text-slate-400/90 leading-tight">
+                              {item.desc}
+                            </p>
+                            <div className="flex items-center gap-3 text-[10px] font-semibold text-slate-400 pt-0.5">
+                              <span>Raw: <strong className="text-slate-300 font-mono">{Math.round(item.raw)}</strong></span>
+                              <span>Akhir: <strong className="text-slate-300 font-mono">{Math.round(item.final)}</strong></span>
+                              <span>Rank: <strong className="text-indigo-400 font-mono">#{globalRank.toLocaleString('en-US')}</strong></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-3xl font-black text-pink-400 font-mono tracking-tight group-hover:scale-105 origin-right transition-transform block">
+                            {Math.round(item.pp)}
+                            <span className="text-xs ml-0.5 font-bold uppercase tracking-widest">pp</span>
+                          </span>
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block pt-0.5">
+                            {item.pp >= 1000 ? "ACC: 100%" : item.pp >= 500 ? "ACC: 99.5%" : item.pp >= 150 ? "ACC: 98.0%" : "ACC: 95.0%"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="relative z-10 border-t border-white/5 pt-3 mt-1 space-y-2 overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="text-[10px] font-black tracking-widest text-pink-400 uppercase mb-2">
+                              Breakdown Pembobotan Subtes ({item.name}):
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {weights.map((w, wIdx) => {
+                                const contribution = w.score * w.weight;
+                                const pct = Math.round(w.weight * 100);
+                                return (
+                                  <div key={wIdx} className="p-2 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between text-xs font-semibold">
+                                    <div className="space-y-0.5">
+                                      <div className="text-slate-200 text-[11px] font-bold">{w.label}</div>
+                                      <div className="text-slate-400 text-[9px] font-medium font-mono">
+                                        Skor: {w.score} × Bobot: {pct}%
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <span className="text-white font-mono font-bold">+{contribution.toFixed(1)}</span>
+                                      <span className="text-[9px] text-slate-400 block font-normal">Kontribusi</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            <div className="p-2.5 rounded-lg bg-pink-500/5 border border-pink-500/15 text-[10px] text-slate-300 leading-relaxed font-semibold">
+                              <span className="text-pink-400 font-bold uppercase mr-1">Formula Matematika:</span>
+                              <span>
+                                Skor Raw = Σ(Skor Subtes × Bobot) = <strong>{Math.round(item.raw)}</strong>
+                              </span>
+                              {penaltyVal < 0.999 && (
+                                <span className="block mt-0.5">
+                                  Terkena Penalti Jurusan: <strong className="text-rose-400 font-mono">-{Math.round((1 - penaltyVal) * 100)}%</strong> (Pengali: {penaltyVal.toFixed(3)}) → Skor Akhir = <strong>{Math.round(item.final)}</strong>
+                                </span>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                });
+              })()}
+            </div>
+
+            <div className="p-4 rounded-xl border border-white/5 bg-white/5 text-[10px] font-bold text-slate-400 leading-relaxed space-y-1">
+              <p className="text-white uppercase tracking-wider mb-1 text-xs">PIECEWISE PP METRIC FORMULA</p>
+              <p>• Skor &gt;= 700: <span className="text-pink-400 font-mono font-bold">500 + ((Skor - 700)/300) * 1500 pp</span> (max 2000 pp)</p>
+              <p>• Skor 500 - 699: <span className="text-pink-400 font-mono font-bold">100 + ((Skor - 500)/200) * 400 pp</span></p>
+              <p>• Skor 232 - 499: <span className="text-pink-400 font-mono font-bold">1 + ((Skor - 232)/268) * 99 pp</span></p>
+              <p>• Skor &lt; 232: <span className="text-pink-400 font-mono font-bold">1 pp</span></p>
+            </div>
+          </div>
+        </div>
+          </>
+        ) : (
+          <Snbt2030Simulator 
+            initialScores={{
+              pu: utbkPU,
+              pbm: utbkPBM,
+              ppu: utbkPPU,
+              pk: utbkPK,
+              litIndo: utbkLitIndo,
+              litIng: utbkLitIng,
+              pm: utbkPM,
+            }}
+            onScoresChange={(scores) => {
+              setUtbkPU(scores.pu);
+              setUtbkPBM(scores.pbm);
+              setUtbkPPU(scores.ppu);
+              setUtbkPK(scores.pk);
+              setUtbkLitIndo(scores.litIndo);
+              setUtbkLitIng(scores.litIng);
+              setUtbkPM(scores.pm);
+            }}
+            activeTierHex={activeTierVisual?.ui.hexCode}
+          />
+        )}
+      </motion.div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen relative font-sans overflow-x-hidden transition-colors duration-1000" style={{ backgroundColor: activeTierVisual?.ui.dominantColor || '#f8fafc' }}>
+      
+      {/* IMMERSIVE FULL-SCREEN BACKGROUND LAYER */}
+      <AnimatePresence>
+        {activeTierVisual && (
+          <motion.div 
+            key={activeTierVisual.tierId}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-0 pointer-events-none"
+          >
+            {/* Base Gradient */}
+            <div 
+              className="absolute inset-0 transition-colors duration-1000" 
+              style={{ 
+                background: `radial-gradient(circle at center, ${activeTierVisual.ui.hexCode}22 0%, ${activeTierVisual.ui.dominantColor} 100%)` 
+              }} 
+            />
+            
+            {/* SVG Illustration Background */}
+            <DecorativeSVGBackground b={(viewMode === 'osu-pp-simulator') ? (osuInterpolationResult?.benar || 60) : (interpolationResult?.benar || 60)} hex={activeTierVisual.ui.hexCode} />
+            
+            {/* Integrated Astronaut Character Visual */}
+            <AstronautVisual tierId={activeTierVisual.tierId} hex={activeTierVisual.ui.hexCode} />
+            
+            {/* Animated Environmental Elements */}
+            <div className="absolute inset-0 overflow-hidden">
+              <motion.div 
+                initial={{ scale: 1.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 0.4 }}
+                transition={{ duration: 2, ease: "easeOut" }}
+                className="absolute inset-0 mix-blend-screen"
+                style={{ background: `radial-gradient(circle at 70% 30%, ${activeTierVisual.ui.hexCode}44, transparent 50%)` }}
+              />
+              
+              {/* Floating Motes / Dust / Energy */}
+              <div className="absolute inset-0 opacity-30">
+                {[...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ y: Math.random() * 100 + "%", x: Math.random() * 100 + "%" }}
+                    animate={{ 
+                      y: [null, (Math.random() - 0.5) * 50 + "%"],
+                      x: [null, (Math.random() - 0.5) * 50 + "%"],
+                      opacity: [0.1, 0.5, 0.1]
+                    }}
+                    transition={{ repeat: Infinity, duration: 5 + Math.random() * 10, ease: "linear" }}
+                    className="absolute w-1 h-1 rounded-full"
+                    style={{ backgroundColor: activeTierVisual.ui.hexCode }}
+                  />
+                ))}
+              </div>
+
+              {/* Tier Specific Overlays (Heat Distortion, Scanlines) */}
+              {activeTierVisual.tierId === "1-9" || activeTierVisual.tierId === "10-39" ? (
+                <div className="absolute inset-0 bg-red-900/10 animate-pulse" />
+              ) : null}
+              
+              <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
+            </div>
+
+            {/* Astronaut Ghost Overlay (Visual metaphor) */}
+            <motion.div 
+              initial={{ x: 100, opacity: 0 }}
+              animate={{ x: 0, opacity: 0.15 }}
+              className="absolute -right-10 bottom-0 select-none pointer-events-none"
+            >
+              <Rocket className="w-[400px] h-[400px] rotate-45 blur-2xl" style={{ color: activeTierVisual.ui.hexCode }} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="relative z-10 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <header className={`mb-12 text-center border-b pb-8 transition-colors duration-500 ${activeTierVisual ? 'border-white/10' : 'border-slate-200'}`}>
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <h1 className={`text-4xl md:text-5xl font-black tracking-tighter mb-4 inline-flex items-center gap-3 uppercase transition-colors duration-500 ${activeTierVisual ? 'text-white' : 'text-slate-900'}`}>
+                <Trophy className={`w-10 h-10 ${activeTierVisual ? '' : 'text-blue-600'}`} style={{ color: activeTierVisual?.ui.hexCode }} />
+                {t.title}
+              </h1>
+              <p className={`text-lg font-medium max-w-2xl mx-auto transition-colors duration-500 ${activeTierVisual ? 'text-white/60' : 'text-slate-500'}`}>
+                {t.subtitle}
+              </p>
+            </motion.div>
+          </header>
+
+        {/* Toolbar */}
+        <div className="mb-8 space-y-4">
+          <div className="flex flex-col xl:flex-row gap-4 items-center justify-between">
+            <div className="relative w-full md:w-96 group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors w-5 h-5" />
+              <input
+                type="text"
+                placeholder={t.searchPlaceholder}
+                className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all bg-white"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-3">
+              {/* View Switcher */}
+              <div className={`flex items-center gap-1 p-1 rounded-2xl border shadow-sm transition-all duration-500 ${activeTierVisual ? 'bg-black/40 border-white/10' : 'bg-white border-slate-200'}`}>
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${viewMode === 'table' ? (activeTierVisual ? 'bg-white text-black' : 'bg-blue-600 text-white shadow-lg shadow-blue-200') : (activeTierVisual ? 'text-white/60 hover:text-white' : 'text-slate-600 hover:bg-slate-50')}`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                  {t.table}
+                </button>
+                <button
+                  onClick={() => setViewMode('chart')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${viewMode === 'chart' ? (activeTierVisual ? 'bg-white text-black' : 'bg-blue-600 text-white shadow-lg shadow-blue-200') : (activeTierVisual ? 'text-white/60 hover:text-white' : 'text-slate-600 hover:bg-slate-50')}`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  {t.chart}
+                </button>
+                <button
+                  onClick={() => setViewMode('calculator')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${viewMode === 'calculator' ? (activeTierVisual ? 'bg-white text-black' : 'bg-blue-600 text-white shadow-lg shadow-blue-200') : (activeTierVisual ? 'text-white/60 hover:text-white' : 'text-slate-600 hover:bg-slate-50')}`}
+                >
+                  <Target className="w-4 h-4" />
+                  {t.calculator}
+                </button>
+                <button
+                  onClick={() => setViewMode('osu-pp-simulator')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${viewMode === 'osu-pp-simulator' ? 'bg-pink-600 text-white shadow-lg shadow-pink-500/30' : (activeTierVisual ? 'text-pink-400 hover:text-pink-200' : 'text-pink-600 hover:bg-pink-50')}`}
+                >
+                  <Gamepad2 className="w-4 h-4 animate-bounce" />
+                  osu! PP Simulator
+                </button>
+              </div>
+
+              {/* Chart Options */}
+              {viewMode === 'chart' && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className={`flex items-center gap-1 p-1 rounded-2xl border shadow-sm transition-all duration-500 ${activeTierVisual ? 'bg-black/40 border-white/10' : 'bg-white border-slate-200'}`}>
+                    {[
+                      { type: 'bar', icon: <BarChart3 className="w-4 h-4" /> },
+                      { type: 'line', icon: <LineChartIcon className="w-4 h-4" /> },
+                      { type: 'area', icon: <AreaChartIcon className="w-4 h-4" /> },
+                      { type: 'scatter', icon: <Share2 className="w-4 h-4 rotate-90" /> }
+                    ].map(t_icon => (
+                      <button
+                        key={t_icon.type}
+                        onClick={() => setChartType(t_icon.type as ChartType)}
+                        className={`p-2 rounded-xl transition-all ${chartType === t_icon.type ? (activeTierVisual ? 'bg-white text-black' : 'bg-slate-900 text-white') : (activeTierVisual ? 'text-white/40 hover:text-white' : 'text-slate-400 hover:bg-slate-50')}`}
+                        title={`${t_icon.type.charAt(0).toUpperCase()}${t_icon.type.slice(1)} Chart`}
+                      >
+                        {t_icon.icon}
+                      </button>
+                    ))}
+                    <div className="w-[1px] h-4 bg-slate-200 mx-1 opacity-20" />
+                    <button
+                      onClick={() => setIsNormalized(!isNormalized)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isNormalized ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : (activeTierVisual ? 'text-white/50 hover:text-white' : 'text-slate-500 hover:bg-slate-50')}`}
+                      title={isNormalized ? "Disable Normalization" : "Normalize different scales"}
+                    >
+                      {isNormalized ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+                      {isNormalized ? t.fixed : t.normalized}
+                    </button>
+                    <div className="w-[1px] h-4 bg-slate-200 mx-1 opacity-20" />
+                    
+                    {/* Zoom X Controls */}
+                    <div className="flex items-center gap-1">
+                      <span className={`text-[10px] font-bold mr-1 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>X:</span>
+                      <button
+                        onClick={() => setChartZoomX(prev => Math.max(1, prev - 1))}
+                        disabled={chartZoomX <= 1}
+                        className={`p-1 rounded-lg transition-all ${chartZoomX > 1 ? (activeTierVisual ? 'text-white hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100') : 'opacity-20 cursor-not-allowed'}`}
+                        title="Zoom Out X"
+                      >
+                        <ZoomOut className="w-3 h-3" />
+                      </button>
+                      <span className={`text-[10px] font-black w-10 text-center ${activeTierVisual ? 'text-white/60' : 'text-slate-500'}`}>
+                        {Math.round(chartZoomX * 100)}%
+                      </span>
+                      <button
+                        onClick={() => setChartZoomX(prev => Math.min(100, prev + 1))}
+                        disabled={chartZoomX >= 100}
+                        className={`p-1 rounded-lg transition-all ${chartZoomX < 100 ? (activeTierVisual ? 'text-white hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100') : 'opacity-20 cursor-not-allowed'}`}
+                        title="Zoom In X"
+                      >
+                        <ZoomIn className="w-3 h-3" />
+                      </button>
+                    </div>
+
+                    <div className="w-[1px] h-3 bg-slate-200 mx-1 opacity-10" />
+
+                    {/* Zoom Y Controls */}
+                    <div className="flex items-center gap-1">
+                      <span className={`text-[10px] font-bold mr-1 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>Y:</span>
+                      <button
+                        onClick={() => setChartZoomY(prev => Math.max(1, prev - 1))}
+                        disabled={chartZoomY <= 1}
+                        className={`p-1 rounded-lg transition-all ${chartZoomY > 1 ? (activeTierVisual ? 'text-white hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100') : 'opacity-20 cursor-not-allowed'}`}
+                        title="Zoom Out Y"
+                      >
+                        <ZoomOut className="w-3 h-3" />
+                      </button>
+                      <span className={`text-[10px] font-black w-10 text-center ${activeTierVisual ? 'text-white/60' : 'text-slate-500'}`}>
+                        {Math.round(chartZoomY * 100)}%
+                      </span>
+                      <button
+                        onClick={() => setChartZoomY(prev => Math.min(100, prev + 1))}
+                        disabled={chartZoomY >= 100}
+                        className={`p-1 rounded-lg transition-all ${chartZoomY < 100 ? (activeTierVisual ? 'text-white hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100') : 'opacity-20 cursor-not-allowed'}`}
+                        title="Zoom In Y"
+                      >
+                        <ZoomIn className="w-3 h-3" />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => { setChartZoomX(1); setChartZoomY(1); }}
+                      className={`p-1 rounded-lg transition-all ${chartZoomX !== 1 || chartZoomY !== 1 ? (activeTierVisual ? 'text-blue-400 hover:bg-white/10' : 'text-blue-600 hover:bg-blue-50') : 'opacity-20 cursor-not-allowed'}`}
+                      title="Reset Zoom"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  {/* RESTORED: Axis Selectors for Chart View (X and Y Axis) */}
+                  <div className={`flex flex-wrap items-center gap-2 p-1 rounded-2xl border shadow-sm transition-all duration-500 ${activeTierVisual ? 'bg-black/40 border-white/10' : 'bg-white border-slate-200'}`}>
+                    <div className="flex items-center gap-2 px-3">
+                      <span className={`text-[10px] font-black uppercase tracking-tighter ${activeTierVisual ? 'text-white/30' : 'text-slate-400'}`}>X:</span>
+                      <select 
+                        value={xAxisMetric}
+                        onChange={(e) => setXAxisMetric(e.target.value as any)}
+                        className={`text-xs font-bold bg-transparent border-none outline-none cursor-pointer transition-colors max-w-[100px] truncate ${activeTierVisual ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+                      >
+                        <optgroup label="Global Leaderboard" className="bg-slate-900 text-white font-black">
+                          {columns.filter(c => c.group === 'global' && (c.isChartable || c.key === 'rankSNBT')).map(c => (
+                            <option key={c.key} value={c.key} className="bg-slate-900 text-white">{c.label}</option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="Indonesian Leaderboard" className="bg-slate-900 text-white font-black">
+                          {columns.filter(c => c.group === 'indonesian' && c.isChartable).map(c => (
+                            <option key={c.key} value={c.key} className="bg-slate-900 text-white">{c.label}</option>
+                          ))}
+                        </optgroup>
+                      </select>
+                    </div>
+                    <div className="w-[1px] h-4 bg-white/10" />
+                    <div className="flex items-center gap-2 px-3 overflow-x-auto no-scrollbar max-w-[360px]">
+                      <span className={`text-[10px] font-black uppercase tracking-tighter ${activeTierVisual ? 'text-white/30' : 'text-slate-400'}`}>Y:</span>
+                      <div className="flex flex-col gap-1.5 py-1">
+                        <div className="flex items-center gap-1.5 flex-nowrap overflow-x-auto no-scrollbar">
+                          <span className={`text-[8px] font-bold uppercase tracking-wider ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>Global:</span>
+                          {chartableMetrics.filter(m => {
+                            const col = columns.find(c => c.key === m.key);
+                            return col?.group === 'global';
+                          }).map(m => (
+                            <button
+                              key={m.key}
+                              onClick={() => toggleYMetric(m.key)}
+                              className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase transition-all border whitespace-nowrap ${yAxisMetrics.has(m.key) ? (activeTierVisual ? 'bg-white border-white text-black' : 'bg-blue-600 border-blue-600 text-white shadow-sm') : (activeTierVisual ? 'bg-white/5 border-white/5 text-white/30 hover:border-white/20' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300')}`}
+                            >
+                              {m.label}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-nowrap overflow-x-auto no-scrollbar">
+                          <span className={`text-[8px] font-bold uppercase tracking-wider ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>Indo:</span>
+                          {chartableMetrics.filter(m => {
+                            const col = columns.find(c => c.key === m.key);
+                            return col?.group === 'indonesian';
+                          }).map(m => (
+                            <button
+                              key={m.key}
+                              onClick={() => toggleYMetric(m.key)}
+                              className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase transition-all border whitespace-nowrap ${yAxisMetrics.has(m.key) ? (activeTierVisual ? 'bg-white border-white text-black' : 'bg-blue-600 border-blue-600 text-white shadow-sm') : (activeTierVisual ? 'bg-white/5 border-white/5 text-white/30 hover:border-white/20' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300')}`}
+                            >
+                              {m.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all text-sm font-semibold ${showFilters ? 'bg-slate-100 border-slate-300 text-slate-900' : 'bg-white border-slate-200 text-slate-600 shadow-sm hover:border-slate-300'}`}
+              >
+                <Settings2 className="w-4 h-4" />
+                {t.columns}
+              </button>
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {showFilters && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                  {columns.map(col => (
+                    <button
+                      key={col.key}
+                      onClick={() => {
+                        const newSet = new Set(visibleColumns);
+                        if (newSet.has(col.key)) newSet.delete(col.key);
+                        else newSet.add(col.key);
+                        setVisibleColumns(newSet);
+                      }}
+                      className={`flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${visibleColumns.has(col.key) ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'}`}
+                    >
+                      <span className="truncate">{col.label}</span>
+                      {visibleColumns.has(col.key) ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {viewMode === 'table' ? (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            className={`rounded-3xl shadow-2xl border overflow-hidden transition-all duration-500 ${activeTierVisual ? 'bg-black/40 border-white/10 shadow-black/40' : 'bg-white border-slate-100'}`}
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  {/* Group Header Row */}
+                  <tr className={`border-b transition-colors duration-500 ${activeTierVisual ? 'bg-white/5 border-white/10' : 'bg-slate-100/40 border-slate-200'}`}>
+                    {activeColumns.filter(c => c.group === 'global').length > 0 && (
+                      <th 
+                        colSpan={activeColumns.filter(c => c.group === 'global').length}
+                        className={`px-6 py-3 text-center text-[11px] font-black uppercase tracking-[0.25em] border-r transition-colors duration-500 ${activeTierVisual ? 'text-blue-400 border-white/10' : 'text-blue-700 border-slate-200'}`}
+                      >
+                        Global Leaderboard
+                      </th>
+                    )}
+                    {activeColumns.filter(c => c.group === 'indonesian').length > 0 && (
+                      <th 
+                        colSpan={activeColumns.filter(c => c.group === 'indonesian').length}
+                        className={`px-6 py-3 text-center text-[11px] font-black uppercase tracking-[0.25em] transition-colors duration-500 ${activeTierVisual ? 'text-indigo-400' : 'text-indigo-700'}`}
+                      >
+                        Indonesian Leaderboard
+                      </th>
+                    )}
+                  </tr>
+                  <tr className={`border-b transition-colors duration-500 ${activeTierVisual ? 'bg-white/10 border-white/10' : 'bg-slate-50/50 border-slate-100'}`}>
+                    {activeColumns.map((col) => (
+                      <th 
+                        key={col.key}
+                        className={`px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap cursor-pointer transition-colors duration-300 ${activeTierVisual ? 'text-white/40 hover:text-white' : 'text-slate-400 hover:text-blue-600'}`}
+                        onClick={() => {
+                          if (sortField === col.key) setIsSortedAsc(!isSortedAsc);
+                          else { setSortField(col.key); setIsSortedAsc(true); }
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span style={activeTierVisual ? { color: activeTierVisual.ui.hexCode } : {}}>{col.icon}</span>
+                          <span>{col.label}</span>
+                          {col.key === 'tinggiBadan' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setGender(prev => prev === 'male' ? 'female' : 'male');
+                              }}
+                              className="p-1 rounded bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-400 border border-yellow-500/30 active:scale-90 transition-all ml-1"
+                              title="Toggle Height Scale (Male / Female)"
+                            >
+                              <Zap className="w-2.5 h-2.5 fill-yellow-400 animate-pulse text-yellow-400" />
+                            </button>
+                          )}
+                          {sortField === col.key && (isSortedAsc ? <ChevronUp className="w-3" /> : <ChevronDown className="w-3" />)}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className={`divide-y transition-colors duration-500 ${activeTierVisual ? 'divide-white/5' : 'divide-slate-50'}`}>
+                  {filteredData.map((row, idx) => (
+                    <motion.tr 
+                      key={idx} 
+                      initial={{ opacity: 0, x: -10 }} 
+                      animate={{ opacity: 1, x: 0 }} 
+                      transition={{ delay: idx * 0.01 }} 
+                      onClick={() => {
+                        // Sync this row to the calculator
+                        setCalcInput(String(row.skorIRT).split('-')[0]);
+                        setCalcSubject('skorIRT');
+                      }}
+                      className={`transition-all group cursor-pointer ${activeTierVisual ? 'hover:bg-white/10' : 'hover:bg-slate-50/80'}`}
+                    >
+                        {activeColumns.map((col) => {
+                          let val = row[col.key];
+                          const isCurrency = col.key === 'asetBersih' || col.key === 'gajiBulanan';
+                          const isAltSupported = col.key === 'tinggiBadan' || (typeof val === 'string' && val.includes('/')) || isCurrency;
+                          const options = isAltSupported ? (isCurrency ? [val] : (col.key === 'tinggiBadan' ? [val] : (val as string).split('/').map(s => s.trim()))) : [val];
+                          // Use a more stable key for table cell alternatives
+                          const rowId = row.jumlahBenar; // jumlahBenar is unique per row
+                          const cellKey = `table-${rowId}-${col.key}`;
+                          const currentVal = col.key === 'tinggiBadan'
+                            ? val
+                            : (isCurrency ? val : options[(altIndices[cellKey] || 0) % options.length]);
+
+                          return (
+                            <td 
+                              key={`${idx}-${col.key}`} 
+                              className={`px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors duration-500 ${activeTierVisual ? 'text-white/70' : 'text-slate-600'} ${isAltSupported ? 'cursor-pointer active:scale-95 transition-transform group/cell' : ''}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (isCurrency) {
+                                  toggleCurrency();
+                                } else if (isAltSupported) {
+                                  if (col.key === 'tinggiBadan') {
+                                    setHeightUnit(prev => prev === 'cm' ? 'inch' : 'cm');
+                                  } else {
+                                    toggleAlt(cellKey, options.length);
+                                  }
+                                }
+                              }}
+                            >
+                              <div className="relative inline-flex items-center">
+                                <AnimatePresence mode="wait">
+                                  <motion.span 
+                                    key={isCurrency ? currencyMode + currentVal : currentVal}
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -5 }}
+                                    className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg ${
+                                      col.key === 'statusPenerimaan' && String(val).includes('ACCEPTED') 
+                                        ? (activeTierVisual ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-emerald-50 text-emerald-700 font-bold') 
+                                        : ''
+                                    } ${
+                                      (col.key === 'jumlahBenar')
+                                        ? (() => {
+                                            const numericVal = parseInt(String(val).split('-')[0]);
+                                            if (numericVal >= 130) return activeTierVisual ? 'bg-amber-500/40 text-amber-300 font-black shadow-[0_0_15px_rgba(245,158,11,0.3)] ring-1 ring-amber-400/50' : 'bg-amber-100 text-amber-900 font-black ring-1 ring-amber-200';
+                                            if (numericVal >= 110) return activeTierVisual ? 'bg-purple-500/40 text-purple-300 font-bold shadow-[0_0_12px_rgba(168,85,247,0.2)] ring-1 ring-purple-400/50' : 'bg-purple-100 text-purple-900 font-bold ring-1 ring-purple-200';
+                                            if (numericVal >= 90) return activeTierVisual ? 'bg-blue-500/30 text-blue-300 font-medium ring-1 ring-blue-400/30' : 'bg-blue-100 text-blue-900 font-medium ring-1 ring-blue-200';
+                                            if (numericVal >= 75) return activeTierVisual ? 'bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-400/30' : 'bg-emerald-100 text-emerald-900 ring-1 ring-emerald-200';
+                                            return activeTierVisual ? 'text-white/60 bg-white/5' : 'text-slate-600 bg-slate-50';
+                                          })()
+                                        : ''
+                                    } ${isAltSupported ? (activeTierVisual ? 'hover:bg-white/10' : 'hover:bg-slate-100') : ''}`}
+                                  >
+                                    {formatValue(currentVal, col.key)}
+                                    {isAltSupported && <Zap className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400 animate-pulse" />}
+                                  </motion.span>
+                                </AnimatePresence>
+                              </div>
+                            </td>
+                          );
+                        })}
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {filteredData.length === 0 && (
+              <div className="py-20 text-center text-slate-400">
+                <Search className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                <p className="text-lg">{t.noMatches}</p>
+              </div>
+            )}
+          </motion.div>
+        ) : viewMode === 'chart' ? (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            className={`rounded-3xl shadow-2xl border p-6 md:p-8 min-h-[600px] flex flex-col transition-all duration-500 ${activeTierVisual ? 'bg-black/60 border-white/10' : 'bg-white border-slate-100'}`}
+          >
+            <div className={`w-full h-[550px] relative overflow-auto custom-scrollbar ${activeTierVisual ? 'scrollbar-white' : ''}`}>
+              <div 
+                className="absolute inset-0" 
+                style={{ 
+                  width: `${chartZoomX * 100}%`, 
+                  height: `${chartZoomY * 100}%`,
+                  minWidth: '100%',
+                  minHeight: '100%'
+                }}
+              >
+                <ResponsiveContainer width="100%" height="100%" debounce={100}>
+                  {renderChart()}
+                </ResponsiveContainer>
+              </div>
+            </div>
+            
+            <div className={`mt-12 p-6 rounded-2xl flex flex-col md:flex-row gap-6 md:items-center transition-colors duration-500 ${activeTierVisual ? 'bg-white/5 border border-white/10' : 'bg-slate-50'}`}>
+              <div className="flex-1">
+                <p className={`font-bold mb-1 text-sm flex items-center gap-2 transition-colors duration-500 ${activeTierVisual ? 'text-white' : 'text-slate-800'}`}>
+                  <Brain className="w-4 h-4 text-blue-600" />
+                  Comparative Insights:
+                </p>
+                <p className={`text-xs leading-relaxed font-medium transition-colors duration-500 ${activeTierVisual ? 'text-white/60' : 'text-slate-500'}`}>
+                  {isNormalized 
+                    ? "Currently in Normalized Mode: All subjects (Correct Ans, SAT, etc.) are scaled to 0-100."
+                    : "Currently in Absolute Mode: Charts show raw values (e.g., Correct Ans 0-160)."}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {activeColumns.filter(c => c.isChartable).map((col, i) => (
+                  <div key={col.key} className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-xl shadow-sm transition-all duration-500 ${activeTierVisual ? 'bg-black/40 border-white/10' : 'bg-white border-slate-200'}`}>
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: `hsl(${210 + (i * 35)}, 75%, 55%)` }} />
+                    <span className={`text-[10px] font-black uppercase tracking-wider transition-colors duration-500 ${activeTierVisual ? 'text-white/70' : 'text-slate-600'}`}>{col.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ) : viewMode === 'osu-pp-simulator' ? (
+          renderOsuSimulator()
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`rounded-3xl shadow-2xl border max-w-6xl mx-auto transition-all duration-500 ${activeTierVisual ? 'bg-transparent border-transparent shadow-none' : 'bg-white border-slate-100 shadow-xl'}`}
+          >
+            <div className="lg:grid lg:grid-cols-12 min-h-[650px] gap-8">
+              <div className={`lg:col-span-4 p-8 rounded-3xl border transition-all duration-500 ${activeTierVisual ? 'bg-black/60 border-white/10' : 'bg-slate-50/50 border-slate-100'}`}>
+                <div className="mb-10">
+                  <h2 className={`text-2xl font-black mb-2 uppercase tracking-tight transition-colors duration-500 ${activeTierVisual ? 'text-white' : 'text-slate-900'}`}>{t.calcTitle}</h2>
+                  <p className={`text-sm font-medium transition-colors duration-500 ${activeTierVisual ? 'text-white/60' : 'text-slate-500'}`}>{t.calcSubtitle}</p>
+                </div>
+                
+                <div className="space-y-8">
+                  <div>
+                    <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>{t.chooseSubject}</label>
+                    <select 
+                      value={calcSubject}
+                      onChange={(e) => setCalcSubject(e.target.value as keyof ComparisonRow)}
+                      className={`w-full border rounded-2xl px-5 py-4 outline-none transition-all font-bold ${activeTierVisual ? 'bg-black/60 border-white/20 text-white' : 'bg-white border-slate-200 text-slate-700'}`}
+                    >
+                      {columns.filter(c => (c.isChartable || c.key === 'rankSNBT') && !['rankSNBT'].includes(c.key)).map(m => (
+                        <option key={m.key} value={m.key} className="bg-slate-900 text-white">{m.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <AnimatePresence mode="popLayout">
+                    {calcSubject === 'tinggiBadan' && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, height: 'auto', scale: 1 }}
+                        exit={{ opacity: 0, height: 0, scale: 0.95 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        className={`p-4 rounded-2xl border border-dashed transition-all duration-500 overflow-hidden ${activeTierVisual ? 'bg-white/5 border-white/10' : 'bg-blue-50/50 border-blue-100'}`}
+                      >
+                        <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-3 transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>
+                          Height Scale Mode
+                        </label>
+                        <button
+                          onClick={() => setGender(prev => prev === 'male' ? 'female' : 'male')}
+                          className={`w-full py-3.5 rounded-xl border-b-4 flex items-center justify-center gap-3 font-black text-sm uppercase tracking-wider transition-all duration-300 active:scale-95 ${
+                            gender === 'male'
+                              ? 'bg-blue-500 border-blue-700 text-white shadow-lg shadow-blue-500/20'
+                              : 'bg-pink-500 border-pink-700 text-white shadow-lg shadow-pink-500/20'
+                          }`}
+                        >
+                          <Zap className="w-4 h-4 text-yellow-300 fill-yellow-300 animate-pulse" />
+                          <span>{gender === 'male' ? 'Male' : 'Female'}</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  
+                  <div>
+                    <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>{t.inputScore}</label>
+                    <div className="relative group/input">
+                      <input 
+                        type="number"
+                        step="1"
+                        min="400"
+                        max="1600"
+                        placeholder={t.scorePlaceholder}
+                        value={calcInput}
+                        onChange={(e) => setCalcInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            handleAdjustment('up');
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            handleAdjustment('down');
+                          }
+                        }}
+                        className={`w-full border rounded-2xl pl-5 pr-16 py-4 outline-none transition-all font-mono font-bold text-2xl ${activeTierVisual ? 'bg-black/60 border-white/20 text-white placeholder:text-white/20' : 'bg-white border-slate-200 text-slate-700'}`}
+                      />
+                      
+                      {/* Adjustment Buttons */}
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                        <button 
+                          onClick={() => handleAdjustment('up')}
+                          className={`p-1 rounded-md transition-colors ${activeTierVisual ? 'hover:bg-white/10 text-white/40 hover:text-white' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleAdjustment('down')}
+                          className={`p-1 rounded-md transition-colors ${activeTierVisual ? 'hover:bg-white/10 text-white/40 hover:text-white' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className={`absolute right-16 bottom-4 flex items-center gap-2 transition-opacity duration-500 ${calcInput ? 'opacity-100' : 'opacity-0'}`}>
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${activeTierVisual ? 'bg-white' : 'bg-blue-500'}`} />
+                        <span className={`text-[8px] font-black uppercase tracking-widest ${activeTierVisual ? 'text-white/40' : 'text-slate-400'}`}>Active</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mt-4">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={isPulling}
+                        onClick={() => handlePull(1)}
+                        className={`flex-1 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 group relative overflow-hidden ${
+                          activeTierVisual 
+                            ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                            : 'bg-slate-900 hover:bg-slate-800 text-white shadow-lg'
+                        } ${isPulling ? 'opacity-50 cursor-wait' : ''}`}
+                      >
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={isPulling ? "pulling" : "idle"}
+                            initial={{ rotate: 0 }}
+                            animate={isPulling ? { rotate: 360 } : { rotate: 0 }}
+                            transition={isPulling ? { repeat: Infinity, duration: 0.5, ease: "linear" } : { type: "spring", stiffness: 200 }}
+                          >
+                            <Dices className="w-5 h-5" />
+                          </motion.div>
+                        </AnimatePresence>
+                        <span className="font-black uppercase tracking-[0.2em] text-[10px]">Pull 1</span>
+                        {!isPulling && <Sparkles className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />}
+                        
+                        <motion.div 
+                          className="absolute inset-0 bg-white/20"
+                          initial={{ x: '-100%' }}
+                          whileHover={{ x: '100%' }}
+                          transition={{ duration: 0.5 }}
+                        />
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={isPulling}
+                        onClick={() => handlePull(10)}
+                        className={`flex-1 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 group relative overflow-hidden ${
+                          activeTierVisual 
+                            ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30' 
+                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20'
+                        } ${isPulling ? 'opacity-50 cursor-wait' : ''}`}
+                      >
+                        <div className="flex -space-x-1">
+                          <Dices className="w-4 h-4" />
+                          <Dices className="w-4 h-4 opacity-50" />
+                        </div>
+                        <span className="font-black uppercase tracking-[0.2em] text-[10px]">Pull 10</span>
+                        <div className="absolute top-1 right-2 text-[8px] font-bold opacity-30 italic">BONUS</div>
+                      </motion.button>
+                    </div>
+
+                    <AnimatePresence>
+                      {pullHistory.length > 0 && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="mt-6 overflow-hidden"
+                        >
+                          <div className={`text-[8px] font-black uppercase tracking-[0.3em] mb-3 text-center opacity-40`}>Gacha Results (Correct Ans)</div>
+                          <div className="grid grid-cols-5 gap-2">
+                            {pullHistory.map((res, i) => {
+                              if (!res) return null;
+                              // Calculate Jumlah Benar equivalent to determine rarity color
+                              const sortedData = [...INTERPOLATION_DATA].sort((a, b) => a.pct - b.pct);
+                              let lower = sortedData[0];
+                              let upper = sortedData[sortedData.length - 1];
+                              for (let j = 0; j < sortedData.length - 1; j++) {
+                                if (res.p >= sortedData[j].pct && res.p <= sortedData[j+1].pct) {
+                                  lower = sortedData[j];
+                                  upper = sortedData[j+1];
+                                  break;
+                                }
+                              }
+                              const t_val = (res.p - lower.pct) / (upper.pct - lower.pct || 1);
+                              const benarVal = lower.benar + t_val * (upper.benar - lower.benar);
+
+                              // Sync with User Specified Rarity Colors (Correct Answers / Jumlah Benar)
+                              let colorClass = "";
+
+                              if (benarVal >= 130) {
+                                // Gold (130-160): Amber-500 theme with heavy metallic glow (shadow-[0_0_40px]), internal highlights, and a scale-up effect
+                                colorClass = "bg-amber-500 border-amber-200 text-white shadow-[0_0_40px_rgba(245,158,11,0.8),inset_0_0_20px_rgba(255,255,255,0.4)] ring-4 ring-amber-400 font-black scale-110 z-20 backdrop-blur-md";
+                              } else if (benarVal >= 110) {
+                                // Purple/Cyber (110-129): Vibrant Purple theme with neon accents
+                                colorClass = "bg-purple-600 border-purple-200 text-white shadow-[0_0_30px_rgba(168,85,247,0.9),inset_0_0_15px_rgba(255,255,255,0.3)] ring-2 ring-purple-400 font-bold scale-105 z-10 backdrop-blur-md";
+                              } else if (benarVal >= 90) {
+                                // Light Blue (90-109): Modern blue theme with increased opacity and refined shadow work
+                                colorClass = "bg-blue-600 border-blue-300 text-white shadow-[0_0_20px_rgba(59,130,246,0.7)] font-bold backdrop-blur-sm opacity-95";
+                              } else if (benarVal >= 75) {
+                                // Light Green (75-89): Emerald Green theme with enhanced vibrancy
+                                colorClass = "bg-emerald-500 border-emerald-300 text-white shadow-[0_0_20px_rgba(16,185,129,0.7)] font-bold backdrop-blur-sm";
+                              } else {
+                                // Gray (0-74): Clean slate/gray theme for standard results
+                                colorClass = "bg-slate-600/60 border-slate-500/50 text-slate-200 font-medium";
+                              }
+
+                              const isSelected = selectedGachaIdx === i;
+                              const isUltraRare = benarVal >= 110;
+                              
+                              return (
+                                <motion.button
+                                  key={i}
+                                  initial={{ scale: 0, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  transition={{ delay: i * 0.05 }}
+                                  onClick={() => {
+                                    if (res) {
+                                      setCalcInput(res.value);
+                                      setSelectedGachaIdx(i);
+                                    }
+                                  }}
+                                  className={`aspect-square rounded-lg flex flex-col items-center justify-center border transition-all relative group/res ${
+                                    isSelected
+                                      ? activeTierVisual ? 'bg-white border-white text-black' : 'bg-slate-900 border-slate-900 text-white'
+                                      : colorClass
+                                  }`}
+                                >
+                                  <span className={`text-[10px] font-mono font-bold leading-none ${calcSubject !== 'iq' ? 'drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' : ''}`}>{res?.value}</span>
+                                  <span className={`text-[6px] font-black opacity-70 mt-0.5 ${isSelected ? 'text-inherit' : ''}`}>{res ? Math.round(res.p) : 0}%</span>
+                                  
+                                  {isUltraRare && !isSelected && (
+                                    <motion.div 
+                                      animate={{ opacity: [0.5, 1, 0.5] }}
+                                      transition={{ repeat: Infinity, duration: 1 }}
+                                      className={`absolute -top-1 -right-1 w-2 h-2 rounded-full blur-[1px] ${benarVal >= 130 ? 'bg-amber-400 shadow-[0_0_8px_#fbbf24]' : 'bg-purple-400 shadow-[0_0_8px_#a855f7]'}`} 
+                                    />
+                                  )}
+                                </motion.button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                <div className={`mt-10 p-5 rounded-2xl border transition-all duration-500 ${activeTierVisual ? 'bg-white/5 border-white/10' : 'bg-blue-50/50 border-blue-100'}`}>
+                  <p className={`text-[10px] font-bold uppercase leading-relaxed italic transition-colors duration-500 ${activeTierVisual ? 'text-white/50' : 'text-blue-600'}`}>
+                    {t.calcDesc}
+                  </p>
+                </div>
+
+                {interpolationResult && (
+                  <div className="flex flex-col items-center">
+                    <PercentileBellCurve 
+                      percentile={interpolationResult.pct} 
+                      themeColor={activeTierVisual?.ui.hexCode || '#3b82f6'} 
+                      isPulling={isPulling}
+                    />
+                    <div className="mt-10 px-8 text-center w-full">
+                      <div className={`h-px w-full mb-6 ${activeTierVisual ? 'bg-white/10' : 'bg-slate-200'}`} />
+                      <p className={`text-xs italic font-bold leading-relaxed transition-colors duration-500 ${activeTierVisual ? 'text-white/50' : 'text-slate-500'}`}>
+                        {t.calcDisclaimer}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="lg:col-span-8 py-8 px-0 lg:px-4">
+                {interpolationResult && activeTierVisual ? (
+                  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
+                    {/* HOLOGRAPHIC HUD HEADER */}
+                    <div className="relative">
+                      {/* HUD Corner Brackets (SVG) */}
+                      <svg className="absolute -top-4 -left-4 w-12 h-12 opacity-40 select-none pointer-events-none" viewBox="0 0 40 40">
+                        <path d="M40,2 L2,2 L2,40" fill="none" stroke={activeTierVisual.ui.hexCode} strokeWidth="1" />
+                      </svg>
+                      <svg className="absolute -top-4 -right-4 w-12 h-12 opacity-40 select-none pointer-events-none" viewBox="0 0 40 40">
+                        <path d="M0,2 L38,2 L38,40" fill="none" stroke={activeTierVisual.ui.hexCode} strokeWidth="1" />
+                      </svg>
+                      <svg className="absolute -bottom-4 -left-4 w-12 h-12 opacity-40 select-none pointer-events-none" viewBox="0 0 40 40">
+                        <path d="M40,38 L2,38 L2,0" fill="none" stroke={activeTierVisual.ui.hexCode} strokeWidth="1" />
+                      </svg>
+                      <svg className="absolute -bottom-4 -right-4 w-12 h-12 opacity-40 select-none pointer-events-none" viewBox="0 0 40 40">
+                        <path d="M0,38 L38,38 L38,0" fill="none" stroke={activeTierVisual.ui.hexCode} strokeWidth="1" />
+                      </svg>
+
+                      {/* HUD Scanning Line Overlay */}
+                      <motion.div 
+                        animate={{ y: ['0%', '1000%'] }}
+                        transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+                        className="absolute inset-x-0 h-px z-20 pointer-events-none opacity-20"
+                        style={{ background: `linear-gradient(to right, transparent, ${activeTierVisual.ui.hexCode}, transparent)` }}
+                      />
+
+                      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/10">
+                        <div className="flex items-center gap-6">
+                        <div className="w-20 h-20 rounded-3xl bg-black/40 border border-white/20 flex items-center justify-center relative overflow-hidden group">
+                           <motion.div 
+                             animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                             transition={{ repeat: Infinity, duration: 4 }}
+                             className="absolute inset-0"
+                             style={{ backgroundColor: activeTierVisual.ui.hexCode }}
+                           />
+                           <Rocket 
+                             className="w-10 h-10 relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+                             style={{ color: activeTierVisual.ui.hexCode }} 
+                           />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                             <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: activeTierVisual.ui.hexCode }} />
+                             <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/40">COORD_{activeTierVisual.tierId.replace(/[^0-9]/g, '')}</p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <h3 className="text-5xl font-black italic tracking-tighter uppercase text-white leading-none">
+                              {t.tierNames[activeTierVisual.tierId] || activeTierVisual.name}
+                            </h3>
+                            <div className="flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/10 ml-2">
+                              <button 
+                                onClick={() => setCalcLayoutMode('grid')}
+                                className={`p-1.5 rounded-lg transition-all ${calcLayoutMode === 'grid' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+                                title="Grid View"
+                              >
+                                <LayoutGrid className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={() => setCalcLayoutMode('single')}
+                                className={`p-1.5 rounded-lg transition-all ${calcLayoutMode === 'single' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+                                title="Single Focus View"
+                              >
+                                <Square className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">
+                          {(() => {
+                            const b = interpolationResult.benar;
+                            if (b < 75) return t.tierCategories.subterranean;
+                            if (b < 90) return t.tierCategories.humanActivity;
+                            if (b < 130) return t.tierCategories.atmosphere;
+                            return t.tierCategories.space;
+                          })()}
+                        </p>
+                        <p className="text-6xl font-black italic text-white leading-none tracking-tighter" style={{ textShadow: `0 0 30px ${activeTierVisual.ui.hexCode}88` }}>
+                          {(() => {
+                            const b = interpolationResult.benar;
+                            let altitude = 0;
+                            
+                            if (b >= 150) {
+                              altitude = 1000 + (b - 150) * 100;
+                            } else if (b >= 140) {
+                              altitude = 500 + (b - 140) * 50;
+                            } else if (b >= 130) {
+                              altitude = 100 + (b - 130) * 40;
+                            } else if (b >= 120) {
+                              altitude = 80 + (b - 120) * 2;
+                            } else if (b >= 110) {
+                              altitude = 50 + (b - 110) * 3;
+                            } else if (b >= 100) {
+                              altitude = 12 + (b - 100) * 3.8;
+                            } else if (b >= 90) {
+                              altitude = 2 + (b - 90) * 1;
+                            } else if (b >= 75) {
+                              altitude = (b - 75) * 0.2;
+                            } else if (b >= 70) {
+                              altitude = -0.1 - (75 - b) * 0.19;
+                            } else if (b >= 60) {
+                              altitude = -2 - (70 - b) * 0.8;
+                            } else if (b >= 50) {
+                              altitude = -10 - (60 - b) * 2.5;
+                            } else if (b >= 40) {
+                              altitude = -35 - (50 - b) * 6.5;
+                            } else if (b >= 2) {
+                              altitude = -100 - (40 - b) * 73.68;
+                            } else {
+                              altitude = -2900 - (2 - b) * 100;
+                            }
+
+                            const formatted = altitude.toLocaleString(undefined, { 
+                              minimumFractionDigits: 1, 
+                              maximumFractionDigits: 1 
+                            });
+                            return (altitude > 0 ? "+" : "") + formatted;
+                          })()}
+                          <span className="text-xl ml-2 text-white/40 uppercase">KM</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                    {/* HUD SUB-CELLS - REMOVED PER USER REQUEST */}
+                    
+                    {/* INTERPOLATED METRICS HUD */}
+                    <div className="pt-8 border-t border-white/10 space-y-8">
+                      {(() => {
+                        const renderMetricCard = (metric: { key: string; labelKey: string; group: string }, isLarge: boolean = false) => {
+                          const val = interpolationResult[metric.key];
+                          if (val === undefined) return null;
+
+                          let label = t.cols[metric.labelKey] || metric.labelKey;
+                          if (metric.key === 'tinggi') {
+                            label = gender === 'male'
+                              ? (language === 'id' ? 'Tinggi Laki-laki' : 'Male Height')
+                              : (language === 'id' ? 'Tinggi Perempuan' : 'Female Height');
+                          }
+                          const isCurrency = metric.key === 'asetBersih' || metric.key === 'gaji';
+                          const isHeight = metric.key === 'tinggi';
+                          const isAltSupported = (typeof val === 'string' && val.includes('/')) || isCurrency || isHeight;
+                          const options = isAltSupported ? (isCurrency ? [val] : (isHeight ? [val] : (val as string).split('/').map(s => s.trim()))) : [val];
+                          const currentVal = (isCurrency || isHeight) ? val : options[(altIndices[metric.key] || 0) % options.length];
+
+                          return (
+                            <motion.div 
+                              key={metric.key}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              whileHover={isAltSupported ? { y: -3, scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' } : {}}
+                              whileTap={isAltSupported ? { scale: 0.96 } : {}}
+                              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                              className={`group transition-all duration-300 ${isLarge ? 'p-10 rounded-[32px] bg-white/5 border border-white/20 shadow-[0_0_50px_rgba(255,255,255,0.05)]' : (isAltSupported ? 'p-4 rounded-2xl cursor-pointer hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 bg-white/5 border border-white/10 ring-1 ring-white/5' : 'p-4 rounded-2xl bg-white/5 border border-white/5')}`}
+                              onClick={(e) => {
+                                if (isCurrency) {
+                                  e.stopPropagation();
+                                  toggleCurrency();
+                                } else if (isHeight) {
+                                  e.stopPropagation();
+                                  setHeightUnit(prev => prev === 'cm' ? 'inch' : 'cm');
+                                } else if (isAltSupported) {
+                                  e.stopPropagation();
+                                  toggleAlt(metric.key, options.length);
+                                }
+                              }}
+                            >
+                              <div className={`flex items-center gap-2 ${isLarge ? 'mb-4' : 'mb-1'}`}>
+                                <div className={`${isLarge ? 'w-1.5 h-6' : 'w-1 h-3'} rounded-full opacity-40 group-hover:opacity-100 transition-opacity`} style={{ backgroundColor: activeTierVisual.ui.hexCode }} />
+                                <p className={`${isLarge ? 'text-[12px]' : 'text-[9px]'} font-black text-white/30 uppercase tracking-[0.2em] group-hover:text-white/60 transition-colors flex items-center gap-1`}>
+                                  {label}
+                                  {isAltSupported && <Zap className={`${isLarge ? 'w-3 h-3' : 'w-2 h-2'} animate-pulse text-yellow-400 fill-yellow-400`} />}
+                                </p>
+                              </div>
+                              <AnimatePresence mode="popLayout">
+                                <motion.p 
+                                  key={isCurrency ? currencyMode + currentVal : (isHeight ? heightUnit + currentVal : currentVal)}
+                                  initial={{ opacity: 0, x: -5 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  exit={{ opacity: 0, x: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                  className={`${isLarge ? 'text-4xl sm:text-5xl mb-6' : 'text-lg sm:text-xl'} font-black text-white leading-tight break-words group-hover:scale-[1.02] origin-left transition-transform ${metric.key !== 'iq' ? 'italic' : ''}`} 
+                                  style={{ textShadow: metric.key !== 'iq' ? `0 0 ${isLarge ? '30px' : '10px'} ${activeTierVisual.ui.hexCode}33` : 'none' }}
+                                >
+                                  {formatValue(currentVal, metric.key === 'sel' ? 'sel' : metric.key)}
+                                </motion.p>
+                              </AnimatePresence>
+                              {isAltSupported && (
+                                <p className={`${isLarge ? 'text-[10px] mt-4' : 'text-[8px] mt-2'} font-bold text-white/40 uppercase group-hover:text-white/80 transition-colors`}>
+                                  {isCurrency 
+                                    ? `TAP TO SWITCH TO ${currencyMode === 'USD' ? 'IDR' : 'USD'}` 
+                                    : (isHeight 
+                                      ? `TAP TO SWITCH TO ${heightUnit === 'cm' ? 'INCH/FEET' : 'CM'}` 
+                                      : `TAP FOR ALT (${((altIndices[metric.key] || 0) % options.length) + 1}/${options.length})`)}
+                                </p>
+                              )}
+                              
+                              {isLarge && (
+                                <div className="mt-8 pt-8 border-t border-white/10 flex items-center justify-between">
+                                   <div className="flex flex-col gap-1">
+                                      <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Environmental Sector</span>
+                                      <span className="text-xs font-bold text-white/60 capitalize">{metric.group} Benchmarking</span>
+                                   </div>
+                                   <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                      <Brain className="w-6 h-6 opacity-40" style={{ color: activeTierVisual.ui.hexCode }} />
+                                   </div>
+                                </div>
+                              )}
+                            </motion.div>
+                          );
+                        };
+
+                        if (calcLayoutMode === 'single') {
+                          const currentMetric = calculatorMetrics[calcActiveIndex];
+                          return (
+                            <div className="relative pt-8">
+                               <div className="flex items-center justify-between mb-12 max-w-xl mx-auto px-6">
+                                  <motion.button 
+                                    whileHover={{ scale: 1.1, x: -5 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={handlePrevCalc}
+                                    className="p-4 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all shadow-xl"
+                                  >
+                                    <ChevronLeft className="w-6 h-6" />
+                                  </motion.button>
+
+                                  <div className="text-center">
+                                     <motion.p 
+                                       key={calcActiveIndex}
+                                       initial={{ opacity: 0, y: 5 }}
+                                       animate={{ opacity: 1, y: 0 }}
+                                       className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 mb-2"
+                                     >
+                                        HUD MODULE {String(calcActiveIndex + 1).padStart(2, '0')} / {calculatorMetrics.length}
+                                     </motion.p>
+                                     <div className="flex items-center justify-center gap-2">
+                                        <div className="flex gap-1">
+                                           {calculatorMetrics.map((_, idx) => (
+                                              <div 
+                                                key={idx} 
+                                                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === calcActiveIndex ? 'w-4 bg-white' : 'bg-white/10'}`} 
+                                              />
+                                           ))}
+                                        </div>
+                                     </div>
+                                  </div>
+
+                                  <motion.button 
+                                    whileHover={{ scale: 1.1, x: 5 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={handleNextCalc}
+                                    className="p-4 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all shadow-xl"
+                                  >
+                                    <ChevronRight className="w-6 h-6" />
+                                  </motion.button>
+                               </div>
+
+                               <div className="max-w-xl mx-auto">
+                                  <AnimatePresence mode="wait">
+                                     <motion.div
+                                       key={calcActiveIndex}
+                                       initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                                       animate={{ opacity: 1, x: 0, scale: 1 }}
+                                       exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                                       transition={{ duration: 0.3, ease: "easeOut" }}
+                                     >
+                                        {renderMetricCard(currentMetric, true)}
+                                     </motion.div>
+                                  </AnimatePresence>
+                               </div>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="space-y-8">
+                            {/* Global Leaderboard Section */}
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-2.5">
+                                <Globe className="w-4 h-4 animate-spin-slow" style={{ color: activeTierVisual.ui.hexCode }} />
+                                <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-blue-400">
+                                  Global Leaderboard
+                                </h4>
+                                <div className="flex-1 h-px bg-white/10" />
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-6">
+                                {calculatorMetrics.filter(m => m.group === 'global').map((metric) => renderMetricCard(metric))}
+                              </div>
+                            </div>
+
+                            {/* Indonesian Leaderboard Section */}
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-2.5">
+                                <Flag className="w-4 h-4 animate-pulse" style={{ color: activeTierVisual.ui.hexCode }} />
+                                <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-indigo-400">
+                                  Indonesian Leaderboard
+                                </h4>
+                                <div className="flex-1 h-px bg-white/10" />
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-6">
+                                {calculatorMetrics.filter(m => m.group === 'indonesian').map((metric) => renderMetricCard(metric))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`h-full flex flex-col items-center justify-center text-center transition-colors duration-500 ${activeTierVisual ? 'text-white/40' : 'text-slate-300'}`}>
+                    <Brain className={`w-16 h-16 mb-4 animate-pulse opacity-20 ${activeTierVisual ? 'text-white' : 'text-slate-900'}`} />
+                    <p className="font-black text-sm uppercase tracking-[0.2em]">Scanner Offline</p>
+                    <p className="text-xs font-medium max-w-[250px] mt-2 leading-relaxed opacity-50">Input your proficiency score to initialize environmental mapping and biometric alignment HUD.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <footer className={`mt-16 text-center text-sm py-8 border-t transition-colors duration-500 ${activeTierVisual ? 'text-white/20 border-white/5' : 'text-slate-400 border-slate-200'}`}>
+          <p>© 2026 Worldwide Exam Comparison Tool • Cultural Reference Benchmarks</p>
+        </footer>
+      </div>
+    </div>
+  );
+};

@@ -1943,7 +1943,11 @@ export const ExamComparison: React.FC<ExamComparisonProps> = ({ t, language }) =
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 p-1 shadow-lg shadow-pink-500/20 active:scale-95 transition-transform">
                 <div className="w-full h-full rounded-xl bg-slate-950 flex flex-col items-center justify-center overflow-hidden relative">
-                  <Gamepad2 className="w-12 h-12 text-pink-400 animate-pulse" />
+                  <img
+                    src="/kemal-av-gaming.png"
+                    alt="Kemal Av Gaming"
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute bottom-1 bg-black/60 text-[8px] font-black tracking-widest text-pink-300 px-1.5 py-0.5 rounded uppercase">
                     LV.99
                   </div>

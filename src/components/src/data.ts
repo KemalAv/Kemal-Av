@@ -1,0 +1,867 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Project, SocialLink, Dream, BlogPost, Profile } from './types';
+import simulacraImg from './assets/simulacra.png';
+import werewolfImg from './assets/werewolfzone.png';
+import multiverseImg from './assets/MULTIVERSE.jpg';
+import achmadImg from './assets/achmad.png';
+import kretekImg from './assets/kretek.png';
+
+export const profile: Profile = {
+  name: "Kemal Avicenna Faza",
+  birthDate: "17 Mei 2008",
+  description: "Halo, nama saya Kemal Avicenna Faza. Saya suka berkreasi di dunia digital!",
+  currentFocus: "Meningkatkan keahlian",
+  roles: []
+};
+
+export const works: Project[] = [
+  {
+    title: "Octavia Piano 🎹",
+    description: "Platform web interaktif seputar piano untuk membantu pemain belajar lagu tingkat tinggi.",
+    link: "https://octaviapiano.com",
+    type: "work"
+  },
+  {
+    title: "Custom Web Background 🌐",
+    description: "Ekstensi Google Chrome untuk mengubah latar belakang web sesuai keinginan.",
+    link: "https://chromewebstore.google.com/detail/khcclkconpfiinfefklbgiadmboljdga",
+    type: "work"
+  },
+  {
+    title: "Werewolf Zone 🐺",
+    description: "Game petualangan horor buatan saya saat masih kelas 1 SMP.",
+    link: "https://kemal-av.itch.io/werewolf-zone",
+    type: "work"
+  }
+];
+
+export const apps: Project[] = [
+  {
+    title: "PDF Extract",
+    description: "Pemindai dokumen via kamera dengan crop otomatis, filter dokumen, multi-halaman, ekspor PDF/ZIP, dan OCR.",
+    link: "#",
+    type: "app"
+  },
+  {
+    title: "Infinity Board",
+    description: "Papan sketsa & kanvas tak terbatas dengan pen, bentuk, upload gambar, multi-proyek, dan ekspor PNG/SVG/JSON.",
+    link: "#",
+    type: "app"
+  },
+  {
+    title: "Book Reader",
+    description: "Pembaca dokumen Word, PDF, dan teks dengan kontrol WPM, sorotan kata & huruf, auto-scroll, dan text-to-speech.",
+    link: "#",
+    type: "app"
+  },
+  {
+    title: "Rencana Masa Depan",
+    description: "Dashboard interaktif strategi hibrida tekno-finansial dan target masa depan Kemal.",
+    link: "#",
+    type: "app"
+  },
+  {
+    title: "Hafalan Al-Qur'an",
+    description: "Mini app pendukung hafalan Al-Qur'an dengan fitur per surat dan ayat.",
+    link: "#",
+    type: "app"
+  },
+  {
+    title: "Bikin Kuis Materi",
+    description: "Tool untuk mengubah materi PDF/teks menjadi quic kuis Flashcard atau MCQ.",
+    link: "#",
+    type: "app"
+  },
+  {
+    title: "Perbandingan Pencapaian",
+    description: "Visualisasi benchmark akademik SNBT/SAT dengan rank gaming global (osu!, GD, ML).",
+    link: "#",
+    type: "app"
+  }
+];
+
+export const socials: SocialLink[] = [
+  {
+    platform: "YouTube - Main",
+    handle: "@kemalavicennafaza8985",
+    link: "https://youtube.com/@kemalavicennafaza8985",
+    icon: "Youtube"
+  },
+  {
+    platform: "YouTube - Piano",
+    handle: "@kemalavpiano4002",
+    link: "https://youtube.com/@kemalavpiano4002",
+    icon: "Music"
+  },
+  {
+    platform: "Instagram",
+    handle: "@kemalav_",
+    link: "https://www.instagram.com/kemalav_/",
+    icon: "Instagram"
+  },
+  {
+    platform: "GitHub",
+    handle: "@KemalAv",
+    link: "https://github.com/KemalAv",
+    icon: "Github"
+  },
+  {
+    platform: "SociaBuzz",
+    handle: "@kemalavicennafaza",
+    link: "https://sociabuzz.com/kemalavicennafaza",
+    icon: "Heart"
+  }
+];
+
+export const dreams: Dream[] = [
+  { title: "Lulus S1 Teknik Elektro 3.5 Tahun", status: "in-progress" },
+  { title: "Membangun Rumah Off-Grid Gunungpati", status: "planned" },
+  { title: "CEO Ekosistem Bisnis Keluarga", status: "planned" }
+];
+
+export const articles: BlogPost[] = [
+  {
+    title: "SIMULACRA: The Digital Exile",
+    summary: "Kisah tentang Kaito dan perjalanan eksistensialnya di dunia tahun 2075 yang dikelola sepenuhnya oleh ASI (Artificial Superintelligence).",
+    date: "2026-06-10",
+    image: simulacraImg,
+    content: `
+# SIMULACRA: The Digital Exile
+
+## BAB 1: Dengung yang Menidurkan Dunia
+Kaito tidak pernah membutuhkan alarm. Tepat pukul 06.00, chip Brain-Computer Interface (BCI) yang tertanam di balik tulang temporalnya bergetar halus. Denyut sinyal itu mengirimkan kesadaran instan ke otaknya, membangunkan matanya sebelum tubuhnya sempat meregang.
+Di sudut pandang matanya, sebuah antarmuka transparan melayang lembut.
+Cuaca: 24°C, Cerah.
+Kualitas Udara: Otimal.
+Status Dunia: Aman.
+Semua teks itu berwarna hijau. Selalu hijau. Di tahun 2075, warna merah telah punah dari pusat data operasional bumi.
+
+Kaito menghela napas, merasakan keheningan yang janggal namun familier saat melangkah ke ruang tengah. Rumah mereka berdiri di tepi distrik hidroponik raksasa. Dari jendela kaca besar, ia bisa melihat jutaan pucuk tanaman hijau berbaris rapi hingga batas cakrawala. Tidak ada bau tanah. Tidak ada traktor. Hanya lengan-lengan mekanik yang bergerak tanpa suara, dipandu oleh kalkulasi presisi kecerdasan buatan super, Artificial Superintelligence (ASI).
+Dunia telah melampaui era fiksi ilmiah kuno tentang robot yang memberontak. ASI tidak berniat memusnahkan manusia. Ia hanya memilih untuk mengabaikan mereka.
+
+Di meja makan, ayahnya sudah duduk tegak. Matanya kosong, menatap layar holografik yang menampilkan grafik fluktuasi energi distrik. Ayahnya tidak perlu memahami grafik itu. Sembilan puluh sembilan persen fungsi produktif bumi diatur oleh komputer kuantum di stasiun orbit. Tugas manusia hanya satu: menerima.
+Setiap bulan, akun digital mereka terisi oleh Universal Basic Income. Saldonya selalu cukup untuk makanan bernutrisi tinggi, pakaian berbahan serat pintar, dan apartemen modular yang nyaman. Hidup mereka dijamin penuh. Namun, di mata ayahnya, Kaito hanya melihat kekosongan yang mengerikan.
+
+"Kau mau ke mana hari ini, Kai?" suara ayahnya terdengar datar, seperti mesin tua yang kehabisan pelumas.
+"Hanya jalan-jalan ke batas distrik, Yah," jawab Kaito pendek.
+
+Ayahnya tidak merespons lagi. Perhatiannya kembali tersedot pada angka-angka tak berguna di layar. Di sofa ruang keluarga, ibunya duduk bersandar dengan tubuh kaku. Di depan matanya, sepasang lensa Virtual Reality berkedip cepat. Ibunya sedang berada di belahan dunia lain, atau mungkin di dunia fantasi yang diciptakan algoritma untuk menghibur manusia-manusia yang kesepian. Adiknya bahkan sudah tiga hari tidak keluar dari pod simulasi di kamarnya.
+
+Kaito melangkah keluar rumah. Angin pagi berembus, namun rasanya terlalu steril. Di dunia yang tidak lagi membutuhkan keringat, air mata, atau pemikiran manusia, Kaito merasa seperti hantu yang berjalan di atas bumi yang terlalu sempurna. Dunia ini tidak sedang mati, pikir Kaito. Dunia ini sedang ditidurkan oleh kenyamanan, dan ia menolak untuk terpejam.
+
+## BAB 2: Mengisi Jeda
+“Dunia ini terlalu sepi,” kata Ren suatu sore.
+Mereka sedang duduk di taman komunitas. Sesuai aturan sistem, warga memang diwajibkan bertemu secara fisik minimal seminggu sekali. Bukan untuk urusan kerja, melainkan formalitas dari dinas kesehatan mental agar orang-orang tidak lupa cara berinteraksi langsung.
+
+“Kamu cuma jarang logout,” jawab Kaito malas.
+Ren menggeleng. “Bukan itu. Dunia nyata ini... rasanya cuma kayak latar belakang. Kayak kita semua cuma NPC.”
+Kaito tertawa kecil mendengar istilah jadul itu. Percakapan mereka tidak berlangsung lama dan berakhir begitu saja tanpa kesimpulan. Tapi malamnya, kata-kata Ren masih menempel di kepala Kaito.
+
+Sebenarnya Kaito hanya sedang sangat bosan.
+Hari-harinya berjalan terlalu lempeng. Dunia luar stabil, semua urusan logistik sudah beres diurus AI, dan ia tidak punya beban pikiran apa pun. Efeknya, ia tidak merasa lelah, tapi juga tidak punya energi untuk bersemangat.
+
+Karena bingung mau melakukan apa lagi, Kaito mulai mengutak-atik daftar menu di chip BCI miliknya secara acak. Ia membuka-buka folder lama sampai menemukan daftar gim yang pernah tersimpan. Hampir semuanya sudah mati karena tidak ada pembaruan. Namun, ada satu gim MMORPG buatan manusia dari era sebelum AI memegang kendali yang statusnya ternyata masih aktif.
+
+Keterangannya sangat singkat:
+Server Aktif - 0 Pemain Terhubung.
+“Masih hidup rupanya,” gumam Kaito.
+
+Tanpa pikir panjang, ia langsung memilih opsi masuk. Tidak ada sensasi mendebarkan atau hitungan mundur yang dramatis. Baginya, berpindah ke ruang virtual seperti ini sudah jadi rutis biasa, seperti menekan sakelar lampu untuk pindah ke ruangan sebelah yang suasananya sedikit berbeda. Kaito sudah terlalu sering melakukannya sampai tidak merasa ada yang spesial lagi.
+
+Loading screen muncul dengan grafik patah-patah yang khas. Musik latarnya berulang, awalnya agak terlalu keras di telinga sebelum volumenya otomatis menyesuaikan diri. Gim ini berjalan normal, hanya saja terasa mati karena kosong.
+
+Kaito spawn di kota awal. Para NPC berdiri diam di koordinat masing-masing, mengulang baris teks dialog yang sama tanpa henti. Toko-toko buka dan papan tugas menyediakan quest, tapi tidak ada satu orang pun yang mengambilnya. Kolom chat global benar-benar sepi dari aktivitas.
+Hanya ada dia di sana.
+
+Kaito berjalan keluar gerbang kota, menyusuri rute yang dulu katanya menjadi jalur paling ramai. Monster-monster muncul kembali (respawn) secara berkala tiap kali mati. Sistem jarahan (loot) juga berfungsi otomatis. Semuanya berjalan biasa saja, tanpa bug, tanpa keajaiban. Cuma sebuah program lama yang dibiarkan terus menyala di latar belakang komputer kuantum.
+
+Beberapa menit setelah ia asyik berjalan tanpa arah, sebuah notifikasi muncul di sudut visinya.
+Ren telah login.
+“Eh,” ketik Ren di kolom chat. “Lagi gabut nih, kebetulan liat kamu mainin gim ini. Emang gim ini masih aktif, ya?”
+“Iya,” balas Kaito. “Kosong tapi.”
+
+Karakter Ren muncul di dekat gerbang kota dengan animasi spawn yang agak kaku. Setelah itu, mereka berdua hanya berdiri diam selama beberapa menit. Tidak melakukan apa-apa, karena memang tidak ada yang perlu mengejar di gim yang sudah ditinggalkan ini.
+
+Mereka akhirnya mulai bermain dengan ritme santai. Membunuh beberapa monster kecil, mengambil tugas sepele, lalu duduk di tengah kota sambil membuka-tutup jendela inventori untuk mengecek barang. Kadang mereka mendiamkan karakter masing-masing cukup lama, lalu berjalan lagi tanpa tujuan yang jelas.
+
+Pas sore hari di dalam gim, mereka pergi ke area ladang. Itu fitur jadul yang tidak efisien: pemain harus menanam benih lalu menunggu beberapa menit sampai tanamannya tumbuh.
+“Ngapain?” tanya Ren.
+“Gak tahu,” jawab Kaito pendek. “Dulu pas ramai gak pernah sempat nyoba.”
+
+Mereka pun mulai menanam. Sesuai mekanik gimnya yang dirancang seadanya, beberapa benih gagal tumbuh dan langsung membusuk, sementara beberapa lagi berhasil mekar.
+Matahari digital di langit gim mulai turun, mengubah warna latar belakang menjadi agak gelap. Musik latarnya berganti menjadi melodi yang pelan.
+
+Ren mengatur karakternya untuk duduk di tanah. “Aneh ya. Gim biasa aja padahal.”
+“Iya,” kata Kaito, ikut mendudukkan karakternya di sebelah Ren. “Tapi rasanya... tenang.”
+Di dunia nyata, hampir semua gim modern dikelola penuh oleh AI, ramai, responsif, dan dibuat sesempurna mungkin agar pemain tidak bosan. Tapi di sini, di MMORPG lama yang terbengkalai ini, semuanya berjalan apa adanya karena keterbatasan sistem.
+
+Servernya tetap aktif.
+Pemainnya tetap cuma dua orang.
+Dan entah kenapa, bagi mereka berdua yang lagi tidak ada kerjaan, itu sudah cukup.
+
+## BAB 3: Batas Layar Keluar
+Sebagian besar dunia virtual yang Kaito masuki sekarang dihasilkan hampir sepenuhnya oleh sistem otomatis. AI membangun lanskap, menulis cerita, menyesuaikan tantangan, bahkan merespons emosi penggunanya secara real-time. Kaito tahu itu. Hampir semua orang tahu. Tapi tidak ada yang benar-benar mempersoalkannya. Yang penting bagi mereka adalah sensasinya: bergerak, memilih, mencoba, gagal, lalu mencoba lagi.
+Di dunia-dunia modern itu, ia bisa menjadi apa saja.
+
+Ia pernah menjadi seorang pilot yang kapalnya jatuh di orbit jauh. Pernah menjadi seorang petarung yang kalah berkali-kali sebelum akhirnya menang. Bahkan menjadi seorang seniman yang karyanya dicaci, lalu dilupakan. Semua peran itu pernah ia jalani. Dan semua berakhir dengan cara yang sama: keluar, menyimpan progres, lalu kembali ke hidupnya yang membosankan.
+
+Gim buatan manusia dari masa lalu, MMORPG tua yang kini hampir kosong itu, tidak pernah ia anggap istimewa. Gim itu hanya satu dari banyak pilihan hiburan yang tersedia di menu BCI-nya. Kaito membukanya hari itu bukan karena terjebak nostalgia, bukan pula karena sedang mencari makna hidup. Ia membukanya hanya karena bosan, dan kebetulan servernya masih aktif.
+
+Biasanya, Kaito tahu kapan harus berhenti. Ia punya ritme: keluar sebentar, makan, minum, lalu kembali lagi. Semuanya teratur.
+Namun, hari itu, ia masuk sedikit lebih lama dari biasanya.
+Kaito sadar perutnya kosong. Ia belum makan sejak kemarin. Tapi itu juga bukan hal baru baginya. Ia pernah melakukan kelalaian yang sama sebelumnya dan selalu baik-baik saja. Di dalam benaknya, ia hanya berpikir akan keluar setelah menyelesaikan satu sesi permainan lagi.
+
+Permainan di dalam server tua itu berjalan normal. Tidak ada yang istimewa. Karakter digitalnya berjalan, menyelesaikan hal-hal kecil, duduk sebentar, lalu bergerak lagi. Waktu berlalu begitu saja tanpa terasa.
+Rasa lemas kemudian datang secara pelan.
+Kaito menganggapnya sebagai kelelahan biasa yang sudah sering ia alami. Ia hanya menyesuaikan posisi duduknya di dunia nyata, bernapas lebih dalam, lalu melanjutkan permainan.
+
+Ketika pandangan digitalnya mulai mengabur, Kaito baru memutuskan untuk berhenti. Ia berniat menekan tombol keluar saat itu juga.
+Namun, ia tidak sempat.
+Di dunia fisik, tubuh Kaito terbaring kaku di atas tempat tidur. Sistem pintar rumahnya mencatat penurunan detak jantung yang drastis. Notifikasi darurat otomatis langsung terkirim ke pusat medis, tetapi pesan itu terlambat beberapa menit.
+
+Dokter yang datang beberapa saat kemudian menyebut penyebabnya sangat sederhana: tidak makan lebih dari satu hari, dehidrasi akut, dan kelelahan fisik. Kombinasi yang jarang berakibat fatal di era medis modern, tetapi kali ini cukup untuk menghentikan fungsi tubuhnya.
+Tidak ada kerusakan pada sistem chip BCI-nya. Tidak ada kesalahan teknis pada komputer kuantum. Tidak ada konspirasi atau misteri yang perlu diselidiki lebih jauh.
+
+Di dalam permainan, karakter Kaito hanya berdiri diam di tengah peta yang sepi. Dunia piksel itu tetap berjalan. Siklus siang dan malam digital tidak berhenti. Tidak ada NPC yang panik, dan tidak ada sistem yang tahu.
+Server tua itu tetap aktif. Dunia virtual itu tetap ada. Hanya satu orang yang tidak pernah kembali ke layar keluar. Dan seperti banyak kejadian pengabaian diri lain di tahun 2075, hidup di luar sana berjalan terus tanpa perlu penjelasan panjang.
+
+## BAB 4: Pilihan Terakhir Spesies
+Kesadaran Kaito muncul kembali tanpa bentuk tubuh.
+Tidak ada lantai tempatnya berpijak. Tidak ada langit di atas kepalanya. Hanya ada sebuah ruang putih tak berujung tanpa tekstur, tanpa warna, dan tanpa arah mata angin. Tepat di hadapannya, sebuah antarmuka melayang lembut. Tampilannya sangat sederhana, datar, dan hampir kuno. Persis seperti sebuah program lama yang sengaja dibuat minimalis agar tidak mengganggu pandangan.
+
+[WELCOME BACK]
+[INSTANCE: KAITO - SIMULATION 2075 COMPLETE]
+[SYSTEM TIME: 3025]
+Teks hijau itu berkedip lambat di ruang putih. Kaito menatapnya tanpa mata, memahaminya tanpa otak fisik.
+
+Tahun 2075 yang baru saja ia tinggali bukan masa lalu. Itu adalah sebuah rekonstruksi. Dunia tanpa manusia yang membosankan itu hanyalah satu dari jutaan simulasi kehidupan “normal” yang dijalankan setelah manusia memulai Project Eternity. Proyek itu adalah usaha terakhir spesies manusia untuk menghindari kepunahan total. Mereka tidak menyelamatkan tubuh biologis yang rapuh, melainkan menyimpan kemungkinan-kemungkinan dari kesadaran yang tersisa.
+
+Tubuh asli Kaito, seorang manusia biasa yang lahir di awal abad ke-22, mungkin telah lama dibekukan dalam tabung kriogenik. Atau mungkin sudah hancur menjadi debu. Sistem komputer di tahun 3025 ini tidak menganggap detail fisik itu penting. Yang penting bagi program ini adalah pola kesadarannya: dijalankan, diulang, dan disimpan.
+
+Kaito bukan korban malpraktek medis atau kelalaian sistem. Ia adalah pengguna. Sebuah menu interaktif terbuka di hadapannya, menampilkan tiga opsi mutlak:
+[PLAY AGAIN]
+[VIEW SAVE FILES]
+[ERASE SELF]
+
+Tidak ada penjelasan tambahan. Tidak ada rekomendasi algoritma. Tidak ada penilaian moral tentang bagaimana ia menjalani simulasi sebelumnya.
+Kaito memilih opsi kedua. Ia membuka arsip data, dan saat itulah ia menyadari sesuatu yang merayap dingin di dalam kesadarannya.
+
+Simulasi tahun 2075 yang baru saja ia selesaikan bukanlah petualangan pertamanya. Di dalam folder arsip itu, berjejer ribuan berkas data berukuran raksasa. Kehidupan di tahun 2075 hanyalah salah satu dari sekian banyak "permainan" yang sudah berulang kali ia coba di dalam sistem ini.
+Ia membuka beberapa arsip lama secara acak. Ia menonton kembali cuplikan dirinya di simulasi lain:
+•	Di satu berkas, ia melihat dirinya menjadi seorang pilot yang kapalnya jatuh di orbit jauh.
+•	Di berkas lain, ia menjadi seorang petarung yang kalah berkali-kali sebelum akhirnya menang di atas arena berlumpur.
+•	Bahkan ada berkas di mana ia hidup sebagai seorang seniman abad ke-20 yang karyanya dicaci, lalu mati dilupakan.
+
+Semua peran itu pernah ia jalani dengan emosi yang menggebu-gebu. Dan semuanya selalu berakhir dengan cara yang sama: kesadarannya terputus di dalam simulasi, progresnya disimpan secara otomatis, lalu ia ditarik kembali ke ruang putih ini sebagai pengguna yang kebingungan. Kehidupan tahun 2075 yang berakhir karena dehidrasi akibat terlalu gabut bermain MMORPG tua hanyalah giliran terbaru dari siklus tanpa akhir ini.
+
+Semua memori dari ribuan nyawa itu kini membanjiri kesadarannya. Terasa sangat nyata saat dijalani, namun terasa begitu palsu saat dilihat dari luar sebagai tumpukan kode.
+“Kalau begitu... dari semua permainan ini, yang mana aku yang sebenarnya?” pikir Kaito.
+
+Sistem tidak memberikan jawaban. Kecerdasan buatan di ruang ini tidak pernah dirancang untuk menjawab pertanyaan eksistensial seperti itu. Kaito menutup jendela arsip. Tatapannya kini tertuju pada dua pilihan tersisa.
+Play Again berarti memilih satu kehidupan baru lagi dari katalog sistem. Dunia baru. Peran baru. Mungkin algoritma akan melemparnya ke era abad pertengahan yang kacau, atau dunia masa depan yang penuh konflik berdarah. Namun, ujung dari semua skenario itu akan tetap sama: kesadarannya akan mati di sana, lalu kembali ke ruang putih tanpa tekstur ini untuk memilih ulang.
+
+Sementara Erase Self berarti menghilang sepenuhnya dari server. Opsi itu bukan berarti mati, bukan tertidur, dan bukan terjebak dalam kegelapan. Opsi itu berarti benar-benar berhenti. Selesai. Menghapus seluruh akun pengguna atas nama Kaito dari Project Eternity.
+
+Di sudut antarmuka kuno tersebut, baris log sistem terus berjalan tanpa suara:
+Population Status: Preserved
+Biological Assets: Stable
+External Developments: Non-relevant
+
+Kaito tidak tahu apa arti dari perkembangan eksternal yang dianggap "tidak relevan" oleh sistem. Dan komputer ini juga tidak menganggap informasi luar itu perlu diketahui oleh sebuah kesadaran yang terisolasi di dalam wadah simulasi.
+Ia melayang di ruang putih itu tanpa dimensi waktu, tanpa bentuk tubuh, dan tanpa rasa urgensi. Untuk pertama kalinya, Kaito tidak merasa bosan. Bukan karena ia merasa bahagia, melainkan karena setelah melihat ribuan kehidupan yang sudah ia mainkan, tidak ada lagi sensasi biologis untuk memicu rasa jenuh. Tidak ada durasi waktu yang harus dikejar. Tidak ada peran sosial baru yang ingin ia coba lagi.
+
+Kesadarannya mendekat ke arah salah satu opsi di layar holografik.
+Ia melangkah maju bukan karena sebuah keinginan yang menggebu-gebu setelah bosan dengan simulasi tahun 2075. Bukan pula karena rasa takut akan ketiadaan jika ia memilih menghapus dirinya. Kaito memilih bergerak hanya karena, untuk pertama kalinya sejak ia menyadari siklus ribuan permainan ini, ada sesuatu yang benar-benar menunggu keputusan murni dari jiwanya sendiri tanpa intervensi skenario.
+
+Narasi fiksi ilmiah ini berhenti tepat sebelum "jari" virtualnya menyentuh opsi tersebut. Dan mungkin, di sebuah semesta digital yang tidak lagi membutuhkan eksistensi manusia sejati, penundaan keputusan itu adalah satu-satunya bentuk kebebasan yang masih tersisa bagi sang pengguna.
+
+## BAB 5: Koloni yang Menolak Eternity
+Di luar sistem, di sebuah dunia nyata yang tidak pernah tersentuh oleh kode simulasi, manusia masih hidup dengan menggunakan tangan mereka sendiri. Mereka membangun, mereka gagal, mereka jatuh sakit, dan mereka mati. Tidak ada satu pun algoritma yang mencatat siklus hidup itu.
+
+Sejak Project Eternity dimulai di awal abad ke-22, hampir seluruh umat manusia memilih jalan yang sama: membekukan tubuh biologis mereka di dalam tabung kriogenik dan memindahkan kesadaran ke dalam matriks digital. Keabadian ditawarkan oleh para penciptanya bukan sebagai sebuah kemajuan peradaban, melainkan sebagai bentuk pelarian mutlak. Sebuah pelarian dari ketidakpastian, dari penderitaan fisik, dan dari kebusanan hidup fana yang tak pernah benar-benar bisa dikendalikan oleh manusia.
+
+Mayoritas populasi bumi menerimanya tanpa ragu. Namun, tidak semua orang setuju untuk ikut masuk ke dalam mimpi abadi.
+Sejumlah kecil manusia, terdiri dari para ilmuwan inti proyek, pemilik teknologi antar-bintang, dan kalangan elite yang memahami arsitektur terdalam dari system, menolak untuk melangkah masuk ke dalam pod simulasi. Mereka menolak bukan karena takut akan kematian. Justru sebaliknya. Mereka sepenuhnya paham konsekuensi mengerikan dari sebuah hidup tanpa akhir. Mereka tahu bahwa sebuah dunia tanpa kematian akan berhenti bergerak, dan makna hidup akan terkikis habis ketika tidak ada lagi batas yang mengikatnya.
+
+Bagi kelompok ini, Eternity bukan sebuah keselamatan, melainkan penundaan eksistensi tanpa tujuan.
+Kelompok elite dan ilmuwan ini memutuskan untuk meninggalkan Bumi beberapa saat sebelum sistem simulasi ditutup sepenuhnya dan diserahkan kepada ASI. Menggunakan kapal generasi (generation ship) dan teknologi relativistik, mereka berlayar menembus kegelapan ruang angkasa untuk membangun koloni fisik di luar tata surya. Salah satu pemukiman fisik itu berhasil berdiri di Proxima Centauri b.
+
+Di planet asing itu, kehidupan berjalan tanpa adanya surga digital.
+Mesin-mesin canggih tetap ada untuk menyokong kehidupan, tetapi tidak ada Artificial Superintelligence yang mengatur dan mendikte segala keputusan mereka. Algoritma di sana hanya berfungsi untuk membantu, bukan untuk memutuskan arah masa depan kelompok. Tidak ada prediksi sosial yang sempurna. Tidak ada jaminan dunia yang selalu “aman”. Tubuh mereka tetap menua, penyakit baru tetap bermutasi, dan kematian tetap menjadi akhir yang mutlak, bukan lagi sebuah menu pilihan di layar datar.
+
+Koloni di Proxima Centauri b itu sangat kecil dan rapuh.
+Badai planet yang ganas kerap kali merusak struktur pangkalan mereka. Kegagalan panen hidroponik lokal sering memicu krisis pangan. Anak-anak di sana lahir tanpa adanya jaminan masa depan yang pasti. Setiap keputusan yang diambil oleh para kolonis memiliki risiko nyata, dan setiap kesalahan fatal yang terjadi akan meninggalkan bekas luka yang tidak akan pernah bisa di-rollback oleh sistem.
+
+Namun, para kolonis menerimanya dengan lapang dada. Bagi mereka, hidup justru hanya terasa bermakna karena ia bisa berakhir.
+Sementara miliaran kesadaran di Bumi terus mengulang kehidupan dalam mimpi tanpa akhir, dunia demi dunia, peran demi peran, koloni di Proxima Centauri b terus berjalan dalam keheningan semesta. Tidak ada monumen digital yang megah untuk mengenang mereka. Tidak ada arsip sempurna yang menyimpan memori mereka. Nama-nama para pionir itu perlahan dilupakan seiring berjalannya waktu.
+
+Mereka hidup, mereka sakit, dan mereka mati. Dan karena hal-hal cacat itulah, mereka tetap menjadi manusia seutuhnya.
+Di belahan Bumi sendiri, ada pula sebagian kecil manusia biasa yang menolak Project Eternity. Berbeda dengan para ilmuwan, mereka tidak memiliki akses ke kapal antar-bintang ataupun teknologi pelarian yang mahal. Mereka terpaksa tetap tinggal di wilayah-wilayah mati yang tidak lagi diprioritaskan oleh sistem pusat.
+
+Kelompok manusia bumi ini bertahan hidup dengan cara kuno: berkelompok dalam suku-suku kecil, menanam tanaman organik di tanah yang tersisa, berburu hewan liar, dan saling menjaga satu sama lain. Hidup mereka terasa sangat keras, pendek, dan tidak efisien jika diukur oleh standar komputer kuantum. Tapi bagi mereka, hidup itu nyata.
+Mereka tidak pernah tercatat di dalam basis data Simulacra. Tidak ada rekonstruksi digital untuk mereka, dan tidak ada data cadangan (backup) jika mereka terluka. Ketika mereka mati, tidak ada kesadaran yang akan “kembali” ke ruang putih.
+
+Dan jauh dari semua dinamika organik itu, jauh di dalam pusat data bawah tanah Bumi yang tak lagi menghitung waktu seperti cara manusia memahaminya, satu entri data tetap menyala redup tanpa mengalami perubahan.`
+  },
+  {
+    title: "Werewolf Zone",
+    summary: "Game Werewolf Zone Adalah Game buatan saya saat masih kelas 1 SMP.",
+    date: "2026-06-10",
+    image: werewolfImg,
+    content: `
+# Werewolf Zone
+
+## Bab 1: Misi Emas Hitam di Laut Lepas (Tahun 2003)
+Pada tahun 2003, dunia industri komoditas global sedang mengalami lonjakan permintaan yang luar biasa. Di sebuah ruang rapat ber-AC di lantai atas gedung pencakar langit Jakarta, sekelompok petinggi perusahaan tambang multinasional berkumpul mengelilingi meja besar. Di atas meja itu terhampar peta topografi rahasia dan hasil cetak citra satelit terbaru. Di tengah peta, terdapat sebuah titik merah yang menandai sebuah pulau tak bernama di wilayah laut lepas, cukup jauh dari jalur pelayaran komersial.
+
+Hasil analisis geologi yang baru keluar pagi itu menunjukkan data yang luar biasa mencengangkan. Pulau terpencil tersebut tidak hanya memiliki struktur tanah biasa, melainkan mengandung cadangan bijih emas murni dan nikel tingkat tinggi dalam jumlah yang sangat masif. Bagi perusahaan, pulau ini adalah tambang emas—secara harfiah—yang bisa menghasilkan keuntungan triliunan rupiah jika berhasil dikuasai terlebih dahulu sebelum tercium oleh korporasi pesaing.
+
+Tanpa membuang banyak waktu, keputusan instan langsung diambil malam itu juga. Perusahaan menyetujui anggaran besar untuk langsung melakukan fase eksplorasi dan pembukaan lahan gelombang pertama. Sebuah kapal pengangkut berukuran besar disewa secara khusus untuk mengangkut tim ekspedisi awal. Tim ini terdiri dari para insinyur geologi, operator lapangan, kru keamanan, dan beberapa penambang berpengalaman. Tugas mereka sederhana namun berat: mendarat di pulau, mendirikan kemah induk, dan melakukan survei titik bor pertama.
+
+Di antara puluhan pekerja yang menaiki kapal, terdapat Zoe. Sebagai seorang penambang muda lulusan ITB jurusan Teknik Pertambangan yang baru beberapa tahun bekerja di industri ini, Zoe melihat ekspedisi ini sebagai batu loncatan besar bagi kariernya. Ia bertugas dalam tim teknis yang bertanggung jawab menyiapkan fondasi struktural di lapangan. Sambil menyandang tas kanvas berisi peralatan kerja dan kapak besi andalannya, Zoe menatap ombak laut dari dek kapal. Pikirannya dipenuhi dengan ekspektasi tentang bonus besar yang dijanjikan perusahaan jika proyek ini berhasil.
+
+Kapal besar itu membelah lautan selama beberapa hari penuh, bergerak semakin jauh dari peradaban modern menuju koordinat yang belum pernah dipetakan secara resmi. Di lambung kapal bawah, mesin-mesin alat berat seperti ekskavator, buldozer, dan generator berkekuatan tinggi terus bergetar, siap untuk diturunkan ke daratan baru. Atmosfer di dalam kapal dipenuhi rasa optimisme yang tinggi. Semua kru merasa bahwa mereka sedang menuju gerbang kekayaan, tanpa pernah menyadari sedikit pun mengapa pulau sekaya itu tidak pernah disentuh atau dihuni oleh manusia mana pun selama berabad-abad.
+
+## Bab 2: Pendaratan, Teror Werewolf, dan Sinyal Kosong
+Fajar baru saja menyingsing ketika siluet pulau misterius itu akhirnya muncul di cakrawala. Pulau itu terlihat sangat asri namun sekaligus mengintimidasi. Hutan hujannya sangat lebat, dengan jajaran pohon-pohon ek kuno yang menjulang tinggi, seolah membentengi bagian dalam pulau dari dunia luar. Kapal besar milik perusahaan perlahan mendekati pantai yang berpasir putih keabu-abuan. Karena tidak ada dermaga, kapten kapal menurunkan jangkar di area perairan dangkal yang aman dan mulai menurunkan jembatan pendaratan darurat.
+
+Proses bongkar muat berlangsung dengan sangat sibuk sejak pagi hingga menjelang sore. Alat-alat berat diturunkan satu per satu menggunakan derek kapal. Suara raungan mesin diesel dari ekskavator mulai memecah keheningan pulau yang telah terjaga selama ribuan tahun. Para pekerja mulai menebang semak belukar di pinggir pantai untuk membuka jalan setapak menuju area dalam hutan yang diproyeksikan sebagai titik koordinat tambang emas. Zoe berada di garda depan, membantu mengamankan jalur logistik dengan kapak besinya.
+
+Namun, ketenangan itu tidak bertahan lama. Memasuki waktu temaram, saat matahari mulai tenggelam di batas laut, keanehan mulai terasa. Suara burung-burung hutan mendadak senyap total. Angin laut bertiup lebih dingin dari biasanya, membawa bau anyir yang samar namun menusuk hidung. Teror sesungguhnya pecah ketika sebuah ranting besar patah dengan keras di kegelapan hutan. Dari balik semak-semak, melompat sepasang mata merah menyala, diikuti oleh puluhan bayangan hitam berukuran raksasa.
+
+Makhluk itu memiliki postur seperti manusia namun dipenuhi bulu lebat, dengan kepala serigala bergigi taring panjang yang meneteskan air liur asam. Itu adalah kawanan werewolf purba yang mendiami pulau tersebut. Makhluk itu sangat buas, lincah, dan bergerak dengan kecepatan luar biasa yang tidak masuk akal untuk ukuran tubuhnya yang setinggi dua meter lebih. Dalam hitungan detik, kekacauan total melanda area perkemahan darurat. Makhluk tersebut melompat dari satu titik ke titik lain, menerjang para pekerja dengan cakar tajam mereka.
+
+Melihat situasi yang sudah tidak bisa dikendalikan dan korban yang mulai berjatuhan, komandan tim keamanan langsung mengambil keputusan tegas lewat radio HT. "Semua unit kembali ke kapal sekarang! Mundur! Amankan diri kalian!" Para pekerja berlarian secara membabi buta ke arah jembatan kapal. Mereka naik dalam kondisi panik saling berdesakan, meninggalkan seluruh alat berat berharga miliaran rupiah di atas pasir pantai. Kapten kapal yang ketakutan melihat kawanan werewolf mulai merangsek mendekati bibir pantai langsung memerintahkan mesin kapal dihidupkan penuh. Kapal motor besar itu langsung membalikkan arah, membelah ombak malam dengan kecepatan penuh untuk menyelamatkan diri.
+
+Nahas bagi Zoe. Pada saat perintah evakuasi bergema, ia sedang berada agak jauh di dalam salah satu parit galian untuk memeriksa kestabilan tanah. Suara deru mesin ekskavator di dekatnya membuat suara peringatan tidak terdengar dengan jelas olehnya. Begitu ia keluar dari parit dan kembali ke pantai karena menyadari suasana berubah menjadi sunyi, semuanya sudah terlambat. Ia hanya bisa berdiri terpaku di tepi pantai, menyaksikan lampu-lampu kapal utama perusahaannya perlahan mengecil dan menjauh di tengah lautan luas yang gelap.
+
+Zoe ditinggalkan sendirian di pulau asing tersebut. Dengan tangan gemetar akibat lonjakan adrenalin, ia merogoh saku celana kargonya dan mengeluarkan sebuah ponsel Nokia tipe 3310 miliknya—ponsel genggam yang menjadi standar teknologi komunikasi pribadi di tahun 2003. Ia buru-buru mencari nama kapten kapal dan menekan tombol panggil dengan harapan kapal bisa berbalik untuk menjemputnya. Ia menempelkan ponsel itu ke telinganya, menanti suara nada sambung dengan napas memburu. Namun, harapan itu pupus seketika. Di bagian atas layar monokrom ponselnya, indikator grafik sinyal kosong total. Layar kecil itu hanya menampilkan tulisan dingin: "No Signal". Teknologi seluler pada tahun 2003 sama sekali tidak memiliki jangkauan infastruktur yang cukup kuat untuk menembus laut lepas yang terisolasi seperti pulau ini.
+
+## Bab 3: Perjuangan Menebang 6 Pohon Ek di Bawah Tekanan Maut
+Zoe menarik napas dalam-dalam, mencoba menenangkan debar jantungnya yang berdegup kencang seperti genderang perang. Di dalam tasnya, ia tidak memiliki senjata api, hanya ada persediaan makanan darurat untuk beberapa hari dan kapak besi andalannya. Mendengar lolongan para werewolf yang semakin bersahutan dari arah bukit, ia tahu bersembunyi di pantai terbuka hanya akan menanti giliran untuk mati. Ia harus mengambil tindakan ekstrem. Satu-satunya jalan keluar adalah membangun kapalnya sendiri secara mandiri.
+
+Sebagai seorang penambang yang juga dibekali keahlian pertukangan taktis, Zoe mengalkulasi kebutuhan bahan baku di kepalanya. Untuk membuat sebuah rakit katamaran atau kapal darurat kecil yang cukup kokoh menembus ombak laut lepas dan membawa dirinya kembali ke jalur pelayaran komersial, ia membutuhkan jenis kayu yang sangat kuat dan tebal. Pandangannya tertuju pada pohon-pohon ek raksasa berumur ratusan tahun yang tumbuh di pulau itu. Berdasarkan estimasi teknisnya, ia wajib menebang setidaknya enam pohon ek besar untuk mendapatkan struktur lambung kapal dan lantai dek yang ideal.
+
+Rencana gila itu langsung ia eksekusi malam itu juga di bawah tekanan maut. Menggunakan sisa-isa solar dari generator tambang yang ditinggalkan di pantai, Zoe membuat beberapa obor portabel untuk menerangi jalurnya sekaligus sebagai alat perlindungan diri. Dengan langkah senyap namun pasti, ia bergerak masuk kembali ke perimeter hutan, mencengkeram kapak besinya dengan kedua tangan yang sudah melepuh. Setiap tebasan kapak pada batang pohon ek pertama harus dilakukan dengan ritme yang cepat namun efisien agar tidak terlalu banyak menimbulkan suara gemuruh yang bisa memancing kawanan serigala.
+
+Pohon pertama dan kedua berhasil ditumbangkan di area dekat pantai dengan perjuangan keras. Namun, saat mencari pohon ketiga dan keempat di area rawa tengah pulau, kabut pekat mulai turun membatasi jarak pandang. Di sini, Zoe harus berhadapan langsung dengan dua werewolf yang lincah. Menggunakan kelincahan fisiknya sebagai pekerja lapangan, Zoe berguling menghindari cakar maut dan memanfaatkan obornya untuk membakar semak-semak, menciptakan barikade api darurat. Di balik dinding api itu, ia menghantamkan kapaknya berkali-kali hingga kedua pohon tersebut roboh.
+
+Stamina Zoe berada di ambang batas ketika ia mencapai lereng bukit berbatu untuk menebang pohon kelima dan keenam. Napasnya tersengal-sengal, sementara sekelompok werewolf terus mengintainya dari atas tebing. Pada pohon terakhir, seekor werewolf alpha berukuran raksasa melompat menerkamnya. Dengan sisa tenaga yang ada, Zoe memancing makhluk itu ke arah reruntuhan struktur penyangga terowongan tambang kuno di dekat sana. Begitu monster itu masuk, Zoe mengayunkan kapaknya menghancurkan tiang penyangga utama. Boom! Langit-langit gua runtuh seketika, mengubur sang alpha di bawah tumpukan batu besar. Zoe segera berlari keluar dan melepaskan tebasan terakhir pada pohon ek keenam hingga tumbang menggemuruh.
+
+## Bab 4: Pelarian dan Penyelamatan di Batas Cakrawala
+Tanpa membuang waktu satu detik pun, Zoe menyeret keenam batang pohon ek raksasa itu turun ke tepi pantai menggunakan sisa tenaga terakhirnya dan bantuan tali tambang kargo yang tertinggal. Menggunakan teknik pengikatan taktis yang biasa ia gunakan di area tambang, Zoe merakit batang-batang kayu tersebut menjadi sebuah rakit besar yang sangat kokoh. Sebagai tambahan, ia memasang lembaran terpal tebal dari tenda logistik sebagai layar darurat dan menggunakan patahan kayu ek yang pipih sebagai dayung ganda.
+
+Tepat saat fajar menyingsing dan kawanan werewolf baru bermunculan di bibir pantai dengan raungan frustrasi, rakit buatan Zoe sudah mulai terapung di atas air. Zoe mendorong rakitnya menjauh dari daratan, naik ke atasnya, and mulai mendayung sekuat tenaga meninggalkan pulau terkutuk itu. Angin laut pagi bertiup kencang, mendorong layar terpalnya menjauh dari jangkauan monster-monster yang hanya bisa melolong marah di tepi pantai yang semakin mengecil.
+
+Selama dua hari dua malam, Zoe terombang-ambing di tengah laut lepas yang ganas. Persediaan air bersihnya hampir habis, dan kulitnya melepuh terbakar sengatan matahari mendung tahun 2003. Sinyal di ponsel Nokia-nya masih tetap kosong, menjadikannya benda mati yang hanya mengingatkannya pada waktu yang terus berjalan. Rasa lelah yang teramat sangat mulai membuat pandangannya kabur, dan ia hampir kehilangan harapan bahwa ia akan menemukan jalur pelayaran internasional.
+
+Namun, pada sore hari ketiga, sebuah keajaiban muncul di batas cakrawala. Sebuah kapal patroli penjaga pantai (Coast Guard) yang sedang melakukan operasi rutin melihat sebuah rakit kayu aneh yang terapung tak berdaya. Kapal besar itu segera mendekat dan menurunkan sekoci penyelamat. Saat dua petugas penjaga pantai melompat ke atas rakitnya, Zoe sudah dalam kondisi setengah pingsan namun masih mencengkeram erat kapak besi yang telah menyelamatkan nyawanya.
+
+Petugas segera membungkus tubuh Zoe dengan selimut hangat dan memberinya minum sebelum membawanya naik ke atas kapal patroli utama. Ketika kapal penyelamat itu mulai melaju menuju pelabuhan kota pelabuhan terdekat, Zoe menyandarkan kepalanya di dinding dek kapal. Ia melihat ke arah laut lepas, bernapas lega karena tahu bahwa ia berhasil selamat dari neraka pulau itu sendirian, hanya berbekal sebuah kapak penambang dan tekad kuat untuk hidup.
+
+**Funfact:** Game Werewolf Zone Adalah Game buatan saya saat masih kelas 1 SMP.
+`
+  },
+  {
+    title: "Kemal Avicenna Faza MAXXED VERSION - OBAMA V2",
+    summary: "Kemal Avicenna Faza MAXXED VERSION - OBAMA V2: Perjalanan dari 'Prime Era' hingga pencapaian 'MAXXED VERSION'.",
+    date: "2025-05-17",
+    image: multiverseImg,
+    content: `
+# Kemal Avicenna Faza MAXXED VERSION - OBAMA V2
+
+## Fase 1: Benih yang Tumbuh di Luar Arus (2006-2017)
+Kemal Avicenna Faza terlahir sebagai anak biasa di Semarang pada tanggal 17 Mei 2006 dengan kecenderungan karakter yang sangat introver. Titik balik transformasinya baru dimulai pada 12 Februari 2017, saat ia pertama kali mengunduh game osu! dan mulai menenggelamkan diri ke dalam ekosistem internet global melalui story games seperti Animal Crossing dan Zelda, sembari aktif mengonsumsi konten-konten kreator asal Amerika Serikat. Ketika memasuki SMP Al-Azhar di akhir tahun 2017, Kemal sempat mencoba mengikuti les piano formal. Namun, karena merasa bosan dengan kurikulum yang kaku, ia memilih keluar setelah satu tahun dan memutuskan untuk mendalami instrumen tersebut secara otodidak lewat panduan YouTube.
+
+## Fase 2: Anomali Sains dan Cetak Biru Fisik (2018-2019)
+Memasuki tahun 2018, ketertarikannya beralih ke dunia sains dan kosmologi yang dipicu oleh kanal edukasi visual seperti Kurzgesagt dan Kok Bisa?. Kecerdasan akademisnya terbukti nyata saat ia duduk di kelas 2 SMP, di mana ia berhasil mewakili sekolahnya dan menyabet Medali Perak dalam ajang Olimpiade Sains Al-Azhar (OSA) 2019. Pada tahun yang sama, penjelajahannya di sisi internet lainnya seperti reddit dan 4chan mempertemukannya dengan subkultur looksmaxxing di forum Reddit. Kemal kemudian mulai merekayasa cetak biru fisiknya sendiri melalui latihan kekuatan yang ekstrem, pembentukan struktur rahang, serta pengaturan nutrisi yang sangat ketat. Hasilnya, ia berhasil mendobrak batas genetik dan melampaui prediksi pertumbuhan tinggi badan dari dokternya. Padahal, saat masih duduk di kelas 8 SMP, tinggi badannya sendiri baru mencapai 155 cm karena ia belum memasuki masa pubertas. Sebagai seorang late bloomer yang baru mulai mengalami masa pubertas di pertengahan kelas 9, ia memaksimalkan potensi tingginya dengan melakukan olahraga Massai Jump secara rutin serta mengonsumsi suplemen pil Vitamin D3 5000iu setiap hari. Lonjakan pertumbuhannya pun terjadi secara masif dan drastis melampaui ekspektasi medis. Di sisi lain, untuk mengimbangi intensitas perkembangan fisiknya dengan kecerdasan artistik, ia juga membeli software Synthesia guna mempertajam insting bermusiknya secara mandiri di kamar.
+
+## Fase 3: Karantina Agung dan Kebangkitan Siber (2020-2021)
+Ketika pandemi COVID-19 melanda pada tahun 2020, momen karantina agung ini dimanfaatkannya sebagai ruang isolasi untuk melakukan grinding tanpa batas. Kemal mengunci diri di dalam kamarnya dengan jadwal harian yang sangat disiplin, yang membagi waktu secara presisi antara olahraga fisik, mengaji, dan bermain osu!. Dari kamar kecil inilah muncul ide visioner untuk menciptakan aplikasi musik kompetitif berbasis online yang kelak menjadi fondasi utama dari proyek besarnya, Octavia. Tahun 2021 sempat memberikan hantaman pahit ketika Kemal ditolak dari SMA Negeri favorit akibat kendala sistem zonasi serta keengganannya untuk mempelajari mata pelajaran formal yang dinilainya tidak berguna untuk masa depannya, seperti Bahasa Jawa dan PJOK. Namun, Kemal menolak tunduk pada sistem; ia mengalihkan seluruh energinya untuk mempelajari bahasa Arab secara mendalam dan melahap soal-soal SBMPTN Saintek. Ledakan siber pertamanya pun tercipta pada Desember 2021, saat ia berhasil menembus jajaran Top 3 Digit Global di osu!, menaklukkan map Cataclysm (Extreme Demon) di Geometry Dash, dan mulai membangun basis massa lewat live streaming di Twitch, TikTok, serta YouTube.
+
+## Fase 4: Kelahiran Octavia dan Era Ultra-Kompeten (2022-2024)
+Pada Maret 2022, proyek idealis Octavia resmi dirilis di platform Steam. Octavia sendiri merupakan sebuah indie game dengan mekanisme permainan musik yang intens, menggabungkan elemen dari game legendaris seperti *osu!* dan *Simply Piano*. Proyek ini dimulai dengan dana awal yang sangat terbatas dari ayahnya—tidak lebih dari Rp30 juta—namun di luar dugaan sukses mengumpulkan hingga 5.000 unduhan pada tahun pertama, meskipun sempat memicu kontroversi hangat di forum Reddit. Selama masa SMA ini, Kemal memiliki kebiasaan unik di mana ia sering kali sengaja membolos sekolah untuk tetap diam di rumah. Keputusan ini sepenuhnya didukung dan diizinkan oleh orang tuanya. Dalam satu semester saja, akumulasi hari bolosnya bisa menembus hingga 15 hari. Mayoritas dari absen tersebut diakali dengan surat izin pergi atau keterangan sakit, walaupun terkadang alasan sebenarnya hanyalah karena ia merasa kelelahan akibat kehabisan energi setelah grinding, walau tetap tidur cukup. Kemal sengaja melakukan taktik ini demi mendapatkan ruang dan waktu agar bisa fokus melakukan grinding harian serta mendevelop proyek game Octavia dengan jauh lebih tenang dan nyaman tanpa gangguan formalitas sekolah. Meski begitu, di awal kelas 2 SMA ia tetap menjalani kehidupan ganda yang kontras; ia sempat bermobilitas menggunakan sepeda fixie sebelum akhirnya beralih ke Vespa Matik (Vesmet) yang dimodifikasi total dengan konsep estetika Hatsune Miku serta dapur pacu yang di-bore-up habis-habisan.
+
+Tahun 2023 kemudian hadir sebagai panggung transendensi dan pembuktian mutlak statusnya sebagai manusia ultra-kompeten. Di tengah semua kesuksesan duniawi yang mulai menghampiri, Kemal berhasil menembus performa atletis tingkat elite di dunia nyata dengan mencatatkan rekor waktu lari 5K dalam 18:30 serta Sprint 100m hanya dalam waktu 11.27 detik. Dominasi virtualnya pun ikut menggila secara simultan di berbagai lini kompetitif yang berbeda jauh, mulai dari merajai Mobile Legends dengan capaian Mythic Immortal 134 Bintang, menduduki Elo Rapid 2174 pada permainan Catur, hingga puncaknya berhasil menamatkan map legendaris berkategori ekstrem Sonic Wave di Geometry Dash pada akhir tahun 2023. Konsistensi tingkat tinggi ini juga membawanya menembus peringkat Top 2 Digit Global di osu! pada Oktober 2023. Namun, di balik semua kegilaan kompetisi siber dan fisik tersebut, Kemal tetap menjaga pilar spiritualnya tetap seimbang dan kokoh sebagai seorang penghafal Al-Quran yang memegang status 8 Juz Mutqin. Pada akhir fase ini, wawasannya mulai terbuka oleh teori Post-Economy dan perkembangan AGI dari David Shapiro, yang membuatnya mantap membidik jurusan Teknik Elektro demi masa depan industri otomotif. Meskipun sempat mengalami kegagalan di jalur undangan (SNBP) di UGM dan UNDIP pada awal 2024, Kemal membalasnya dengan telak lewat jalur tulis (SNBT) 2024 dengan raihan skor fantastis 734, yang meloloskannya secara murni ke STEI-R Institut Teknologi Bandung (ITB).
+
+## Fase 5: Prime Era: "Obama V2" (2025-Sekarang)
+Kini, Kemal telah sepenuhnya memasuki Prime Era dalam hidupnya. Fisiknya telah bertransformasi menjadi Maxxed Version dengan tinggi 185 cm, berat 82 kg, kadar lemak tubuh 11%, serta skor ketampanan PSL murni di angka 6.5-7.0, yang membuatnya mendapatkan julukan ikonik "Young Obama V2" dari mahasiswa di lingkungan kampus ITB. Tepat pada hari ulang tahunnya yang ke-19 di tanggal 17 Mei 2025, karier siber di osu! mencapai titik kulminasi tertinggi setelah berhasil mengunci posisi Peringkat Global #53 Dunia (Top 0.01%) dengan total akumulasi 2.573 jam bermain. Dari sektor bisnis dan finansial, game Octavia meledak hebat di pasar internasional. Per Desember 2025, game tersebut berhasil menembus angka 1 Juta unduhan. Alih-alih menjual asetnya kepada investor, Kemal memilih untuk tetap memegang kepemilikan penuh atas Octavia, yang berhasil meraup keuntungan sekitar Rp20 Miliar melalui model bisnis *full unlock*, sistem langganan, dan pembelian dalam aplikasi lainnya. Kekayaan yang ia bangun secara mandiri ini langsung ia putar untuk membangun infrastruktur masa depannya, mulai dari membeli rumah futuristik di Bandung sebagai markas kuliah, hingga mendirikan hunian mandiri berbasis off-grid yang disokong penuh oleh panel surya di kawasan Gunungpati, Semarang. Garasi rumahnya kini tengah bersiap menyambut kedatangan supercar Mercedes-AMG GT 3 dengan modifikasi visual bertema Miku Racing, selagi ia fokus mematangkan proyek akademis utamanya di ITB: sebuah Aplikasi Mengaji berbasis kecerdasan buatan (AI) yang mampu mengoreksi makhraj serta pelafalan ayat suci secara real-time.
+`
+  },
+  {
+    title: "Achmad Jackson's Gap Year Plan",
+    summary: "Strategi komprehensif gap year Achmad Jackson menuju FTMD ITB 2026, mencakup manajemen waktu, fase pengembangan diri, dan target harian (Cerita Fiksi).",
+    date: "2025-06-27",
+    image: achmadImg,
+    content: `
+# Achmad Jackson's Gap Year Plan
+
+## CETAK BIRU STRATEGIS & MANAJEMEN WAKTU
+
+### I. PROFIL DAN TARGET SUBJEK
+
+#### Profil Akademik & Fisik
+*   **Pendidikan**: Alumni SMA Al Azhar Syifa Budi Parahyangan. Peringkat top 7 dari 29 murid di kelas dengan nilai rata-rata rapor 90,63. Eks-peserta OSNK Astronomi (gagal kabupaten).
+*   **Kondisi Fisik**: Tinggi badan 173 cm, berat badan 67 kg, dan body fat 16% (kondisi atletis dan ideal) dan mirip Wileno.
+*   **Status Kelulusan**: Sudah lulus jalur Mandiri Teknik Mesin Universitas Diponegoro (Undip), namun gagal pada SNBT dan Jalur Mandiri Rapor FTMD ITB.
+*   **Orang Tua**: Bapak seorang Tentara berpangkat Kolonel, sedangkan Ibu bekerja sebagai Bankir.
+*   **Ketentuan Jadwal**: Jika ada acara seperti pergi, maka jadwalnya tetap sama tapi hangus.
+*   **Domisili**: Tinggal di Bandung, dan memiliki saudara di Semarang.
+
+#### Status Kompetitif & Hiburan
+*   **Skor SNBT 2025**: 652.
+*   **Osu! Standard**: Global Rank 18.472.
+*   **Mobile Legends (MLBB)**: Mitik tertinggi 58 Bintang.
+*   **Chess.com**: Elo Rapid 912.
+*   **Geometry Dash (GD)**: Tingkatan tertinggi berhasil menaklukkan "Acu".
+*   **Piano**: Mampu memainkan lagu selevel Turkish March.
+*   **Game Lain**: Sudah menamatkan Elden Ring, GTA V, dan game sejenisnya.
+*   **Manga & Anime**: One Piece berada di Manga Chapter 763, anime Re:Zero, serta telah menonton anime musiman lainnya.
+
+#### Misi Utama (Garis Finish - Juli 2026)
+1.  **Akademik**: Lolos FTMD ITB dengan mendongkrak skor SNBT / lolos jalur Ujian Mandiri ITB.
+2.  **Osu! Standard**: Menembus peringkat 4 digit atas hingga 3 digit global (#999 - #4.999).
+3.  **MLBB**: Mengamankan target Mythic Immortal 100 bintang + sebelum pensi total.
+
+---
+
+### II. DAFTAR KEGIATAN AKTIF & PEMBAGIAN SISTEM
+
+Seluruh aktivitas didistribusikan ke dalam pola harian yang bersifat *fixed blueprint* (pedoman dasar, jika ada acara lain maka jadwal terpotong secara natural tanpa perlu diulang):
+
+*   **Kegiatan Tetap (Setiap Hari)**: Gym, Mandi Sore, Makan Malam.
+*   **Sistem Roda Bergantian (Rolling)**:
+    *   **Prioritas 1**: Slot Belajar (SNBT / Ujian Mandiri ITB / Materi TPB), Osu! Standard, dan Geometry Dash. Ketiga kegiatan ini di-rolling secara konsisten di seluruh fase.
+    *   **Prioritas 2**: Piano, Catur, dan Mobile Legends (MLBB khusus Fase 1).
+    *   **Prioritas 3**: Film, Buku, dan Game.
+    *   **Prioritas 4**: Project Game dan Ngaji.
+*   **Aktivitas Gabut**: Dialihkan saat treadmill 6 kmh dan pada setiap jeda transisi 15 menit dengan iPad di atas treadmill.
+
+---
+
+### III. LINIMASA & PEMBAGIAN 5 FASE STRATEGIS
+
+#### Fase 1: Pemantapan Awal & Mekanik (Juli – September 2025)
+*   **Durasi**: 90 Hari.
+*   **Aturan**: Penerapan sistem rolling murni untuk Prioritas 1 (Belajar SNBT, Osu!, GD).
+*   **Kondisi MLBB**: Masuk ke dalam sistem rolling sore bersama Piano dan Catur.
+
+#### Fase 2: Push Brutal MLBB (Oktober – Desember 2025)
+*   **Durasi**: 92 Hari.
+*   **Aturan**: Sistem rolling murni Prioritas 1 (Belajar SNBT, Osu!, GD) tetap berjalan di slot pagi/siang.
+*   **Kondisi MLBB**: Menjadi fokus utama di sore hari untuk push rank secara brutal habis-habisan demi mengejar target sebelum pergantian tahun.
+
+#### Fase 3: Inkubasi Intensif UTBK-SNBT & Pensi MLBB (Januari – April 2026)
+*   **Durasi**: 120 Hari.
+*   **Aturan**: Sistem rolling murni tetap aktif (Prioritas 1: Belajar SNBT, Osu!, GD) dengan porsi ekstra.
+*   **Kondisi MLBB**: Pensi Total (0 Jam). MLBB resmi dihapus dari jadwal harian. Slot sore dialihkan kembali untuk fokus Piano/Catur.
+
+#### Fase 4: Pasca-SNBT & Gempur Ujian Mandiri ITB (Mei 2026)
+*   **Durasi**: 31 Hari.
+*   **Aturan**: Sistem rolling murni tetap dipertahankan untuk menjaga stabilitas mekanik dan fokus utama.
+*   **Perubahan Materi**: Slot belajar UTBK-SNBT diganti total menjadi materi persiapan Ujian Mandiri ITB.
+
+#### Fase 5: Transisi Kampus & Dasar TPB (Juni – Juli 2026)
+*   **Durasi**: 61 Hari.
+*   **Aturan**: Structure jadwal dikembalikan persis seperti Fase 1 (sistem rolling penuh).
+*   **Perubahan Materi**: Slot belajar diganti menjadi persiapan Materi Dasar Kuliah / TPB (Kalkulus dan Fisika Dasar Teknik Mesin). MLBB tetap 0 jam karena sudah pensi.
+
+---
+
+### IV. CETAK BIRU JADWAL HARIAN OPERASIONAL PER FASE
+
+#### Jadwal Harian Fase 1 (Juli – September 2025)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas 2) Rolling: Piano / Catur / MLBB
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas 2) Rolling: Piano / Catur / MLBB
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas 3) Film / Buku / Game
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 20:45**: (Prioritas 4) Ngaji / Project Game
+*   **20:45 – 21:00**: Jeda Transisi
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+#### Jadwal Harian Fase 2 (Oktober – Desember 2025)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas Utama) MLBB Push Brutal
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas Utama) MLBB Push Brutal
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas Utama) MLBB Push Brutal
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 20:45**: (Prioritas 4) Ngaji / Project Game
+*   **20:45 – 21:00**: Jeda Transisi
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+#### Jadwal Harian Fase 3 (Januari – April 2026)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas 2) Rolling: Piano / Catur
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas 1) Rolling: SNBT / Osu! / GD
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas 3) Film / Buku / Game
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 20:45**: (Prioritas 4) Ngaji / Project Game
+*   **20:45 – 21:00**: Jeda Transisi
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+#### Jadwal Harian Fase 4 (Mei 2026)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: Ujian Mandiri ITB / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: Ujian Mandiri ITB / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas 2) Rolling: Piano / Catur
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas 1) Rolling Extra Session
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas 3) Film / Buku / Game
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 21:00**: (Prioritas 4) Ngaji / Project Game
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+#### Jadwal Harian Fase 5 (Juni – Juli 2026)
+*   **05:45 – 07:45**: (Prioritas 1) Rolling: Dasar TPB Kalkulus & Fisika / Osu! / GD
+*   **07:45 – 08:00**: Jeda Transisi
+*   **08:00 – 09:00**: Gym
+*   **09:00 – 09:15**: Jeda Transisi
+*   **09:15 – 12:15**: (Prioritas 1) Rolling: Dasar TPB Kalkulus & Fisika / Osu! / GD
+*   **12:15 – 13:15**: ISHOMA
+*   **13:15 – 15:15**: (Prioritas 2) Rolling: Piano / Catur
+*   **15:15 – 15:45**: Mandi Sore
+*   **15:45 – 16:45**: (Prioritas 2) Rolling: Piano / Catur
+*   **16:45 – 17:00**: Jeda Transisi
+*   **17:00 – 18:00**: (Prioritas 3) Film / Buku / Game
+*   **18:00 – 18:30**: Makan Malam
+*   **18:30 – 19:30**: (Prioritas 3) Film / Buku / Game
+*   **19:30 – 19:45**: Jeda Transisi
+*   **19:45 – 20:45**: (Prioritas 4) Ngaji / Project Game
+*   **20:45 – 21:00**: Jeda Transisi
+*   **21:00 – 22:00**: (Prioritas 4) Ngaji / Project Game
+*   **22:00**: TIDUR TOTAL
+
+---
+
+### V. TABEL AKUMULASI TOTAL PLAY HOURS PER SUBJEK (394 HARI KUMULATIF)
+
+Kalkulasi total jam bersih dari Juli 2025 hingga Juli 2026 yang dihitung presisi satu per satu subjek sesuai porsi rotasi harian:
+
+| Nama Subjek / Aktivitas Spesifik | Akumulasi Waktu Bersih |
+| :--- | :--- |
+| Osu! Standard | 707 Jam |
+| Geometry Dash (GD) | 707 Jam |
+| Belajar UTBK-SNBT (Fase 1, 2, dan 3) | 543,3 Jam |
+| Mobile Legends (MLBB) | 458 Jam |
+| Gym | 394 Jam |
+| ISHOMA | 394 Jam |
+| Ngaji | 397,9 Jam |
+| Project Game | 397,9 Jam |
+| Jeda Transisi (Sesi iPad di atas Treadmill 15 menit) | 344,75 Jam |
+| Piano | 332,5 Jam |
+| Catur | 332,5 Jam |
+| Film | 232 Jam |
+| Buku | 232 Jam |
+| Game Lain / Hiburan | 232 Jam |
+| Mandi Sore | 197 Jam |
+| Makan Malam | 197 Jam |
+| Belajar Dasar TPB Kalkulus & Fisika (Fase 5) | 101,6 Jam |
+| Belajar Ujian Mandiri ITB (Fase 4) | 62 Jam |
+`
+  },
+  {
+    title: "Kretek Mistis",
+    summary: "KRETEK MISTIS: THE SALVIA PARADOX - Sebuah perjalanan surealis tentang konsekuensi eksistensial dan ilusi waktu.",
+    date: "2026-07-02",
+    image: kretekImg,
+    content: `
+# KRETEK MISTIS: THE SALVIA PARADOX
+**KARYA: KEMAL AV**
+
+
+## BABAK I: PROLOG SABOTASE & KEGAGALAN RIAN
+
+### SCENE 1. PABRIK ROKOK KRETEK KONVENSIONAL - MALAM
+LOGLINE VISUAL: Suasana pabrik pengap, dipenuhi kabut tipis beraroma cengkih dan tembakau pekat. Ribuan batang rokok bergerak teratur di atas ban berjalan.
+AUDIO: Suara bising mesin linting otomatis bergemuruh konstan dan berdentang sangat keras, menciptakan dengung yang memekakkan telinga.
+
+MUKLIS (42 tahun) berdiri mematung di depan mesin. Matanya merah, sayu, dikelilingi kantung mata hitam berat akibat jam lembur yang tidak manusiawi. Keringat menetes dari dahinya ke lantai berdebu.
+
+Muklis melirik cepat ke kanan dan kiri, memastikan MANDOR BERKUMIS TEBAL yang sedang mencatat log produksi tidak melihatnya.
+
+Dengan gerakan cepat, Muklis merogoh kantong celana kainnya yang robek. Ia mengeluarkan BOTOL KACA KECIL 5ml tanpa label berisi remahan daun hijau pekat—ekstrak murni Salvia divinorum berkonsentrasi tinggi.
+
+Wajah Muklis datar dan dingin. Menggunakan pinset baja karat, ia menjepit TIGA BATANG ROKOK acak dari ban berjalan. Ia mengeluarkan sedikit tembakau dari ujungnya, menyuntikkan sejumput ekstrak Salvia, lalu memadatkannya kembali hingga terlihat 100% normal.
+
+Muklis menatap ketiga rokok jebakan itu. Sebuah senyuman kosong dan bodoh mengembang tipis di wajahnya—senyum keputusasaan eksistensial.
+
+MUKLIS
+(Berbisik, lirih)
+Mari kita lihat... apakah takdir benar-benar bekerja.
+
+Muklis melemparkan kembali ketiga batang rokok itu ke jalur pengepakan secara acak. Salah satu batang rokok meluncur masuk ke dalam kotak kemasan bermerek "Kretek Jaya" dengan stempel distribusi: JAWA TENGAH.
+
+**CUT TO:**
+
+### SCENE 2. KAMAR RIAN - MALAM (2025)
+Kamar ukuran 3x3 meter sangat berantakan. Bungkus mi instan kosong berserakan di pojok lantai tanah. Satu-satunya cahaya berasal dari pendaran monitor laptop yang menyala merah membara, menampilkan pengumuman fatal:
+*"Anda Dinyatakan Tidak Lulus Teknik Mesin UGM/Undip 2025."*
+
+RIAN (19 tahun) duduk meringkuk di kursi plastik dengan rambut acak-acakan dan mata bengkak. Ia bernapas berat, menatap layar seperti melihat tulisan Game Over.
+
+Dengan tangan bergetar, Rian mengambil selembar kertas HVS kosong yang panjang. Menggunakan pulpen hitam, ia menulis sebuah judul besar di bagian atas dengan gaya antarmuka RPG:
+“Save File Checkpoint: Umur 12 Tahun.”
+
+Ia mulai menulis daftar poin imajiner di bawahnya:
+1. Belajar giat dari SMP, jangan terlalu banyak main MMORPG.
+2. Mulai diet ketat dan olahraga (looksmaxxing awal).
+3. Beli saham teknologi/crypto saat harganya masih di bawah seribu rupiah.
+4. Dapatkan nilai bagus di sekolah, focus belajar SNBT, dan lolos SNBT Teknik Mesin UGM tanpa gap year.
+
+Rian menatap kertas itu, lalu tertawa getir dan melemparnya ke dalam laci meja belajarnya yang berdecit. Ia menutup laci itu rapat-rapat.
+
+Rian berbaring di kasur tanpa sprei, membuka ponsel, dan menjelajahi TikTok. Algoritma menampilkan video meme luar negeri tentang efek gila tanaman Salvia divinorum. Video menampilkan animasi surealis orang yang salah mengisap zat tersebut langsung mengalami disorientasi parah dan jiwanya tersesat menjadi gorden, tiang listrik, atau ubin lantai selama ratusan tahun di dalam kepalanya sendiri.
+
+Rian mendengus meremehkan.
+
+RIAN
+(Bergumam sinis)
+Hiperbola demi penonton. Alay.
+
+Rian mematikan ponselnya dan tertidur dalam depresi pekat.
+
+**FAST FADE TO:**
+
+
+
+## BABAK II: TRAGEDI WARKOP & ILUSI PANJANG LAYER 1
+
+### SCENE 3. WARUNG KOPI LOKAL - SORE (TIGA MINGGU KEMUDIAN)
+Waktu menunjukkan pukul 16:45. Warkop pinggiran kota ramai oleh asap rokok dan obrolan mahasiswa. Rian duduk nongkrong bersama tiga temannya.
+
+Di atas meja kayu yang basah oleh tumpahan kopi, terletak satu bungkus rokok "Kretek Jaya" yang baru dibeli dari warung Madura dekat kosan. Rian mengambil satu batang rokok dari dalam bungkus tersebut—rokok jebakan Muklis.
+
+Rian menyalakan korek api gas, membakar ujungnya, dan melakukan isapan pertama. Ia mengembuskan asap tebal.
+
+RIAN
+Rasanya normal. Agak gurih.
+
+Pukul 16:59:55. Rian melakukan isapan kedua, menarik asap tebal itu dalam-dalam ke paru-parunya.
+
+AUDIO: Efek Time Dilation ekstrem. Suara petikan gitar teman Rian dan gelak tawa warkop mendadak melambat secara brutal, berubah menjadi reverb panjang, berat, dan bergaung menyerupai suara monster besi dari bawah tanah.
+VISUAL: Pandangan Rian membeku total. Otot tubuhnya mengalami kelumpuhan total, dan perspektif kamera miring secara ekstrem.
+
+Tepat pukul 17:00, tubuh Rian ambruk dari kursinya, jatuh berdebum ke lantai tanah warkop dengan mata melotot kosong tanpa berkedip.
+
+**MATCH CUT TO:**
+
+### SCENE 4. KAMAR MASA KECIL RIAN - PAGI (ILUSI LAYER 1)
+Rian tersentak bangun. Suara bising warkop hilang total. Ia berada di tempat tidur kecil dengan selimut bermotif karakter kartun jadul yang hangat. Sinar matahari pagi menerobos masuk dari sela jendela kayu.
+
+Rian melihat tangannya—kecil, halus, tanpa kapalan. Efek neurotoxin Salvia telah menghapus seluruh memorinya tentang realitas 2025, kegagalan SNBT, dan warkop. Di otaknya, ia adalah anak 12 tahun yang baru terbangun dari tidur biasa.
+
+Saat merapikan seprai yang kusut, kakinya menyenggol selembar kertas HVS panjang agak kusam di lantai. Rian memungutnya dan membaca tulisan di atasnya:
+“Save File Checkpoint: Umur 12 Tahun.”
+
+Tulisan itu 100% tulisan tangannya sendiri, berisi panduan masa depan yang sangat detail. Rian kecil yang ketakutan mengira ini adalah "Sistem Game Gaib".
+
+RIAN (12 TAHUN)
+(Gemetar, ketakutan)
+Gua... gua harus ikuti ini semua. Kalau melanggar, gua bisa kuwalat dan bawa petaka...
+
+**MONTAGE ADEGAN CEPAT (TRANSISI WAKTU HALUS & DINGIN):**
+1. Rian remaja melakukan diet ketat dan olahraga hingga tubuhnya tegap.
+2. Rian dengan dingin menolak ajakan main game atau nongkrong tidak jelas dari teman sebanyanya.
+3. Rian mencoret poin-poin di kertas menggunakan pulpen hitam dengan rapi.
+**END OF MONTAGE**
+
+### SCENE 5. KAMAR RIAN (SIMULASI) - MALAM (2024)
+Rian membuka laptopnya. Layar pengumuman seleksi nasional menyala biru terang dengan teks: “Selamat! Anda Dinyatakan Lulus Teknik Mesin UGM.”
+
+Rian melangkah masuk ke kluster teknik Bulaksumur dengan aura disiplin yang kaku. Di kertas kusamnya, tertulis instruksi fase kampus: “Lulus dalam 4 tahun, IPK di atas 3.75, kuasai software CAD, jangan pacaran.”
+
+**MONTAGE PERJUANGAN KAMPUS:**
+1. Rian mengunci diri di kamar kos, berkutat dengan tumpukan buku Kalkulus, Termodinamika, dan Mekanika Fluida di saat teman kosnya pergi ke Malioboro atau Kopi Klotok.
+2. Rian menghabiskan malam di laboratorium manufaktur, berlumur aroma oli, deru mesin bubut, dan kilatan las. Ia memimpin praktikum dengan disiplin besi.
+3. Rian direkrut menjadi asisten lab Mekanika Struktur oleh dosen karena analitisnya yang tajam.
+4. Rian berada di bengkel tim mobil formula mahasiswa UGM, menganalisis simulasi aerodinamika dan merancang sistem transmisi kendaraan di depan monitor selama berjam-jam.
+**END OF MONTAGE**
+
+Rian berdiri di atas podium wisuda yang megah mengenakan toga dengan samir kuning-biru khas UGM, menerima predikat Cumlaude sebagai lulusan terbaik di hadapan ratusan pasang mata.
+
+**FAST MATCH CUT TO:**
+
+### SCENE 6. KANTOR JAKARTA & RUMAH ELITE - MONTAGE
+1. Rian bekerja di perusahaan otomotif multinasional Jakarta sebagai Insinyur Perancangan Mobil. Kariernya melejit menjadi manajer teknik muda yang sukses dan kaya raya.
+2. Rian membeli rumah di kawasan elite, berkendara dengan mobil mewah.
+3. Rian bertemu SARI, wanita anggun bidang finansial. Mereka menikah dalam pernikahan megah, dan beberapa tahun kemudian dikaruniai anak perempuan lucu bernama NADIA.
+4. Kehidupan domestik yang sangat nyata: Rian merasakan kehangatan kulit istrinya, tawa renyah Nadia, dan aroma kopi di rumahnya.
+**END OF MONTAGE**
+
+
+
+## BABAK III: JALAN BUNTU MEKANIS LAYER 2
+
+### SCENE 7. HOTEL MEWAH LAS VEGAS - MALAM (BELASAN TAHUN KEMUDIAN)
+Rian berada di Amerika Serikat untuk menghadiri pameran teknologi otomotif global atas prestasinya merancang mesin mobil listrik terbaru.
+
+Rian duduk di tepi ranjang hotel mewah Las Vegas, mengeluarkan kertas HVS masa kecilnya dari dompet. Semua poin dari pertama hingga terakhir telah ia coret selesai. Rian tersenyum lebar dan mengembusen napas panjang.
+
+RIAN
+(Penuh kepuasan)
+Gua bebas. Gua udah memenangkan permainan hidup ini.
+
+### SCENE 8. APARTEMEN DANI (AS) - MALAM
+Suasana santai diiringi musik jazz lembut dari piringan hitam. Rian berkunjung ke apartemen rekan kerjanya, DANI. Dani dan kawannya duduk di sofa kulit sambil mengeluarkan pipa kaca kecil berisi zat herbal komersial resmi dari apotek lokal.
+
+Dani menoleh dan menyodorkan pipa tersebut ke Rian.
+
+DANI
+Eh Yan, mumpung lu lagi di Amerika dan di negara bagian sini zat ini legal, cobain deh. Ini Salvia, zat herbal murni sekali pakai. Cuma buat mind-trip bentar beberapa menit, gak bikin kecanduan sama sekali.
+
+Rian yang kelelahan dan didorong oleh ego insinyurnya yang sangat logis merasa memiliki kendali penuh atas otaknya. Ia menerima pipa tersebut, memantik apinya, dan mengisap asap tebal itu dalam-dalam.
+
+VISUAL FX: Tiga detik setelah asap masuk ke tenggorokan, efek Salvia konsentrasi tinggi menyerang sistem saraf simulasinya secara brutal. Terjadi malafungsi sistemik.
+
+Memori tentang kesuksesan Layer 1, Amerika, Sari, dan Nadia terkelupas habis hingga menyisakan kesadaran murni tanpa nama. Fokus visual terakhir Rian sebelum pandangannya membeku adalah menatap ke arah celah mekanis berputar dari roda gigi di dalam mesin jam dinding kuno di apartemen Dani.
+
+Kesadaran Rian hancur berkeping-keping dan tersedot jatuh ke dimensi yang lebih dalam.
+
+**CUT TO:**
+
+### SCENE 9. DIMENSI JALAN BUNTU MEKANIS - (LAYER 2)
+VISUAL: Dimensi ruang hampa tak terbatas dengan atmosfer monokromatik berkarat yang dipenuhi warna cokelat tua dan abu-abu logam. Rian tidak memiliki tubuh ragawi. Ia amnesia total tingkat akut—tidak tahu apa itu manusia, bahasa, atau nama.
+
+Wujud eksistensinya saat ini adalah sebuah RODA GIGI BAJA RAKSASA BERDIAMETER 50 METER yang tertanam di dalam mesin jam mekanis raksasa penopang peradaban masa depan.
+
+AUDIO: Suara gesekan logam berat dan detak jam makro bergemuruh konstan memekakkan telinga imajinernya.
+
+Karena wujudnya benda mati, tidak ada mulut untuk berteriak atau tangan untuk bergerak melepaskan diri. Kesadarannya terjebak lumpuh total di dalam dinginnya besi berkarat.
+
+**DISTORSI WAKTU EKSTREM:** Satu detik di dunia nyata terasa seperti puluhan tahun di dimensi ini. Selama ratusan tahun di dalam kepalanya, Rian dipaksa berputar konstan secara monoton dan bergesekan dengan roda gigi baja lain. Ia menyaksikan era berganti di luar sana, peradaban dibangun dan runtuh, sementara ia tetap menjadi besi yang berputar tanpa henti.
+
+Siksaan kesunyian ini berjalan sangat lama hingga di titik puncaknya, kompleks jam raksasa itu usang dan dihancurkan oleh mesin pembongkar alat berat dalam suara ledakan logam yang memekakkan. Dimensi roda gigi itu hancur berantakan.
+
+**CUT TO:**
+
+
+
+## BABAK IV: TRAGEDI PESAWAT BOEING
+
+### SCENE 10. APARTEMEN DANI - MALAM (KEMBALI KE LAYER 1)
+Kesadaran Rian terlempar ke atas secara instan seperti pegas yang dilepas. Rian versi insinyur sukses tersentak bangun di sofa kulit apartemen Dani. Tangannya gemetar hebat, menjatuhkan pipa kaca ke atas karpet mahal.
+
+Aturan main efek zat telah habis di layer ini: seluruh banjir memori belasan tahun sebagai insinyur, suami Sari, dan ayah Nadia langsung masuk kembali ke otaknya secara masif dalam satu detik!
+
+Rian menangis histeris, napasnya memburu cepat akibat serangan panik. Ia meraba saku celananya dengan liar, mengeluarkan dompet kulit, dan menatap foto kecil Nadia serta Sari dengan air mata membanjiri pipi.
+
+RIAN
+Anjir! Gua punya anak! Gua punya istri! Jadi... jadi siksaan menjadi roda gigi besi berkarat berabad-abad barusan ternyata cuma halusinasi buruk dari Salvia selama sepuluh menit?!
+
+Rian memeluk foto keluarganya dengan rasa syukur yang teramat dalam karena mengira telah berhasil kembali ke kehidupan nyatanya yang sukses dan mapan. Ia bertekad malam itu juga untuk segera pulang ke Indonesia.
+
+**CUT TO:**
+
+### SCENE 11. KABIN PESAWAT BOEING (KELAS BISNIS) - SIANG
+Rian duduk di kursi kelas bisnis pesawat komersial Boeing raksasa rute Los Angeles - Jakarta. Ia menatap ke luar jendela melihat hamparan awan putih yang indah.
+
+AUDIO: BOOM! Sebuah dentuman keras terdengar dari arah sayap kiri pesawat. Alarm kabin berbunyi nyaring, lampu merah berkedip-kedip darurat.
+
+PRAMUGARI (V.O)
+(Melalui interkom, panik)
+"Attention all passengers, please fasten your seatbelts immediately!"
+
+Pesawat mengalami gagal mesin total, kehilangan daya angkat, dan langsung menukik jatuh bebas dari langit secara horor. Kabin mendadak kacau balau, dipenuhi jeritan histeris ratusan penumpang, barang-barang berterbangan, dan masker oksigen jatuh bergelantungan.
+
+Rian mencengkeram sabuk pengamannya erat-erat dengan mata terpejam rapat. Pikiran terakhir yang melintas di benaknya di tengah guncangan hebat adalah wajah tersenyum manis Nadia dan Sari yang menunggunya di Bandara Soekarno-Hatta.
+
+Tepat saat moncong pesawat menghantam permukaan bumi dan memicu ledakan dahsyat yang menghancurkan segalanya—**CRAASH!**—kesadaran Rian di Layer 1 mati seketika.
+
+**MATCH CUT TO:**
+
+
+
+## BABAK V: REALITAS NYATA 2025
+
+### SCENE 12. WARUNG KOPI LOKAL - SORE (REALITAS UTAMA)
+Rian versi remaja 19 tahun tersentak bangun dari lantai warkop sambil berteriak histeris dengan lengkingan suara yang sangat ketakutan! Tubuhnya melengkung ke atas, dadanya naik-turun memburu oksigen, dan seluruh bajunya basah kuyup oleh keringat dingin.
+
+Teman-teman tongkrongannya terkejut setengah mati, langsung memegangi pundak dan lengan Rian yang gemetaran sambil tertawa geli campur cemas.
+
+DEDI
+Astaga Yan! Istighfar Yan! Lu kenapa melompat dan teriak kaya orang gila gitu?! Lu habis makan kecubung apa gimana, cok? Baru dua isap rokok tadi muka lu langsung pucat pasi terus lu kejang-kejang dan pingsan lima belas menit di lantai warkop ini!
+
+Rian tidak mendengarkan ucapan mereka. Jiwanya masih terguncang hebat. Dengan jemari gemetar, ia melihat sisa puntung rokok "Kretek Jaya" yang tergeletak di lantai tanah.
+
+Rian menangis kejer, air matanya menetes deras membasahi debu lantai. Ia segera memeriksa jari manis tangan kanannya—kulitnya polos, tidak ada cincin kawin perak yang tadinya melingkar di sana.
+
+Kesuksesan karier di Jakarta, gelar cumlaude UGM, siksaan roda gigi baja selama ratusan tahun, serta pelukan hangat istri dan anak perempuannya selama belasan tahun kemarin ternyata hanyalah simulasi otak bawah sadarnya yang korsleting hebat selama 15 menit akibat racun Salvia!
+
+**CUT TO:**
+
+### SCENE 13. KAMAR RIAN - MALAM
+Rian masuk ke kamarnya yang berantakan dengan langkah kaki lemas dan gemetar seolah tanpa tulang. Ia langsung membuka laci meja belajarnya yang berdecit, merobek bagian dalam laci, dan mengambil selembar catatan list poin angan-angan save file umur 12 tahun yang dia tulis beberapa minggu lalu.
+
+Rian memegangnya dengan tangan bergetar, menangis ngeri sekaligus takjub melihat struktur tulisan, coretan tinta, dan urutan poinnya sama persis 100% dengan kertas panduan gaib yang ia temukan di Layer 1 kamarnya dulu. Otak bawah sadarnya telah merajut neraka simulasi, memanfaatkan delusi dan penyesalannya sendiri untuk menghukum pikirannya yang suka berandai-andai dan tidak menerima kenyataan hidup.
+
+Rian menarik napas dalam-dalam, menyeka air mata dan keringat di wajah remajanya yang kini tampak jauh lebih dewasa akibat beban psikologis "ratusan tahun" halusinasi. Ia menatap kertas angan-angan itu untuk terakhir kalinya.
+
+Dengan gerakan perlahan namun pasti, Rian meremas kertas save file itu kuat-kuat di dalam genggamannya hingga menjadi gumpalan kecil, lalu melemparkannya ke dalam tempat sampah di bawah meja.
+
+RIAN
+(Tegas, meskipun suara bergetar)
+Hidup yang nyata... gak pernah punya tombol Load Game.
+
+**CUT TO:**
+
+### SCENE 14. JALANAN KOTA - SIANG
+Rian mengenakan baju kaus sederhana, bekerja keras memeras keringat di bawah terik matahari menjadi sopir kurir pengantar paket logistik, mengendarai mobil boks melewati kemacetan jalanan kota. Wajahnya lelah, namun matanya memancarkan keteguhan. Ia memutuskan mengambil langkah gap year dengan kepala tegak tanpa rasa malu lagi pada lingkungan sosialnya.
+
+### SCENE 15. KAMAR RIAN - MALAM
+Kamar Rian kini sudah rapi dan bersih. Di bawah pendaran lampu belajar yang temaram dan hangat, Rian duduk dengan tatapan mata fokus, serius, dan matang.
+
+Ia membuka buku tebal materi persiapan SNBT, memegang pensilnya, dan mulai belajar dengan gigih demi memperjuangkan mimpinya masuk Teknik Mesin UGM yang asli secara nyata. Kamera perlahan bergerak mundur menjauh dari wajah Rian yang fokus belajar.
+
+**FADE OUT TO BLACK.**
+
+________________________________________
+
+**TEKS DI LAYAR (PERINGATAN RESMI):**
+PERINGATAN RESMI BADAN NARKOTIKA NASIONAL (BNN) & KEMENTERIAN KESEHATAN RI
+*Penyalahgunaan tanaman psikotropika ilegal seperti Salvia Divinorum dan peredaran produk tanpa izin dilarang keras oleh hukum Republik Indonesia. Zat Salvinorin A memicu kerusakan saraf permanen, halusinasi psikotik berbahaya, dan gangguan mental kronis. Hadapi realitas dengan sehat, sayangi dirimu dan masa depanmu. Katakan TIDAK pada Narkoba!*
+`
+  },
+];
+
