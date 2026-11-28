@@ -414,7 +414,7 @@ Kini, Kemal telah sepenuhnya memasuki Prime Era dalam hidupnya. Fisiknya telah b
 
 #### Status Kompetitif & Hiburan
 *   **Skor SNBT 2025**: 652.
-*   **Osu! Standard**: Global Rank 21.782.
+*   **Osu! Standard**: Global Rank 18.472.
 *   **Mobile Legends (MLBB)**: Mitik tertinggi 58 Bintang.
 *   **Chess.com**: Elo Rapid 912.
 *   **Geometry Dash (GD)**: Tingkatan tertinggi berhasil menaklukkan "Acu".

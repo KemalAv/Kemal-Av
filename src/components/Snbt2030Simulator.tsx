@@ -75,12 +75,14 @@ interface SimSubtestResult {
   totalIrtMax: number;
   theta: number;
   score: number;
+  ceiling?: number;
 }
 
 interface SimSession {
   id: string;
   meanDifficulty: number;
   meanDiscrimination: number;
+  ceilings?: Record<string, number>;
 }
 
 interface SavedSimResult {
@@ -265,19 +267,35 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     }
   }, [simCurrentSubtestIndex, simState]);
 
-  // Estimate theta using 3PL IRT model and anchor to real UTBK-SNBT standard population distribution
+  // Estimate theta with the 3PL IRT model (MLE + weak normal prior)
+  const EASY_MISS_WEIGHT = 2;
+
+  // Score for one subtest. A perfect answer sheet always gets the subtest maximum.
+  const scoreSubtest = (questions: SimQuestion[], theta: number, ceiling: number) => {
+    const perfect = questions.length > 0 && questions.every(q => q.userAnswer === 'benar');
+    return perfect ? ceiling : calculateSnbtIrtScore(theta, ceiling);
+  };
+
   const estimateTheta = (questions: SimQuestion[]) => {
     if (!questions || questions.length === 0) return 0;
 
+    // A perfect (or empty) answer sheet is shown at theta = +3 (or -3); the score for a perfect sheet is the subtest maximum (see scoreSubtest)
+    const correctCount = questions.filter(q => q.userAnswer === 'benar').length;
+    if (correctCount === questions.length) return 3;
+    if (correctCount === 0) return -3;
+
     let bestTheta = 0;
     let maxLogPosterior = -Infinity;
-    for (let theta = -3.5; theta <= 3.5; theta += 0.02) {
+    // Search range wider than the final clamp, so perfect/zero answers reach the clamp instead of stopping at the grid edge
+    for (let theta = -5; theta <= 5; theta += 0.02) {
       let logLikelihood = 0;
       for (const q of questions) {
         // 3-Parameter Logistic (3PL) formula
         const p = q.c + (1 - q.c) * (1 / (1 + Math.exp(-q.a * (theta - q.b))));
         const y = q.userAnswer === 'benar' ? 1 : 0;
-        logLikelihood += y * Math.log(Math.max(1e-6, p)) + (1 - y) * Math.log(Math.max(1e-6, 1 - p));
+        // A wrong answer on an easy item (b < 0) counts twice as much, like SNBT where missing easy items hurts most
+        const missWeight = y === 0 && q.b < 0 ? EASY_MISS_WEIGHT : 1;
+        logLikelihood += missWeight * (y * Math.log(Math.max(1e-6, p)) + (1 - y) * Math.log(Math.max(1e-6, 1 - p)));
       }
       // Gaussian regularizer
       const logPrior = -0.5 * Math.pow(theta / 3.0, 2);
@@ -289,71 +307,57 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       }
     }
 
-    // Psychometric UTBK-SNBT standard norming:
-    // In UTBK-SNBT:
-    // - Mean population capability theta = 0.0 corresponds to ~37.5% accuracy (Score 500).
-    // - Benar ~100/160 (62.5%) -> theta ~ +1.25 -> Skor ~650
-    // - Benar ~115/160 (71.9%) -> theta ~ +1.70 -> Skor ~704 (Mendekati / tembus 700)
-    // - Benar ~125/160 (78.1%) -> theta ~ +2.07 -> Skor ~748 (Tembus 740 - 760)
-    // - Benar ~136/160 (85.0% / 17 dari 20) -> theta ~ +2.50 -> Skor ~800+
-    const rawCorrect = questions.filter(q => q.userAnswer === 'benar').length;
-    const totalQ = questions.length;
-    const rawProp = rawCorrect / totalQ;
-
-    const subtestKey = questions[0].id.split('-')[0];
-    let multiplierUpper = 5.10;
-    let multiplierLower = 3.60;
-
-    if (subtestKey === 'litIndo') {
-      multiplierUpper = 2.00;
-      multiplierLower = 1.50; // Adjusted proportionally
-    } else if (subtestKey === 'pu') {
-      multiplierUpper = 2.50;
-      multiplierLower = 1.80; // Adjusted proportionally
-    }
-
-    let abilityZ = 0;
-    if (rawProp >= 0.375) {
-      // Upper curve: progressive psychometric rewards for high-difficulty questions
-      abilityZ = (rawProp - 0.375) * multiplierUpper;
-    } else {
-      // Lower curve: standard calibration down to guessing threshold
-      abilityZ = (rawProp - 0.375) * multiplierLower;
-    }
-    
-    // Combine 3PL item-weighted theta (65%) with proportion-anchored ability (35%)
-    const calibratedTheta = (bestTheta * 1.40) * 0.65 + abilityZ * 0.35;
-    const boundedTheta = Math.max(-2.5, Math.min(3.8, calibratedTheta));
-
-    return Number(boundedTheta.toFixed(2));
+    return Number(Math.max(-3, Math.min(3, bestTheta)).toFixed(2));
   };
 
-  // Gentle calibration lift for the low/mid range. The pure IRT mapping (theta -> score) is kept as is;
-  // on top of it, scores below ~700 get a small, smooth bonus (max ~+34) that fades to 0 at 700,
-  // so the top range is untouched. Tuned so a total of ~90/160 correct lands around 610.
-  const SCORE_LIFT_POINTS: [number, number][] = [
-    [250, 0], [350, 8], [450, 20], [520, 28], [578, 34], [620, 26], [664, 9], [700, 0]
+  // Per-session maximum score per subtest. The table below maps theta = +3 (the top of the scale) to REF_MAX;
+  // every session stretches the curve so that the top score lands somewhere inside the subtest's range.
+  const REF_MAX = 860; // score the table gives at theta = +3, the top of the scale
+  // Fixed maximum score per subtest (same every session). Use [min, max] instead of a single value to make it fluctuate again.
+  const CEILING_RANGE: Record<string, [number, number]> = {
+    pu: [900, 900],
+    ppu: [950, 950],
+    pbm: [950, 950],
+    litIndo: [850, 850],
+    pk: [1000, 1000],
+    litIng: [900, 900],
+    pm: [950, 950],
+  };
+  const drawCeilings = (): Record<string, number> => {
+    const out: Record<string, number> = {};
+    SUBTESTS_CONFIG.forEach(sub => {
+      const range = CEILING_RANGE[sub.key];
+      out[sub.key] = range
+        ? Math.round(range[0] + Math.random() * (range[1] - range[0]))
+        : REF_MAX;
+    });
+    return out;
+  };
+
+  // Conversion table theta -> SNBT score. Between the knots the score is linear in theta.
+  // Outside the table it continues with the standard slope (120 points per theta).
+  // The knots are the standard line 500 + 120*theta, nudged upward in the 250-700 range
+  // (the same curve as before, written as one table instead of a separate adjustment step).
+  const THETA_TO_SCORE_TABLE: [number, number][] = [
+    [-2.0833, 250], [-1.25, 358], [-0.4167, 470], [0.1667, 548],
+    [0.65, 612], [1.0, 646], [1.3667, 673], [1.6667, 700]
   ];
-  const lowMidScoreLift = (score: number) => {
-    const pts = SCORE_LIFT_POINTS;
-    if (score <= pts[0][0] || score >= pts[pts.length - 1][0]) return 0;
-    for (let i = 1; i < pts.length; i++) {
-      if (score <= pts[i][0]) {
-        const [x0, y0] = pts[i - 1];
-        const [x1, y1] = pts[i];
-        return y0 + ((y1 - y0) * (score - x0)) / (x1 - x0);
-      }
+  const calculateSnbtIrtScore = (theta: number, ceiling: number = REF_MAX) => {
+    const t = THETA_TO_SCORE_TABLE;
+    let raw: number;
+    if (theta <= t[0][0]) {
+      raw = t[0][1] + 120 * (theta - t[0][0]);
+    } else if (theta >= t[t.length - 1][0]) {
+      raw = t[t.length - 1][1] + 120 * (theta - t[t.length - 1][0]);
+    } else {
+      let i = 1;
+      while (theta > t[i][0]) i++;
+      const [x0, y0] = t[i - 1];
+      const [x1, y1] = t[i];
+      raw = y0 + ((y1 - y0) * (theta - x0)) / (x1 - x0);
     }
-    return 0;
-  };
-
-  // Convert estimated theta directly to authentic UTBK-SNBT score (where theta = 0 maps to exactly 500)
-  const calculateSnbtIrtScore = (theta: number) => {
-    // Official IRT Linear Transformation: Score = 500 + 120 * theta (Mean = 500, SD = 120)
-    // Theta 0.0 = exactly 500
-    const baseScore = Math.round(500 + 120 * theta);
-    const rawScore = Math.round(baseScore + lowMidScoreLift(baseScore));
-    return Math.max(200, Math.min(1000, rawScore));
+    raw = 500 + (raw - 500) * ((ceiling - 500) / (REF_MAX - 500));
+    return Math.max(200, Math.min(1000, Math.round(raw)));
   };
 
   // Helper to generate authentic 3PL pseudo-guessing parameter c matching real UTBK-SNBT:
@@ -458,7 +462,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     const session: SimSession = {
       id: sessionId,
       meanDifficulty,
-      meanDiscrimination
+      meanDiscrimination,
+      ceilings: drawCeilings()
     };
 
     setSimSession(session);
@@ -473,6 +478,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
 
   const startInstantSimulation = () => {
     const sessionId = "SESS-" + Math.floor(1000 + Math.random() * 9000);
+    const ceilings = drawCeilings();
 
     // Subtle package-level difficulty shift: e.g. [-0.08, +0.08]
     const packageShift = (Math.random() - 0.5) * 0.16;
@@ -585,7 +591,7 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       allQuestions[sub.key] = list;
 
       const theta = estimateTheta(list);
-      const score = calculateSnbtIrtScore(theta);
+      const score = scoreSubtest(list, theta, ceilings[sub.key]);
 
       results.push({
         key: sub.key,
@@ -595,7 +601,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
         irtEarned,
         totalIrtMax,
         theta,
-        score
+        score,
+        ceiling: ceilings[sub.key]
       });
     });
 
@@ -607,7 +614,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     const session: SimSession = {
       id: sessionId,
       meanDifficulty,
-      meanDiscrimination
+      meanDiscrimination,
+      ceilings
     };
 
     setSimSession(session);
@@ -712,7 +720,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
     });
 
     const theta = estimateTheta(qList);
-    const score = calculateSnbtIrtScore(theta);
+    const ceiling = simSession.ceilings?.[activeSub.key] ?? REF_MAX;
+    const score = scoreSubtest(qList, theta, ceiling);
 
     const result: SimSubtestResult = {
       key: activeSub.key,
@@ -722,7 +731,8 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
       irtEarned,
       totalIrtMax,
       theta,
-      score
+      score,
+      ceiling
     };
 
     const newResults = [...simSubtestResults, result];
@@ -2285,15 +2295,6 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
 
               {/* Skip and Dev Bypasses */}
               <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-slate-400 font-medium">Equating Index Sesi (b̄):</span>
-                  <span className="font-mono font-bold text-white">
-                    {(simSession?.meanDifficulty || 0) >= 0 ? '+' : ''}{(simSession?.meanDifficulty || 0).toFixed(3)}
-                  </span>
-                  <span className="text-slate-500 font-mono text-[10px]">
-                    (3PL IRT Standardized)
-                  </span>
-                </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
@@ -2369,35 +2370,6 @@ export const Snbt2030Simulator: React.FC<Snbt2030SimulatorProps> = ({
                   </div>
                 </div>
 
-                <div className="p-6 rounded-3xl border border-white/10 bg-black/40 space-y-4">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Metrik IRT Sesi</span>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between font-medium">
-                      <span className="text-xs text-slate-400">Sesi ID</span>
-                      <span className="font-mono text-sm font-bold text-purple-300">{simLastSavedResult?.sessionId}</span>
-                    </div>
-                    {(() => {
-                      const meanB = simLastSavedResult?.meanDifficulty ?? 0;
-                      const meanA = simLastSavedResult?.meanDiscrimination ?? 1.15;
-                      return (
-                        <>
-                          <div className="flex items-center justify-between font-medium">
-                            <span className="text-xs text-slate-400">Penyetaraan IRT (b̄)</span>
-                            <span className="font-mono text-xs font-bold text-slate-200">
-                              {meanB >= 0 ? '+' : ''}{meanB.toFixed(3)}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between font-medium">
-                            <span className="text-xs text-slate-400">Mean Daya Pembeda (ā)</span>
-                            <span className="font-mono text-xs font-bold text-purple-300">
-                              {meanA.toFixed(3)}x
-                            </span>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
               </div>
 
               {/* 7 Subtest Results Details Breakdown */}

@@ -23,36 +23,36 @@ export const CLUSTER_WEIGHTS: Record<ProdiCluster, ClusterWeights> = {
     id: 'teknik',
     name: 'Teknik',
     icon: '🛠️',
-    desc: 'Penalaran Matematika & Pengetahuan Kuantitatif (PM 25%, PK 20%, PU 20%, LitIndo 15%, LitIng 10%, PBM 5%, PPU 5%)',
-    weights: { pu: 0.20, pbm: 0.05, ppu: 0.05, pk: 0.20, litIndo: 0.15, litIng: 0.10, pm: 0.25 }
+    desc: 'Penalaran Matematika, Pengetahuan Kuantitatif & Penalaran Umum (PM 20%, PK 20%, PU 20%, LitIndo 10%, LitIng 10%, PBM 10%, PPU 10%)',
+    weights: { pu: 0.20, pbm: 0.10, ppu: 0.10, pk: 0.20, litIndo: 0.10, litIng: 0.10, pm: 0.20 }
   },
   sosial: {
     id: 'sosial',
     name: 'Sosial',
     icon: '📚',
-    desc: 'Pemahaman Bacaan, Menulis & Literasi Indonesia (PBM 25%, LitIndo 25%, PPU 15%, PU 15%, LitIng 10%, PM 5%, PK 5%)',
-    weights: { pu: 0.15, pbm: 0.25, ppu: 0.15, pk: 0.05, litIndo: 0.25, litIng: 0.10, pm: 0.05 }
+    desc: 'Pemahaman Bacaan, Literasi Indonesia & Pengetahuan Umum (PBM 20%, LitIndo 20%, PPU 15%, PU 15%, LitIng 10%, PM 10%, PK 10%)',
+    weights: { pu: 0.15, pbm: 0.20, ppu: 0.15, pk: 0.10, litIndo: 0.20, litIng: 0.10, pm: 0.10 }
   },
   kesehatan: {
     id: 'kesehatan',
     name: 'Kesehatan',
     icon: '🏥',
-    desc: 'Penalaran Umum & Literasi Bahasa Inggris (PU 25%, LitIng 25%, PK 15%, PM 15%, LitIndo 10%, PBM 5%, PPU 5%)',
-    weights: { pu: 0.25, pbm: 0.05, ppu: 0.05, pk: 0.15, litIndo: 0.10, litIng: 0.25, pm: 0.15 }
+    desc: 'Penalaran Umum & Literasi Bahasa Inggris (PU 20%, LitIng 20%, PK 15%, PM 15%, LitIndo 10%, PBM 10%, PPU 10%)',
+    weights: { pu: 0.20, pbm: 0.10, ppu: 0.10, pk: 0.15, litIndo: 0.10, litIng: 0.20, pm: 0.15 }
   },
   bisnis: {
     id: 'bisnis',
     name: 'Bisnis',
     icon: '💼',
-    desc: 'Penalaran Umum & Literasi Bahasa Inggris (PU 20%, LitIng 20%, PK 15%, PM 15%, PBM 10%, LitIndo 10%, PPU 10%)',
+    desc: 'Penalaran Umum & Literasi Bahasa Inggris (PU 20%, LitIng 20%, PK 15%, PM 15%, LitIndo 10%, PBM 10%, PPU 10%)',
     weights: { pu: 0.20, pbm: 0.10, ppu: 0.10, pk: 0.15, litIndo: 0.10, litIng: 0.20, pm: 0.15 }
   },
   sastra: {
     id: 'sastra',
     name: 'Sastra',
     icon: '🎭',
-    desc: 'Literasi Bahasa Inggris & Pengetahuan Umum (LitIng 25%, PPU 25%, PU 15%, LitIndo 15%, PBM 10%, PM 5%, PK 5%)',
-    weights: { pu: 0.15, pbm: 0.10, ppu: 0.25, pk: 0.05, litIndo: 0.15, litIng: 0.25, pm: 0.05 }
+    desc: 'Literasi Bahasa Inggris, Pengetahuan Umum & Penalaran Umum (LitIng 20%, PPU 20%, PU 15%, LitIndo 15%, PBM 10%, PM 10%, PK 10%)',
+    weights: { pu: 0.15, pbm: 0.10, ppu: 0.20, pk: 0.10, litIndo: 0.15, litIng: 0.20, pm: 0.10 }
   }
 };
 
@@ -1690,15 +1690,15 @@ export interface UserUtbkScores {
 export function getClusterHighlightText(cluster: ProdiCluster): string {
   switch (cluster) {
     case 'teknik':
-      return 'PM 25% • PK 20% • PU 20%';
+      return 'PM 20% • PK 20% • PU 20%';
     case 'sosial':
-      return 'PBM 25% • Lit-ID 25% • PPU 15% • PU 15%';
+      return 'PBM 20% • Lit-ID 20% • PPU 15% • PU 15%';
     case 'kesehatan':
-      return 'PU 25% • Lit-EN 25% • PK 15% • PM 15%';
+      return 'PU 20% • Lit-EN 20% • PK 15% • PM 15%';
     case 'bisnis':
       return 'PU 20% • Lit-EN 20% • PK 15% • PM 15%';
     case 'sastra':
-      return 'Lit-EN 25% • PPU 25% • PU 15% • Lit-ID 15%';
+      return 'Lit-EN 20% • PPU 20% • PU 15% • Lit-ID 15%';
     default:
       return 'Bobot Rumpun Standar';
   }

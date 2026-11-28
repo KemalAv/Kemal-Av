@@ -588,8 +588,31 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
     }));
   };
 
+  // PALM REJECTION: while a pen is in use or hovering, finger and palm touches are ignored.
+  // A stylus touch (touchType 'stylus', e.g. Apple Pencil) always draws. Very large contact areas are treated as palms.
+  const PEN_GRACE_MS = 1200;
+  const PALM_RADIUS_PX = 30;
+  const lastPenTimeRef = useRef(0);
+  const touchIgnoredRef = useRef(false);
+
+  const handleCanvasPointer = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.pointerType === 'pen') lastPenTimeRef.current = performance.now();
+  };
+
+  const shouldIgnoreTouch = (t: Touch) => {
+    if ((t as any).touchType === 'stylus') {
+      lastPenTimeRef.current = performance.now();
+      return false;
+    }
+    if (performance.now() - lastPenTimeRef.current < PEN_GRACE_MS) return true;
+    const radius = Math.max((t as any).radiusX || 0, (t as any).radiusY || 0);
+    return radius > PALM_RADIUS_PX;
+  };
+
   // TOUCH EVENTS (Pinch-to-zoom, Two-finger Pan & Single-touch Draw)
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    touchIgnoredRef.current = Array.from(e.touches).some(t => shouldIgnoreTouch(t as Touch));
+    if (touchIgnoredRef.current) return;
     if (e.touches.length === 2 && !isCanvasLocked) {
       // Pinch to zoom initiation
       const t1 = e.touches[0];
@@ -618,6 +641,7 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (touchIgnoredRef.current) return;
     if (e.touches.length === 2 && touchStateRef.current && !isCanvasLocked) {
       e.preventDefault();
       const t1 = e.touches[0];
@@ -651,6 +675,11 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
   };
 
   const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (touchIgnoredRef.current) {
+      // A rejected palm touch must not end a pen stroke that is still in progress
+      touchIgnoredRef.current = false;
+      return;
+    }
     touchStateRef.current = null;
     handleMouseUp();
   };
@@ -2416,6 +2445,8 @@ export const InfinityBoardApp: React.FC<InfinityBoardAppProps> = ({ onBackToHome
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onDoubleClick={handleDoubleClick}
+        onPointerDown={handleCanvasPointer}
+        onPointerMove={handleCanvasPointer}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

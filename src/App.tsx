@@ -7,6 +7,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Routes, Route, useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
 import Header from './components/Header';
+import { FullscreenScope } from './components/FullscreenScope';
 import Hero from './components/Hero';
 import Projects from './components/Projects';
 import Socials from './components/Socials';
@@ -404,12 +405,12 @@ export default function App() {
       <OfflineIndicator />
       <Routes>
         <Route path="/" element={<MainSite />} />
-        <Route path="/board" element={<InfinityBoardApp onBackToHome={() => navigate('/')} />} />
-        <Route path="/extract" element={<PdfExtractApp onBackToHome={() => navigate('/')} />} />
-        <Route path="/pdf-extract" element={<PdfExtractApp onBackToHome={() => navigate('/')} />} />
-        <Route path="/infinity-board" element={<InfinityBoardApp onBackToHome={() => navigate('/')} />} />
-        <Route path="/app/:title" element={<AppRouter />} />
-        <Route path="/articles/:title" element={<ArticleReader />} />
+        <Route path="/board" element={<FullscreenScope><InfinityBoardApp onBackToHome={() => navigate('/')} /></FullscreenScope>} />
+        <Route path="/extract" element={<FullscreenScope><PdfExtractApp onBackToHome={() => navigate('/')} /></FullscreenScope>} />
+        <Route path="/pdf-extract" element={<FullscreenScope><PdfExtractApp onBackToHome={() => navigate('/')} /></FullscreenScope>} />
+        <Route path="/infinity-board" element={<FullscreenScope><InfinityBoardApp onBackToHome={() => navigate('/')} /></FullscreenScope>} />
+        <Route path="/app/:title" element={<FullscreenScope><AppRouter /></FullscreenScope>} />
+        <Route path="/articles/:title" element={<FullscreenScope><ArticleReader /></FullscreenScope>} />
         <Route path="/articles" element={<MainSite />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
